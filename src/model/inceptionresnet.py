@@ -2,10 +2,12 @@ import torch
 import torchvision.models as models
 import torch.nn as nn
 
-class InceptionResNet:
+class InceptionResNet(nn.Module):
     def __init__(self, num_classes=10, pretrained=True, dropout_probability=0.5):   
+        super(InceptionResNet, self).__init__() # Call parent's constructor
+
         # Load the pre-trained ResNet-18 model
-        self.model = models.inception_v3(pretrained=pretrained) #Ceci
+        self.model = models.resnet18(pretrained=pretrained)
 
         # Freeze all the pre-trained layers
         for param in self.model.parameters():
@@ -18,6 +20,7 @@ class InceptionResNet:
 
     def forward(self, x):
         return self.model(x)
+
     
 
 if __name__ == '__main__':
