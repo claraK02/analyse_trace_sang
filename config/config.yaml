@@ -1,0 +1,7 @@
+image_size: 224
+learning:
+  batch_size: 2
+  epochs: 100
+  learning_rate: 0.001
+  shuffle: True 
+  drop_last: True
