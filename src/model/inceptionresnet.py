@@ -1,13 +1,14 @@
 import torch
 import torchvision.models as models
 import torch.nn as nn
+from torchvision.models.resnet import ResNet18_Weights
 
 class InceptionResNet(nn.Module):
     def __init__(self, num_classes=10, pretrained=True, dropout_probability=0.5):   
         super(InceptionResNet, self).__init__() # Call parent's constructor
 
         # Load the pre-trained ResNet-18 model
-        self.model = models.resnet18(pretrained=pretrained)
+        self.model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
 
         # Freeze all the pre-trained layers
         for param in self.model.parameters():
@@ -20,6 +21,13 @@ class InceptionResNet(nn.Module):
 
     def forward(self, x):
         return self.model(x)
+    
+    def get_parameters(self):
+        """
+        Returns all the parameters of the model, the trainable ones and the frozen ones
+        """
+        return self.model.parameters()
+        
 
     
 
