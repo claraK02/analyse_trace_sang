@@ -3,6 +3,7 @@ import time
 import numpy as np
 from tqdm import tqdm
 import yaml
+from metrics import accuracy_one_hot, accuracy_pytorch
 
 from easydict import EasyDict
 
@@ -15,16 +16,18 @@ from model.inceptionresnet import InceptionResNet
 def train(config: EasyDict) -> None:
 
     # Use gpu or cpu
-    if torch.cuda.is_available() and config.learning.device:
+    if torch.cuda.is_available():
         device = torch.device("cuda")
+        print("Using GPU")
     else:
         device = torch.device("cpu")
+        print("Using CPU")
 
     # Get data
-    train_generator, _ = create_image_classification_dataloader(config=config, mode='train')
-    val_generator, _ = create_image_classification_dataloader(config=config, mode='val')
-    n_train, n_val = len(train_generator), len(val_generator)
-    print(f"Found {n_train} training images and {n_val} validation images")
+    train_generator = create_image_classification_dataloader(config=config, mode='train')
+    val_generator = create_image_classification_dataloader(config=config, mode='val')
+    n_train, n_val = len(train_generator), len(val_generator) 
+    print(f"Found {n_train} training batches and {n_val} validation batches")
 
     # Get model
     model = InceptionResNet(num_classes=3)
@@ -49,7 +52,7 @@ def train(config: EasyDict) -> None:
     for epoch in range(1, config.learning.epochs + 1):
         print("epoch: ", epoch)
         train_loss = 0
-        train_metrics = np.zeros((1))
+        train_metrics = 0
         train_range = tqdm(train_generator)
 
         # Training
@@ -62,14 +65,15 @@ def train(config: EasyDict) -> None:
             loss = criterion(y_pred, y_true) #compares one hot vector and the indices vector
 
             train_loss += loss.item()
-            #train_metrics += metrics.compute(y_true=y_true, y_pred=y_pred)
+            train_metrics += accuracy_pytorch(y_true=y_true, y_pred=y_pred).item() #we want a float
 
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
 
             current_loss = train_loss / (i + 1)
-            train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f}")
+            current_metrics = train_metrics / (i + 1)   
+            train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f} || metrics: {current_metrics:.4f}")
             train_range.refresh()
 
         ###############################################################
@@ -94,10 +98,11 @@ def train(config: EasyDict) -> None:
                 y_pred = model.forward(x)
 
                 val_loss += loss.item()
-                #val_metrics += metrics.compute(y_true=y_true, y_pred=y_pred)
+                val_metrics += accuracy_pytorch(y_true=y_true, y_pred=y_pred).item() #we want a float
 
                 current_loss = val_loss / (i + 1)
-                val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f}")
+                current_metrics = val_metrics / (i + 1)
+                val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f} || metrics: {current_metrics:.4f}")
                 val_range.refresh()
         
         scheduler.step()       
@@ -126,6 +131,7 @@ def train(config: EasyDict) -> None:
 
     stop_time = time.time()
     print(f"training time: {stop_time - start_time}secondes for {config.learning.epochs} epochs")
+    print(f"Loss: {train_loss:.4f} (train) - {val_loss:.4f} (val)" - f"Accuracy: {train_metrics:.4f} (train) - {val_metrics:.4f} (val)")
     
     # if save_experiment:
     #     save_learning_curves(path=logging_path)

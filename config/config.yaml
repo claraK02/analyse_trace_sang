@@ -1,8 +1,8 @@
-image_size: 316
+image_size: 128
 learning:
-  batch_size: 64
+  batch_size: 32
   epochs: 10
-  dropout: 0.5
+  dropout: 0.3
   learning_rate: 0.001
   shuffle: True 
   drop_last: True
