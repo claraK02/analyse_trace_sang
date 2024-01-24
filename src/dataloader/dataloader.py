@@ -26,10 +26,9 @@ class ImageClassificationDataGenerator(Dataset):
         self.class_labels = sorted(os.listdir('data'))
         print(f"Found {len(self.class_labels)} classes: {self.class_labels}")
 
-        # get all the paths of all the images in all the folders or subfolders or subsubfolders or subsubsubfolders in each class
-
         # Get all the paths of all the images in all the folders or subfolders or subsubfolders or subsubsubfolders in each class
-        self.class_paths = {class_label: [] for class_label in self.class_labels}
+        all_image_paths = []
+        all_image_labels = []
         for class_label in self.class_labels:
             print(f"Searching for images in {class_label}...")
             for root, dirs, files in os.walk(os.path.join('data', class_label)):
@@ -38,34 +37,29 @@ class ImageClassificationDataGenerator(Dataset):
                     if file.endswith(('.png', '.jpg', '.jpeg', '.JPG')):  # add or remove file extensions as needed
                         path = os.path.join(root, file)
                         if "Retouches" in path:  # on ne prend pas les images non retouchées
-                            self.class_paths[class_label].append(path)
+                            all_image_paths.append(path)
+                            all_image_labels.append(class_label)
 
         # Shuffle paths to ensure randomness
-        for paths in self.class_paths.values():
-            random.shuffle(paths)
+        c = list(zip(all_image_paths, all_image_labels))
+        random.shuffle(c)
+        all_image_paths, all_image_labels = zip(*c)
 
         # Split data into train and validation sets
-        validation_size = int(validation_percentage * len(self.class_paths))
+        validation_size = int(validation_percentage * len(all_image_paths))
         if self.mode == 'train':
-            self.all_image_paths = []
-            for paths in list(self.class_paths.values())[validation_size:]:
-                self.all_image_paths.extend(paths)
+            self.all_image_paths = all_image_paths[validation_size:]
+            self.all_image_labels = all_image_labels[validation_size:]
         elif self.mode == 'val':
-            self.all_image_paths = []
-            for paths in list(self.class_paths.values())[-validation_size:]:
-                self.all_image_paths.extend(paths)
+            self.all_image_paths = all_image_paths[:validation_size]
+            self.all_image_labels = all_image_labels[:validation_size]
         else:
-            self.all_image_paths = []
-            for paths in self.class_paths.values():
-                self.all_image_paths.extend(paths)
-
-        # Flatten all image paths and their corresponding class labels into two separate lists
-        self.all_image_labels = []
-        for class_label, paths in self.class_paths.items():
-            self.all_image_labels.extend([class_label] * len(paths))
+            self.all_image_paths = all_image_paths
+            self.all_image_labels = all_image_labels
 
         print("Il y a en tout", len(self.all_image_paths), "images dans le générateur ", self.mode)
         print(f"The {self.mode} generator was created")
+        
 
     def __len__(self) -> int:
         return len(self.all_image_paths)
@@ -106,6 +100,8 @@ if __name__ == '__main__':
 
     start_time = time.time()
     dataloader = create_image_classification_dataloader(config=config, mode='train') # Create dataloader
+    dataloader2 = create_image_classification_dataloader(config=config, mode='val') # Create dataloader
+    
     end_time = time.time()
     print(f"Time taken to create dataloader: {end_time - start_time} seconds")
 
