@@ -5,6 +5,12 @@ from tqdm import tqdm
 import yaml
 from metrics import accuracy_one_hot, accuracy_pytorch
 
+#add config to module path
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from config.config import train_step_logger, train_logger
+
 from easydict import EasyDict
 
 import torch
@@ -42,6 +48,8 @@ def train(config: EasyDict) -> None:
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning.learning_rate)
     scheduler = MultiStepLR(optimizer, milestones=config.learning.milestones, gamma=config.learning.gamma)
 
+    # Save experiment
+    save_experiment = config.learning.save_experiment #str true or false
 
 
     ###############################################################
@@ -97,6 +105,8 @@ def train(config: EasyDict) -> None:
 
                 y_pred = model.forward(x)
 
+                loss = criterion(y_pred, y_true)
+
                 val_loss += loss.item()
                 val_metrics += accuracy_pytorch(y_true=y_true, y_pred=y_pred).item() #we want a float
 
@@ -114,8 +124,11 @@ def train(config: EasyDict) -> None:
         val_loss = val_loss / n_val
         train_metrics = train_metrics / n_train
         val_metrics = val_metrics / n_val
-        
-        # if save_experiment:
+
+        if save_experiment:
+            logging_path = train_logger(config, metrics_name=["accuracy"])
+
+        # if save_experiment=='true':
         #     train_step_logger(path=logging_path, 
         #                       epoch=epoch, 
         #                       train_loss=train_loss, 
@@ -123,11 +136,11 @@ def train(config: EasyDict) -> None:
         #                       train_metrics=train_metrics,
         #                       val_metrics=val_metrics)
             
-        #     if config.learning.save_checkpoint and val_loss < best_val_loss:
-        #         print('save model weights')
-        #         torch.save(model.state_dict(), os.path.join(logging_path, 'checkpoint.pt'))
-        #         best_val_loss = val_loss
-        #         ic(best_val_loss)
+        if config.learning.save_checkpoint=='true':
+            print('saving model weights...' )
+            torch.save(model.state_dict(), os.path.join(logging_path, 'checkpoint.pt'))
+            best_val_loss = val_loss
+            print(f"best val loss: {best_val_loss:.4f}")
 
     stop_time = time.time()
     print(f"training time: {stop_time - start_time}secondes for {config.learning.epochs} epochs")

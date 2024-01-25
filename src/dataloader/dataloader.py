@@ -24,7 +24,15 @@ class ImageClassificationDataGenerator(Dataset):
 
         # Get the list of classes! they are the folder names in data_path
         self.class_labels = sorted(os.listdir('data'))
+        print("class_labels:", self.class_labels)
         print(f"Found {len(self.class_labels)} classes: {self.class_labels}")
+
+        #We have the following correspondance between class labels and class indices:
+        # 0: Carrelage NH
+        # 1: Carrelage H
+        # 2: Carrelage V
+
+
 
         # Get all the paths of all the images in all the folders or subfolders or subsubfolders or subsubsubfolders in each class
         all_image_paths = []
