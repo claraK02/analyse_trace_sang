@@ -36,7 +36,7 @@ def train(config: EasyDict) -> None:
     print(f"Found {n_train} training batches and {n_val} validation batches")
 
     # Get model
-    model = AdversarialInceptionResNet(num_classes=3)
+    model = AdversarialInceptionResNet(num_classes=3, background_classes=4)
     model = model.to(device)
     
 
@@ -140,7 +140,7 @@ def train(config: EasyDict) -> None:
         val_background_metrics = 0
         val_range = tqdm(val_generator)
 
-        model.eval()
+        model.eval() #we need to put the model in evaluation mode to deactivate the dropout and the batch normalization
 
         with torch.no_grad():
 
@@ -199,7 +199,8 @@ def train(config: EasyDict) -> None:
         #                       train_metrics=train_metrics,
         #                       val_metrics=val_metrics)
             
-        if config.learning.save_checkpoint=='true' and val_loss < best_val_loss:
+        #save at last epoch
+        if config.learning.save_checkpoint=='true' and epoch==config.learning.epochs:
             print('saving model weights...' )
             torch.save(model.state_dict(), os.path.join(logging_path, 'checkpoint.pt'))
             best_val_loss = val_loss

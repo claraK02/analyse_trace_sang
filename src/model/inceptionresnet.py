@@ -58,7 +58,7 @@ class InceptionResNet(nn.Module):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)  # Use self.parameters() instead of self.model.parameters()
 
 class AdversarialInceptionResNet(nn.Module):
-    def __init__(self, num_classes=2, pretrained=True, dropout_probability=0.5, hidden_size=100, background_classes=10):   
+    def __init__(self, num_classes=2, pretrained=True, dropout_probability=0.5, hidden_size=100, background_classes=4):   
         super(AdversarialInceptionResNet, self).__init__() # Call parent's constructor
 
         # Load the pre-trained ResNet-18 model
