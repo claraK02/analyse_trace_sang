@@ -65,7 +65,7 @@ def train(config: EasyDict) -> None:
 
         # Training
         model.train()
-        for i, (x, y_true) in enumerate(train_range):
+        for i, (x, y_true,z) in enumerate(train_range):  #ATTENTION: z is the background !
             x = x.to(device) #x shape: torch.Size([32, 3, 316, 316])
             y_true = y_true.to(device) #y_true shape: torch.Size([32])
             y_pred = model.forward(x) #y_pred shape: torch.Size([32, 3])
@@ -89,7 +89,6 @@ def train(config: EasyDict) -> None:
         ###############################################################
 
         val_loss = 0
-        #val_metrics = np.zeros((len(metrics_name)))
         val_range = tqdm(val_generator)
 
         model.eval()
@@ -99,7 +98,7 @@ def train(config: EasyDict) -> None:
             val_loss = 0
             val_metrics = 0
             
-            for i, (x, y_true) in enumerate(val_range):
+            for i, (x, y_true,z) in enumerate(val_range): #ATTENTION: z is the background !
                 x = x.to(device)
                 y_true = y_true.to(device)
 

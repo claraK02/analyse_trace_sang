@@ -37,6 +37,8 @@ class ImageClassificationDataGenerator(Dataset):
         # Get all the paths of all the images in all the folders or subfolders or subsubfolders or subsubsubfolders in each class
         all_image_paths = []
         all_image_labels = []
+        all_image_backgrounds = []
+
         for class_label in self.class_labels:
             print(f"Searching for images in {class_label}...")
             for root, dirs, files in os.walk(os.path.join('data', class_label)):
@@ -47,23 +49,34 @@ class ImageClassificationDataGenerator(Dataset):
                         if "Retouches" in path:  # on ne prend pas les images non retouchées
                             all_image_paths.append(path)
                             all_image_labels.append(class_label)
+                            if "Carrelage" in path:
+                                all_image_backgrounds.append("carrelage")
+                            if "Papier" in path:
+                                all_image_backgrounds.append("papier")
+                            if "Bois" in path:
+                                all_image_backgrounds.append("bois")
+                            if "Lino" in path:
+                                all_image_backgrounds.append("lino")
 
         # Shuffle paths to ensure randomness
-        c = list(zip(all_image_paths, all_image_labels))
+        c = list(zip(all_image_paths, all_image_labels, all_image_backgrounds))
         random.shuffle(c)
-        all_image_paths, all_image_labels = zip(*c)
+        all_image_paths, all_image_labels,all_image_backgrounds = zip(*c)
 
         # Split data into train and validation sets
         validation_size = int(validation_percentage * len(all_image_paths))
         if self.mode == 'train':
             self.all_image_paths = all_image_paths[validation_size:]
             self.all_image_labels = all_image_labels[validation_size:]
+            self.all_image_backgrounds = all_image_backgrounds[validation_size:]
         elif self.mode == 'val':
             self.all_image_paths = all_image_paths[:validation_size]
             self.all_image_labels = all_image_labels[:validation_size]
+            self.all_image_backgrounds = all_image_backgrounds[:validation_size]
         else:
             self.all_image_paths = all_image_paths
             self.all_image_labels = all_image_labels
+            self.all_image_backgrounds = all_image_backgrounds
 
         print("Il y a en tout", len(self.all_image_paths), "images dans le générateur ", self.mode)
         print(f"The {self.mode} generator was created")
@@ -89,7 +102,12 @@ class ImageClassificationDataGenerator(Dataset):
         # Convert class label to tensor
         y = torch.tensor(self.class_labels.index(class_label), dtype=torch.long)
 
-        return x, y
+        # Convert background label to tensor
+        background = self.all_image_backgrounds[index]
+        list_backgrounds = ["carrelage", "papier", "bois", "lino"] #on a 4 backgrounds différents
+        z = torch.tensor(list_backgrounds.index(background), dtype=torch.long)
+
+        return x, y, z #on retourne aussi le background
 
 def create_image_classification_dataloader(config: EasyDict, mode: str, validation_percentage: float = 0.2) -> Tuple[DataLoader, Dict[str, int]]:
     generator = ImageClassificationDataGenerator(config=config, mode=mode, validation_percentage=validation_percentage)
@@ -113,7 +131,7 @@ if __name__ == '__main__':
     end_time = time.time()
     print(f"Time taken to create dataloader: {end_time - start_time} seconds")
 
-    for i, (x, y) in enumerate(dataloader): # Iterate over the dataset
+    for i, (x, y, z) in enumerate(dataloader): # Iterate over the dataset
         start_time = time.time()
         print(x.shape, y.shape)
         end_time = time.time()

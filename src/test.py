@@ -40,7 +40,7 @@ def plot_image(image, image_path, prediction):
     plt.text(5, 5, f'Path: {image_path}\nPrediction: {prediction}', bbox=dict(facecolor='red', alpha=0.5))
     plt.show()
 
-def main(weights_path):
+def test_model(weights_path):
     image_paths = ['data/4- Modèle Transfert glissé/2- Carrelage/Retouches/16.jpeg','data/1- Modèle Traces passives/2- Carrelage/Carrelage NH/Retouches/7.jpeg']  # replace with your image paths
 
     model = load_model(weights_path)
@@ -65,5 +65,5 @@ if __name__ == '__main__':
     #     - 2 est le modèle de transfert glissé
 
     model_path = 'logs/resnet18_1/checkpoint.pt'
-    main(model_path)
+    test_model(model_path)
 

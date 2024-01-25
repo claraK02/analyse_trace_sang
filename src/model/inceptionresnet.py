@@ -3,6 +3,7 @@ import torchvision.models as models
 import torch.nn as nn
 from torchvision.models.resnet import ResNet18_Weights
 from torch.nn import functional as F
+from itertools import chain
 
 class InceptionResNet(nn.Module):
     def __init__(self, num_classes=2, pretrained=True, dropout_probability=0.5, hidden_size=100):   
@@ -56,6 +57,61 @@ class InceptionResNet(nn.Module):
         """
         return sum(p.numel() for p in self.parameters() if p.requires_grad)  # Use self.parameters() instead of self.model.parameters()
 
+class AdversarialInceptionResNet(nn.Module):
+    def __init__(self, num_classes=2, pretrained=True, dropout_probability=0.5, hidden_size=100, background_classes=10):   
+        super(AdversarialInceptionResNet, self).__init__() # Call parent's constructor
+
+        # Load the pre-trained ResNet-18 model
+        self.model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+
+        # Freeze all the pre-trained layers
+        for param in self.model.parameters():
+            param.requires_grad = False
+
+        # Add a dropout layer and modify the last layer of the model
+        self.dropout = nn.Dropout(dropout_probability)
+        self.fc1 = torch.nn.Linear(1000, hidden_size)  # Change the input size to 1000
+        self.fc2 = torch.nn.Linear(hidden_size, num_classes)
+
+        # Add an adversary
+        self.adversary = torch.nn.Linear(hidden_size, background_classes)
+
+        # Unfreeze the newly added layers
+        for param in self.fc1.parameters():
+            param.requires_grad = True
+        for param in self.fc2.parameters():
+            param.requires_grad = True
+        for param in self.adversary.parameters():
+            param.requires_grad = True
+
+    def forward(self, x):
+        """
+        input: x is a tensor of shape (batch_size, 3, 512, 512)
+        output: y is a tensor of shape (batch_size, num_classes)
+        """
+        x = self.model(x)
+        x = self.dropout(x)
+        x = F.relu(self.fc1(x))
+        y = self.fc2(x)
+        
+        # Adversarial output
+        adv_output = self.adversary(x)  # detach to avoid backpropagation to the main model ??
+
+
+
+        return y, adv_output
+    
+    def main_parameters(self):
+        """
+        Returns the parameters of the main model
+        """
+        return chain(self.fc1.parameters(), self.fc2.parameters())
+
+    def adversary_parameters(self):
+        """
+        Returns the parameters of the adversary
+        """
+        return self.adversary.parameters()
     
 
 if __name__ == '__main__':

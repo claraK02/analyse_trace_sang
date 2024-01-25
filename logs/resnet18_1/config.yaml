@@ -1,11 +1,11 @@
-config_metadata: 'Saving time : 01/25/2024, 15:44:45'
+config_metadata: 'Saving time : 01/25/2024, 19:38:36'
 image_size: 128
 name: 'resnet18'
 
 # learning options
 learning:
     batch_size: 32
-    epochs: 1
+    epochs: 10
     dropout: 0.3
     learning_rate: 0.001
     shuffle: true
