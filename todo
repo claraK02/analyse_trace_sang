@@ -1,8 +1,5 @@
 DATA
-- faire une liste des données de train/val/test
 - revoir le chargement des données
-- Faire une liste de LABEL et de BACKGROUND
-- retourner un {'background': Tensor, 'image': Tensor, 'label': Tensor}
 - revoir les configs
 - script pour visualiser les données
 - ajouter de la data augmentation
