@@ -1,6 +1,5 @@
 import os
 import time
-import pandas as pd
 from PIL import Image
 from typing import Tuple
 from easydict import EasyDict
@@ -11,7 +10,7 @@ from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
 
 
-LABEL = ['1- Modèle Traces passives', "15- Modèle Modèle d'impact", '4- Modèle Transfert glissé']
+LABEL = ['traces_passive', 'transfert_glisse']
 BACKGROUND = ['carrelage', 'papier', 'bois', 'lino']
 
 
@@ -21,13 +20,22 @@ class DataGenerator(Dataset):
             raise ValueError(f"Error, expected mode is train, val, or test but found: {mode}")
         self.mode = mode
 
-        data_item_path = os.path.join(config.data.path, f'{self.mode}_item.csv')
-        if not os.path.exists(data_item_path):
-            raise FileNotFoundError(f"File {data_item_path} wasn't found")
-        self.data = pd.read_csv(data_item_path)
+        dst_path = os.path.join(config.data.path, f'{mode}_{config.data.image_size}')
+        if not os.path.exists(dst_path):
+            raise FileNotFoundError(f"{dst_path} wans't found. Make sure that you have run get_data_transform",
+                                    f"with the image_size={config.data.image_size}")
+        
+        self.data: Tuple[str, str, str] = []
+        for label in LABEL:
+            for background in BACKGROUND:
+                folder = os.path.join(dst_path, label, background)
+                if not os.path.exists(folder):
+                    raise FileNotFoundError(f"{folder} wasn't found")
+                for image_name in os.listdir(folder):
+                    self.data.append((os.path.join(folder, image_name), label, background))
         
         self.transform = transforms.Compose([
-            transforms.Resize((config.data.image_size, config.data.image_size)),
+            # transforms.Resize((config.data.image_size, config.data.image_size)),
             transforms.ToTensor(),
         ])
 
@@ -44,7 +52,7 @@ class DataGenerator(Dataset):
         label:  (1)                             torch.float32
         backg:  (1)                             torch.float32
         '''
-        _, image_path, label, background = self.data.loc[index]
+        image_path, label, background = self.data[index]
 
         # Get image
         img = Image.open(image_path)
@@ -81,6 +89,13 @@ if __name__ == '__main__':
 
     config = EasyDict(yaml.safe_load(open('config/config.yaml')))
     config.learning.num_workers = 1
+
+    # generator = DataGenerator(config=config, mode='train')
+    # print(len(generator))
+    # x, label, background = generator.__getitem__(index=3)
+    # ic(x.shape, x.dtype)
+    # ic(label, label.shape, label.dtype)
+    # ic(background, background.shape, background.dtype)
 
     dataloader = create_dataloader(config=config, mode='train')
     print(dataloader.batch_size)

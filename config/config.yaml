@@ -1,7 +1,7 @@
 name: "resnet18"
 
 data:
-  path: data
+  path: data_transform
   image_size: 128
 
 learning:
