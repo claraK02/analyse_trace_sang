@@ -52,7 +52,7 @@ class DataGenerator(Dataset):
         -----
         SHAPE & DTYPE
         x:      (3, image_size, image_size)     torch.float32
-        label:  (1)                             torch.float32
+        label:  (1)                             torch.int64
         backg:  (1)                             torch.float32
         '''
         image_path, label, background = self.data[index]
@@ -64,7 +64,7 @@ class DataGenerator(Dataset):
         # Get label
         if label not in LABEL:
             raise ValueError(f"Expected label in LABEL but found {label}")
-        label = torch.tensor(LABEL.index(label), dtype=torch.float32)
+        label = torch.tensor(LABEL.index(label), dtype=torch.float32).long()
 
         # Get background
         if background not in BACKGROUND:

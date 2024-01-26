@@ -1,5 +1,6 @@
 import os
-from typing import Dict, List, Optional
+import yaml
+from typing import Dict, List
 from datetime import datetime
 from easydict import EasyDict
 
@@ -82,8 +83,8 @@ def train_step_logger(path: str,
                       epoch: int, 
                       train_loss: float,
                       val_loss: float, 
-                      train_metrics: Optional[List[float]]=[], 
-                      val_metrics: Optional[List[float]]=[]
+                      train_metrics: List[float]=[], 
+                      val_metrics: List[float]=[]
                       ) -> None:
     """
     writes loss and metrics values in the train_log.csv
@@ -105,3 +106,22 @@ def test_logger(path: str, metrics: List[str], values: List[float]) -> None:
         for i in range(len(metrics)):
             f.write(metrics[i] + ': ' + str(values[i]) + '\n')
 
+
+def load_config(path: str='config/config.yaml') -> EasyDict:
+    """ Load a yaml into an EasyDict"""
+    stream = open(path, 'r')
+    return EasyDict(yaml.safe_load(stream))
+
+
+def find_config(experiment_path: str) -> str:
+    """ find the .yaml file in a folder and return the .yaml path """
+    yaml_in_path = list(filter(lambda x: x[-5:] == '.yaml', os.listdir(experiment_path)))
+
+    if len(yaml_in_path) == 1:
+        return os.path.join(experiment_path, yaml_in_path[0])
+
+    if len(yaml_in_path) == 0:
+        raise FileNotFoundError("ERROR: config.yaml wasn't found in", experiment_path)
+    
+    if len(yaml_in_path) > 0:
+        raise FileNotFoundError("ERROR: a lot a .yaml was found in", experiment_path)

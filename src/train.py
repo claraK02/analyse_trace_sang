@@ -1,55 +1,51 @@
 import os
+import sys
 import time
 import numpy as np
 from tqdm import tqdm
-import yaml
-from metrics import accuracy_one_hot, accuracy_pytorch
-
-#add config to module path
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
-from config.config import train_step_logger, train_logger
-
 from easydict import EasyDict
+from os.path import dirname as up
 
 import torch
 from torch.optim.lr_scheduler import MultiStepLR
-from dataloader.dataloader import create_image_classification_dataloader
-from model.inceptionresnet import InceptionResNet
+
+sys.path.append(up(os.path.abspath(__file__)))
+sys.path.append(up(up(os.path.abspath(__file__))))
+
+from metrics import accuracy_one_hot, accuracy_pytorch
+from config.config import train_step_logger, train_logger
+from dataloader.dataloader import create_dataloader
+from model import resnet
+from utils import utils, plot_learning_curves
 
 
 def train(config: EasyDict) -> None:
 
-    # Use gpu or cpu
-    if torch.cuda.is_available():
-        device = torch.device("cuda")
-        print("Using GPU")
-    else:
-        device = torch.device("cpu")
-        print("Using CPU")
+    device = utils.get_device(device_config=config.learning.device)
 
     # Get data
-    train_generator = create_image_classification_dataloader(config=config, mode='train')
-    val_generator = create_image_classification_dataloader(config=config, mode='val')
+    train_generator = create_dataloader(config=config, mode='train')
+    val_generator = create_dataloader(config=config, mode='val')
     n_train, n_val = len(train_generator), len(val_generator) 
     print(f"Found {n_train} training batches and {n_val} validation batches")
 
     # Get model
-    model = InceptionResNet(num_classes=3)
+    model = resnet.Resnet(num_classes=2)
     model = model.to(device)
-    
 
     # Loss
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
 
     # Optimizer and Scheduler
-    
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.learning.learning_rate)
+    optimizer = torch.optim.Adam(model.get_only_learned_parameters().values(), lr=config.learning.learning_rate_resnet)
     scheduler = MultiStepLR(optimizer, milestones=config.learning.milestones, gamma=config.learning.gamma)
 
     # Save experiment
-    save_experiment = config.learning.save_experiment #str true or false
+    save_experiment = config.learning.save_experiment
+    print(f'{save_experiment = }')
+    if save_experiment:
+        logging_path = train_logger(config, metrics_name=['acc'])
+        best_val_loss = 10e6
 
 
     ###############################################################
@@ -65,19 +61,18 @@ def train(config: EasyDict) -> None:
 
         # Training
         model.train()
-        for i, (x, y_true,z) in enumerate(train_range):  #ATTENTION: z is the background !
-            x = x.to(device) #x shape: torch.Size([32, 3, 316, 316])
-            y_true = y_true.to(device) #y_true shape: torch.Size([32])
-            y_pred = model.forward(x) #y_pred shape: torch.Size([32, 3])
-
-            loss = criterion(y_pred, y_true) #compares one hot vector and the indices vector
-
-            train_loss += loss.item()
-            train_metrics += accuracy_pytorch(y_true=y_true, y_pred=y_pred).item() #we want a float
+        for i, (x, y_true, _) in enumerate(train_range):
+            x = x.to(device)            # x shape: torch.Size([32, 3, 128, 128])
+            y_true = y_true.to(device)  # y_true shape: torch.Size([32])
+            y_pred = model.forward(x)   # y_pred shape: torch.Size([32, 2])
+            loss = criterion(y_pred, y_true)
 
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
+
+            train_loss += loss.item()
+            train_metrics += accuracy_pytorch(y_true=y_true, y_pred=y_pred).item()
 
             current_loss = train_loss / (i + 1)
             current_metrics = train_metrics / (i + 1)   
@@ -89,16 +84,14 @@ def train(config: EasyDict) -> None:
         ###############################################################
 
         val_loss = 0
+        val_metrics = 0
         val_range = tqdm(val_generator)
 
         model.eval()
 
         with torch.no_grad():
-
-            val_loss = 0
-            val_metrics = 0
             
-            for i, (x, y_true,z) in enumerate(val_range): #ATTENTION: z is the background !
+            for i, (x, y_true, _) in enumerate(val_range):
                 x = x.to(device)
                 y_true = y_true.to(device)
 
@@ -107,7 +100,7 @@ def train(config: EasyDict) -> None:
                 loss = criterion(y_pred, y_true)
 
                 val_loss += loss.item()
-                val_metrics += accuracy_pytorch(y_true=y_true, y_pred=y_pred).item() #we want a float
+                val_metrics += accuracy_pytorch(y_true=y_true, y_pred=y_pred).item()
 
                 current_loss = val_loss / (i + 1)
                 current_metrics = val_metrics / (i + 1)
@@ -125,30 +118,30 @@ def train(config: EasyDict) -> None:
         val_metrics = val_metrics / n_val
 
         if save_experiment:
-            logging_path = train_logger(config, metrics_name=["accuracy"])
-
-        # if save_experiment=='true':
-        #     train_step_logger(path=logging_path, 
-        #                       epoch=epoch, 
-        #                       train_loss=train_loss, 
-        #                       val_loss=val_loss,
-        #                       train_metrics=train_metrics,
-        #                       val_metrics=val_metrics)
+            train_step_logger(path=logging_path, 
+                              epoch=epoch, 
+                              train_loss=train_loss, 
+                              val_loss=val_loss,
+                              train_metrics=[train_metrics],
+                              val_metrics=[val_metrics])
             
-        if config.learning.save_checkpoint=='true':
-            print('saving model weights...' )
-            torch.save(model.state_dict(), os.path.join(logging_path, 'checkpoint.pt'))
-            best_val_loss = val_loss
-            print(f"best val loss: {best_val_loss:.4f}")
+            if val_loss < best_val_loss:
+                print('save model weights')
+                torch.save(model.get_only_learned_parameters(),
+                           os.path.join(logging_path, 'checkpoint.pt'))
+                best_val_loss = val_loss
+
+            print(f'{best_val_loss = }')
 
     stop_time = time.time()
     print(f"training time: {stop_time - start_time}secondes for {config.learning.epochs} epochs")
-    print(f"Loss: {train_loss:.4f} (train) - {val_loss:.4f} (val)" - f"Accuracy: {train_metrics:.4f} (train) - {val_metrics:.4f} (val)")
+    print(f"Loss: {train_loss:.4f} (train) - {val_loss:.4f} (val) - Accuracy: {train_metrics:.4f} (train) - {val_metrics:.4f} (val)")
     
-    # if save_experiment:
-    #     save_learning_curves(path=logging_path)
+    if save_experiment:
+        plot_learning_curves.save_learning_curves(path=logging_path)
 
 
 if __name__ == '__main__':
+    import yaml
     config = EasyDict(yaml.safe_load(open('config/config.yaml')))  # Load config file
     train(config=config)

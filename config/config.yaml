@@ -15,16 +15,16 @@ data:
 
 learning:
   batch_size: 32
-  epochs: 3
+  epochs: 10
   dropout: 0.3
   learning_rate_resnet: 0.0001
   learning_rate_adversary: 0.001
   shuffle: true 
   drop_last: true
-  device: "cuda"
+  device: cuda
   milestones: [50, 75]
   gamma: 0.1
   save_experiment: true
   save_checkpoint: true
-  loss: "CrossEntropyLoss"
+  loss: crossentropy
   num_workers: 2

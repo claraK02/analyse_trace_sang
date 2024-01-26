@@ -1,6 +1,3 @@
-DATA
-- revoir les configs
-
 MODEL et TRAIN
 - faire un script pour voir les meilleurs hyperparamètres
 - voir la backbonne de RESNET

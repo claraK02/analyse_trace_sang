@@ -47,7 +47,11 @@ def get_result(path: str) -> Tuple[List[float], List[str]]:
 
 
 if __name__ == '__main__':
-    logs_path = 'logs'
-    experiments_path = list(map(lambda folder: os.path.join(logs_path, folder), os.listdir(logs_path)))
-    for experiment_path in experiments_path:
-        save_learning_curves(path=experiment_path)
+    import argparse
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('path', type=str,
+                        help="log to plot learning curves")
+    args = parser.parse_args()
+
+    save_learning_curves(path=args.path)
