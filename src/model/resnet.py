@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Tuple
 from os.path import dirname as up
 
 import torch
@@ -35,6 +36,20 @@ class Resnet(Model):
         x = x.squeeze(-1).squeeze(-1)
         x = self.resnet_end(x)
         return x
+    
+    def forward_and_get_intermediate(self, x: Tensor) -> Tuple[Tensor, Tensor]:
+        """
+        input:
+            - x is a tensor of shape (batch_size, 3, 128, 128)
+        
+        output:
+            - intermediate is a tensor of shape (batch_size, 1000)
+            - reel_output  is a tensor of shape (batch_size, num_classes) 
+        """
+        x = self.resnet_begin(x)
+        intermediate = x.squeeze(-1).squeeze(-1)
+        reel_output = self.resnet_end(intermediate)
+        return intermediate, reel_output
 
 
 if __name__ == '__main__':
