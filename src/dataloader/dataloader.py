@@ -1,13 +1,18 @@
 import os
+import sys
 import time
 from PIL import Image
 from typing import Tuple
 from easydict import EasyDict
+from os.path import dirname as up
 
 import torch
 from torch import Tensor
-from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
+
+sys.path.append(up(up(up(os.path.abspath(__file__)))))
+
+from src.dataloader.transforms import get_transforms
 
 
 LABEL = ['traces_passive', 'transfert_glisse']
@@ -34,15 +39,8 @@ class DataGenerator(Dataset):
                 for image_name in os.listdir(folder):
                     self.data.append((os.path.join(folder, image_name), label, background))
         
-        self.transform = transforms.Compose([
-            # transforms.RandomRotation(degrees=(0, 180)),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomVerticalFlip(p=0.5),
-            # transforms.RandomPerspective(distortion_scale=0.1, p=0.5, fill=0),
-            transforms.ColorJitter(brightness=.5, contrast=0.5, saturation=0., hue=.0),
-            # transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
-            transforms.ToTensor(),
-        ])
+        self.transform = get_transforms(transforms_config=config.data.transforms)
+        print(self.transform)
 
     def __len__(self) -> int:
         return len(self.data)

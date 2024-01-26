@@ -3,6 +3,15 @@ name: "resnet18"
 data:
   path: data_transform
   image_size: 128
+  transforms:
+    run_rotation: false
+    run_hflip: true
+    run_vflip: true
+    color:
+      brightness: 0.5
+      contrast: 0.5
+      saturation: 0.0
+      hue: 0.0
 
 learning:
   batch_size: 32
