@@ -1,8 +1,5 @@
 DATA
-- revoir le chargement des données
 - revoir les configs
-- script pour visualiser les données
-- ajouter de la data augmentation
 
 MODEL et TRAIN
 - faire un script pour voir les meilleurs hyperparamètres

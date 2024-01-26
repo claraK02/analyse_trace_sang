@@ -35,7 +35,12 @@ class DataGenerator(Dataset):
                     self.data.append((os.path.join(folder, image_name), label, background))
         
         self.transform = transforms.Compose([
-            # transforms.Resize((config.data.image_size, config.data.image_size)),
+            # transforms.RandomRotation(degrees=(0, 180)),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.5),
+            # transforms.RandomPerspective(distortion_scale=0.1, p=0.5, fill=0),
+            transforms.ColorJitter(brightness=.5, contrast=0.5, saturation=0., hue=.0),
+            # transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
             transforms.ToTensor(),
         ])
 
@@ -83,11 +88,17 @@ def create_dataloader(config: EasyDict, mode: str) -> DataLoader:
 
 
 if __name__ == '__main__':
+    import sys
     import yaml
     import time
     from icecream import ic 
+    from os.path import dirname as up
 
-    config = EasyDict(yaml.safe_load(open('config/config.yaml')))
+    sys.path.append(up(up(up(os.path.abspath(__file__)))))
+    from src.dataloader.show_batch import plot_batch
+
+    config_path = 'config/config.yaml'   
+    config = EasyDict(yaml.safe_load(open(config_path)))
     config.learning.num_workers = 1
 
     # generator = DataGenerator(config=config, mode='train')
@@ -107,3 +118,5 @@ if __name__ == '__main__':
     ic(x.shape, x.dtype)
     ic(label, label.shape, label.dtype)
     ic(background, background.shape, background.dtype)
+
+    plot_batch(x=x)
