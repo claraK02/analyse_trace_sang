@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-import numpy as np
 from tqdm import tqdm
 from easydict import EasyDict
 from os.path import dirname as up
@@ -10,12 +9,11 @@ import torch
 from torch.optim.lr_scheduler import MultiStepLR
 
 sys.path.append(up(os.path.abspath(__file__)))
-sys.path.append(up(up(os.path.abspath(__file__))))
 
-from metrics import accuracy_one_hot, accuracy_pytorch
 from config.config import train_step_logger, train_logger
-from dataloader.dataloader import create_dataloader
-from model import resnet
+from src.dataloader.dataloader import create_dataloader
+from metrics import Metrics
+from src.model import resnet
 from utils import utils, plot_learning_curves
 
 
@@ -40,11 +38,15 @@ def train(config: EasyDict) -> None:
     optimizer = torch.optim.Adam(model.get_only_learned_parameters().values(), lr=config.learning.learning_rate_resnet)
     scheduler = MultiStepLR(optimizer, milestones=config.learning.milestones, gamma=config.learning.gamma)
 
+    # Get metrics
+    metrics = Metrics(num_classes=config.data.num_classes, run_argmax_on_y_true=False)
+    metrics.to(device)
+
     # Save experiment
     save_experiment = config.learning.save_experiment
     print(f'{save_experiment = }')
     if save_experiment:
-        logging_path = train_logger(config, metrics_name=['acc'])
+        logging_path = train_logger(config, metrics_name=metrics.get_names())
         best_val_loss = 10e6
 
 
@@ -56,7 +58,7 @@ def train(config: EasyDict) -> None:
     for epoch in range(1, config.learning.epochs + 1):
         print("epoch: ", epoch)
         train_loss = 0
-        train_metrics = 0
+        train_metrics = metrics.init_metrics()
         train_range = tqdm(train_generator)
 
         # Training
@@ -72,11 +74,11 @@ def train(config: EasyDict) -> None:
             optimizer.zero_grad()
 
             train_loss += loss.item()
-            train_metrics += accuracy_pytorch(y_true=y_true, y_pred=y_pred).item()
+            train_metrics += metrics.compute(y_pred, y_true)
 
             current_loss = train_loss / (i + 1)
             current_metrics = train_metrics / (i + 1)   
-            train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f} || metrics: {current_metrics:.4f}")
+            train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f}")
             train_range.refresh()
 
         ###############################################################
@@ -84,7 +86,7 @@ def train(config: EasyDict) -> None:
         ###############################################################
 
         val_loss = 0
-        val_metrics = 0
+        val_metrics = metrics.init_metrics()
         val_range = tqdm(val_generator)
 
         model.eval()
@@ -100,11 +102,11 @@ def train(config: EasyDict) -> None:
                 loss = criterion(y_pred, y_true)
 
                 val_loss += loss.item()
-                val_metrics += accuracy_pytorch(y_true=y_true, y_pred=y_pred).item()
+                val_metrics += metrics.compute(y_pred, y_true)
 
                 current_loss = val_loss / (i + 1)
                 current_metrics = val_metrics / (i + 1)
-                val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f} || metrics: {current_metrics:.4f}")
+                val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f}")
                 val_range.refresh()
         
         scheduler.step()       
@@ -122,8 +124,8 @@ def train(config: EasyDict) -> None:
                               epoch=epoch, 
                               train_loss=train_loss, 
                               val_loss=val_loss,
-                              train_metrics=[train_metrics],
-                              val_metrics=[val_metrics])
+                              train_metrics=train_metrics,
+                              val_metrics=val_metrics)
             
             if val_loss < best_val_loss:
                 print('save model weights')
@@ -135,7 +137,6 @@ def train(config: EasyDict) -> None:
 
     stop_time = time.time()
     print(f"training time: {stop_time - start_time}secondes for {config.learning.epochs} epochs")
-    print(f"Loss: {train_loss:.4f} (train) - {val_loss:.4f} (val) - Accuracy: {train_metrics:.4f} (train) - {val_metrics:.4f} (val)")
     
     if save_experiment:
         plot_learning_curves.save_learning_curves(path=logging_path)

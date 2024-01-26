@@ -36,10 +36,9 @@ def train_logger(config: EasyDict, metrics_name: List[str]=None) -> str:
     # create train_log.csv where save the metrics
     with open(os.path.join(path, 'train_log.csv'), 'w') as f:
         first_line = 'step,' + config.learning.loss + ',val ' + config.learning.loss
-        if 'metrics' in config.keys():
-            for metric in metrics_name:
-                first_line += ',' + metric
-                first_line += ',val ' + metric
+        for metric in metrics_name:
+            first_line += ',' + metric
+            first_line += ',val ' + metric
         f.write(first_line + '\n')
     f.close()
 

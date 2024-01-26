@@ -39,7 +39,7 @@ class DataGenerator(Dataset):
                 for image_name in os.listdir(folder):
                     self.data.append((os.path.join(folder, image_name), label, background))
         
-        self.transform = get_transforms(transforms_config=config.data.transforms)
+        self.transform = get_transforms(transforms_config=config.data.transforms, mode=mode)
         print(self.transform)
 
     def __len__(self) -> int:

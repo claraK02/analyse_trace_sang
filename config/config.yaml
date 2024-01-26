@@ -3,6 +3,7 @@ name: "resnet18"
 data:
   path: data_transform
   image_size: 128
+  num_classes: 2
   transforms:
     run_rotation: false
     run_hflip: true
