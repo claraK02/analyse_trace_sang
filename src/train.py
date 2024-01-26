@@ -35,7 +35,7 @@ def train(config: EasyDict) -> None:
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
 
     # Optimizer and Scheduler
-    optimizer = torch.optim.Adam(model.get_only_learned_parameters().values(), lr=config.learning.learning_rate_resnet)
+    optimizer = torch.optim.Adam(model.get_learned_parameters(), lr=config.learning.learning_rate_resnet)
     scheduler = MultiStepLR(optimizer, milestones=config.learning.milestones, gamma=config.learning.gamma)
 
     # Get metrics
@@ -77,7 +77,6 @@ def train(config: EasyDict) -> None:
             train_metrics += metrics.compute(y_pred, y_true)
 
             current_loss = train_loss / (i + 1)
-            current_metrics = train_metrics / (i + 1)   
             train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f}")
             train_range.refresh()
 
@@ -105,7 +104,6 @@ def train(config: EasyDict) -> None:
                 val_metrics += metrics.compute(y_pred, y_true)
 
                 current_loss = val_loss / (i + 1)
-                current_metrics = val_metrics / (i + 1)
                 val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f}")
                 val_range.refresh()
         
