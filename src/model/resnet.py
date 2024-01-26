@@ -16,6 +16,8 @@ from src.model.basemodel import Model
 class Resnet(Model):
     def __init__(self,
                  num_classes: int,
+                 hidden_size: int,
+                 p_dropout: float
                  ) -> None:   
         super(Resnet, self).__init__()
 
@@ -25,7 +27,10 @@ class Resnet(Model):
         for param in self.resnet_begin.parameters():
             param.requires_grad = False
         
-        self.resnet_end = torch.nn.Linear(512, num_classes)
+        self.fc1 = nn.Linear(in_features=512, out_features=hidden_size)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(p=p_dropout)
+        self.fc2 = nn.Linear(in_features=hidden_size, out_features=num_classes)
 
     def forward(self, x: Tensor) -> Tensor:
         """
@@ -34,7 +39,9 @@ class Resnet(Model):
         """
         x = self.resnet_begin(x)
         x = x.squeeze(-1).squeeze(-1)
-        x = self.resnet_end(x)
+        x = self.fc1(x)
+        x = self.dropout(self.relu(x))
+        x = self.fc2(x)
         return x
     
     def forward_and_get_intermediate(self, x: Tensor) -> Tuple[Tensor, Tensor]:
@@ -47,15 +54,17 @@ class Resnet(Model):
             - reel_output  is a tensor of shape (batch_size, num_classes) 
         """
         x = self.resnet_begin(x)
-        intermediate = x.squeeze(-1).squeeze(-1)
-        reel_output = self.resnet_end(intermediate)
+        x = x.squeeze(-1).squeeze(-1)
+        intermediate = self.relu(self.fc1(x))
+        x = self.dropout(intermediate)
+        reel_output = self.fc2(x)
         return intermediate, reel_output
     
     def train(self) -> None:
-        return None
+        self.dropout = self.dropout.train()
     
     def eval(self) -> None:
-        return None
+        self.dropout = self.dropout.eval()
 
 
 if __name__ == '__main__':
