@@ -50,6 +50,12 @@ class Resnet(Model):
         intermediate = x.squeeze(-1).squeeze(-1)
         reel_output = self.resnet_end(intermediate)
         return intermediate, reel_output
+    
+    def train(self) -> None:
+        return None
+    
+    def eval(self) -> None:
+        return None
 
 
 if __name__ == '__main__':
