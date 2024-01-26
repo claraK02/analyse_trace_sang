@@ -55,7 +55,7 @@ def split_data(data: DATA_TYPE,
 
     train_data = data[:split_1]
     val_data = data[split_1 : split_2]
-    test_data = data[:split_2]
+    test_data = data[split_2:]
 
     return train_data, val_data, test_data
 
