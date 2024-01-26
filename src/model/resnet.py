@@ -24,7 +24,7 @@ class Resnet(Model):
         for param in self.resnet_begin.parameters():
             param.requires_grad = False
         
-        self.fc = torch.nn.Linear(512, num_classes)
+        self.resnet_end = torch.nn.Linear(512, num_classes)
 
     def forward(self, x: Tensor) -> Tensor:
         """
@@ -33,7 +33,7 @@ class Resnet(Model):
         """
         x = self.resnet_begin(x)
         x = x.squeeze(-1).squeeze(-1)
-        x = self.fc(x)
+        x = self.resnet_end(x)
         return x
 
 
