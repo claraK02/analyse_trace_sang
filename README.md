@@ -10,3 +10,8 @@ This directory contains the following subdirectories:
        
 
 Please refer to the individual directories for more detailed information.
+
+# Create data transform
+```bash
+python .\data_transform\get_data_transform.py
+```
