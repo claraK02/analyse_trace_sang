@@ -1,7 +1,12 @@
 __pycache__
 
 # data
-1- Modèle Traces passives
-15- Modèle Modèle d'impact
-4- Modèle Transfert glissé
-Cas réels
+data/*
+!split_data.py
+!train_item.csv
+!val_item.csv
+!test_item.csv
+
+# data_transform
+data_transform/*
+!data_transform/get_data_transform.py
