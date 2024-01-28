@@ -1,6 +1,7 @@
 import os
 import sys
 from typing import Tuple
+from easydict import EasyDict
 from os.path import dirname as up
 
 import torch
@@ -17,7 +18,8 @@ class Resnet(Model):
     def __init__(self,
                  num_classes: int,
                  hidden_size: int,
-                 p_dropout: float
+                 p_dropout: float,
+                 **kwargs
                  ) -> None:   
         super(Resnet, self).__init__()
 
@@ -67,9 +69,19 @@ class Resnet(Model):
         self.dropout = self.dropout.eval()
 
 
+def get_resnet(config: EasyDict) -> Resnet:
+    """ return resnet according the configuration """
+    resnet = Resnet(num_classes=config.data.num_classes,
+                    **config.model.resnet)
+    return resnet
+
+
 if __name__ == '__main__':
-    from torch import nn
-    model = Resnet(num_classes=2)
+    import yaml
+    config_path = 'config/config.yaml'   
+    config = EasyDict(yaml.safe_load(open(config_path)))
+
+    model = get_resnet(config)
     print("Total parameters:", model.get_number_parameters())
     print("Trainable parameters:", model.get_number_learnable_parameters())
     learnable_param = model.get_dict_learned_parameters()
@@ -80,4 +92,3 @@ if __name__ == '__main__':
     y = model.forward(x)
 
     print("y shape:",y.shape)
-
