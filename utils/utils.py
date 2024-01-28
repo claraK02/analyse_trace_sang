@@ -1,7 +1,7 @@
 import os
 import sys
 import torch
-from typing import Any
+from typing import Any, List
 from os.path import dirname as up
 
 sys.path.append(up(os.path.abspath(__file__)))
@@ -24,7 +24,7 @@ def put_on_device(device: torch.device, *args: Any) -> None:
         arg = arg.to(device)
 
 
-def get_metrics_name_for_adv(resnet_metrics: Metrics, adv_metrics: Metrics) -> str:
+def get_metrics_name_for_adv(resnet_metrics: Metrics, adv_metrics: Metrics) -> List[str]:
     """ get all metrics name """
     add_name = lambda model_name, metric_name: f'{model_name}_{metric_name}'
     add_resnet = lambda metric_name: add_name(model_name='resnet', metric_name=metric_name)
