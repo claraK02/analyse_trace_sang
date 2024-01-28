@@ -160,9 +160,9 @@ def train(config: EasyDict) -> None:
             
             if val_loss < best_val_loss:
                 print('save model weights')
-                torch.save(res_model.get_only_learned_parameters(),
+                torch.save(res_model.get_dict_learned_parameters(),
                            os.path.join(logging_path, 'res_checkpoint.pt'))
-                torch.save(adv_model.get_only_learned_parameters(),
+                torch.save(adv_model.get_dict_learned_parameters(),
                            os.path.join(logging_path, 'adv_checkpoint.pt'))
                 best_val_loss = val_loss
 
