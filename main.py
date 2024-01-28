@@ -2,7 +2,7 @@ import os
 import argparse
 
 from config.config import load_config, find_config
-from src.train import train
+from src import train, train_adversarial2
 
 
 def main(options: dict) -> None:
@@ -10,7 +10,12 @@ def main(options: dict) -> None:
     config = load_config(options['config_path'])
 
     if options['mode'] == 'train':
-        train(config)
+        if config.model.name == 'resnet':
+            print('train resnet')
+            train.train(config)
+        else:
+            print('train adversarial')
+            train_adversarial2.train(config)
     
     if options['mode'] == 'test':
         raise NotImplementedError
