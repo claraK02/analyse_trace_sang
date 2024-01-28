@@ -1,4 +1,4 @@
-config_metadata: 'Saving time : 01/26/2024, 18:47:51'
+config_metadata: 'Saving time : 01/28/2024, 20:06:43'
 name: 'resnet18'
 
 # data options
@@ -6,6 +6,7 @@ data:
     path: 'data_transform'
     image_size: 128
     num_classes: 2
+    background_classes: 4
     transforms:
         run_rotation: false
         run_hflip: true
@@ -15,6 +16,16 @@ data:
             contrast: 0.5
             saturation: 0.0
             hue: 0.0
+
+# model options
+model:
+    name: 'resnet'
+    resnet:
+        hidden_size: 64
+        p_dropout: 0.1
+    adversarial:
+        hidden_size: 256
+        p_dropout: 0.1
 
 # learning options
 learning:
