@@ -28,7 +28,7 @@ def train(config: EasyDict) -> None:
     print(f"Found {n_train} training batches and {n_val} validation batches")
 
     # Get model
-    model = resnet.Resnet(num_classes=2)
+    model = resnet.get_resnet(config)
     model = model.to(device)
 
     # Loss
@@ -127,7 +127,7 @@ def train(config: EasyDict) -> None:
             
             if val_loss < best_val_loss:
                 print('save model weights')
-                torch.save(model.get_only_learned_parameters(),
+                torch.save(model.get_dict_learned_parameters(),
                            os.path.join(logging_path, 'checkpoint.pt'))
                 best_val_loss = val_loss
 
