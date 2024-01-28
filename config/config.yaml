@@ -25,7 +25,7 @@ model:
 
 learning:
   batch_size: 32
-  epochs: 10
+  epochs: 5
   learning_rate_resnet: 0.0001
   learning_rate_adversary: 0.001
   shuffle: true 
@@ -33,7 +33,7 @@ learning:
   device: cuda
   milestones: [50, 75]
   gamma: 0.1
-  save_experiment: false
+  save_experiment: true
   save_checkpoint: true
   loss: crossentropy
   num_workers: 2
