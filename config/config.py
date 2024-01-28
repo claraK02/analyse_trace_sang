@@ -26,7 +26,7 @@ def train_logger(config: EasyDict, metrics_name: List[str]=None) -> str:
     path = 'logs'
     if not os.path.exists(path):
         os.makedirs(path)
-    folder_name = number_folder(path, config.name + '_')
+    folder_name = number_folder(path, config.model.name + '_')
     path = os.path.join(path, folder_name)
     os.mkdir(path)
     print(f'{path = }')
