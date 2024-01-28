@@ -1,11 +1,12 @@
 import os
 import sys
-from typing import Tuple
+from typing import Tuple, Iterator
 from easydict import EasyDict
 from os.path import dirname as up
 
 import torch
 from torch import nn, Tensor
+from torch.nn import Parameter
 from torchvision import models
 from torchvision.models.resnet import ResNet18_Weights
 
@@ -46,27 +47,30 @@ class Resnet(Model):
         x = self.fc2(x)
         return x
     
-    def forward_and_get_intermediate(self, x: Tensor) -> Tuple[Tensor, Tensor]:
+    def forward_and_get_intermediare(self, x: Tensor) -> Tuple[Tensor, Tensor]:
         """
         input:
             - x is a tensor of shape (batch_size, 3, 128, 128)
         
         output:
-            - intermediate is a tensor of shape (batch_size, 1000)
+            - intermediare is a tensor of shape (batch_size, 1000)
             - reel_output  is a tensor of shape (batch_size, num_classes) 
         """
         x = self.resnet_begin(x)
         x = x.squeeze(-1).squeeze(-1)
-        intermediate = self.relu(self.fc1(x))
-        x = self.dropout(intermediate)
+        intermediare = self.relu(self.fc1(x))
+        x = self.dropout(intermediare)
         reel_output = self.fc2(x)
-        return intermediate, reel_output
+        return intermediare, reel_output
     
     def train(self) -> None:
         self.dropout = self.dropout.train()
     
     def eval(self) -> None:
         self.dropout = self.dropout.eval()
+    
+    def get_intermediare_parameters(self) -> Iterator[Parameter]:
+        return self.fc1.parameters()
 
 
 def get_resnet(config: EasyDict) -> Resnet:
