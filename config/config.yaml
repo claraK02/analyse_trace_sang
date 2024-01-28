@@ -4,6 +4,7 @@ data:
   path: data_transform
   image_size: 128
   num_classes: 2
+  background_classes: 4
   transforms:
     run_rotation: false
     run_hflip: true
@@ -13,6 +14,16 @@ data:
       contrast: 0.5
       saturation: 0.0
       hue: 0.0
+
+model:
+  name: resnet    # choose between resnet and adversarial
+  resnet:
+    hidden_size: 64
+    p_dropout: 0.1
+  adversarial:
+    hidden_size: 256
+    p_dropout: 0.1
+
 
 learning:
   batch_size: 32
