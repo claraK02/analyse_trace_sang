@@ -3,10 +3,15 @@ import sys
 import time
 import numpy as np
 from tqdm import tqdm
+from icecream import ic
+from itertools import chain
+from typing import Tuple
 from easydict import EasyDict
 from os.path import dirname as up
 
 import torch
+from torch import Tensor
+from torch.optim import Adam
 
 sys.path.append(up(os.path.abspath(__file__)))
 sys.path.append(up(up(os.path.abspath(__file__))))
@@ -27,24 +32,23 @@ def train(config: EasyDict) -> None:
     print(f"Found {n_train} training batches and {n_val} validation batches")
 
     # Get model
-    res_model = resnet.Resnet(num_classes=2)
-    adv_model = adversarial.AdversarialResNet(hidden_size=128,
-                                              p_dropout=0.1,
-                                              background_classes=3)
+    res_model = resnet.get_resnet(config)
+    adv_model = adversarial.get_adv(config)
 
     # Loss
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
+    alpha = 0.1
 
     # Optimizer and Scheduler
-    resnet_optimizer = torch.optim.Adam(res_model.get_learned_parameters(),
-                                        lr=config.learning.learning_rate_resnet)
-    avd_optimizer = torch.optim.Adam(adv_model.parameters(),
-                                     lr=config.learning.learning_rate_adversary)
+    resnet_optimizer = Adam(res_model.get_learned_parameters(),
+                            lr=config.learning.learning_rate_resnet)
+    adv_optimizer = Adam(chain(adv_model.parameters(), res_model.get_intermediare_parameters()),
+                         lr=config.learning.learning_rate_adversary)
 
     # Get metrics
     res_metrics = Metrics(num_classes=config.data.num_classes, run_argmax_on_y_true=False)
     adv_metrics = Metrics(num_classes=4, run_argmax_on_y_true=False)
-    metrics_name = utils.get_metrics_name_for_adv(res_metrics, adv_metrics)
+    metrics_name = ['res loss', 'adv loss'] + utils.get_metrics_name_for_adv(res_metrics, adv_metrics)
 
     # Get and put on device
     device = utils.get_device(device_config=config.learning.device)
@@ -73,85 +77,102 @@ def train(config: EasyDict) -> None:
         res_model.train()
         adv_model.train()
         for i, (x, res_true, adv_true) in enumerate(train_range):
-            utils.put_on_device(device, x, res_true, adv_true)
+            x: Tensor = x.to(device)
+            res_true: Tensor = res_true.to(device)
+            adv_true: Tensor = adv_true.to(device)
 
-            inter, res_pred = res_model.forward_and_get_intermediate(x)
+            inter, res_pred = res_model.forward_and_get_intermediare(x)
             adv_pred = adv_model.forward(x=inter)
 
             res_loss = criterion(res_pred, res_true)
             adv_loss = criterion(adv_pred, adv_true)
 
+            crossloss = res_loss - alpha * adv_loss
 
+            adv_loss.backward(retain_graph=True)
+            crossloss.backward()
 
-    #         loss.backward()
-    #         optimizer.step()
-    #         optimizer.zero_grad()
+            adv_optimizer.step()
+            resnet_optimizer.step()
 
-    #         train_loss += loss.item()
-    #         train_metrics += metrics.compute(y_pred, y_true)
+            resnet_optimizer.zero_grad()
+            adv_optimizer.zero_grad()
 
-    #         current_loss = train_loss / (i + 1)
-    #         train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f}")
-    #         train_range.refresh()
+            train_loss += crossloss.item()
+            train_metrics += np.concatenate((np.array([res_loss.item(), adv_loss.item()]),
+                                             res_metrics.compute(y_pred=res_pred, y_true=res_true),
+                                             adv_metrics.compute(y_pred=adv_pred, y_true=adv_true)))
 
-    #     ###############################################################
-    #     # Start Validation                                            #
-    #     ###############################################################
+            current_loss = train_loss / (i + 1)
+            train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f}")
+            train_range.refresh()
 
-    #     val_loss = 0
-    #     val_metrics = metrics.init_metrics()
-    #     val_range = tqdm(val_generator)
+        ###############################################################
+        # Start Validation                                            #
+        ###############################################################
 
-    #     model.eval()
+        val_loss = 0
+        val_metrics = np.zeros(len(metrics_name))
+        val_range = tqdm(val_generator)
 
-    #     with torch.no_grad():
+        res_model.eval()
+        adv_model.eval()
+        with torch.no_grad():
             
-    #         for i, (x, y_true, _) in enumerate(val_range):
-    #             x = x.to(device)
-    #             y_true = y_true.to(device)
+            for i, (x, res_true, adv_true) in enumerate(val_range):
+                x: Tensor = x.to(device)
+                res_true: Tensor = res_true.to(device)
+                adv_true: Tensor = adv_true.to(device)
 
-    #             y_pred = model.forward(x)
+                inter, res_pred = res_model.forward_and_get_intermediare(x)
+                adv_pred = adv_model.forward(x=inter)
 
-    #             loss = criterion(y_pred, y_true)
+                res_loss = criterion(res_pred, res_true)
+                adv_loss = criterion(adv_pred, adv_true)
 
-    #             val_loss += loss.item()
-    #             val_metrics += metrics.compute(y_pred, y_true)
+                crossloss = res_loss - alpha * adv_loss
 
-    #             current_loss = val_loss / (i + 1)
-    #             val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f}")
-    #             val_range.refresh()
-        
-    #     scheduler.step()       
+                val_loss += crossloss.item()
+                val_metrics += np.concatenate((np.array([res_loss.item(), adv_loss.item()]),
+                                               res_metrics.compute(y_pred=res_pred, y_true=res_true),
+                                               adv_metrics.compute(y_pred=adv_pred, y_true=adv_true)))
 
-    #     ###################################################################
-    #     # Save Scores in logs                                             #
-    #     ###################################################################
-    #     train_loss = train_loss / n_train
-    #     val_loss = val_loss / n_val
-    #     train_metrics = train_metrics / n_train
-    #     val_metrics = val_metrics / n_val
+                current_loss = val_loss / (i + 1)
+                val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f}")
+                val_range.refresh()
+          
 
-    #     if save_experiment:
-    #         train_step_logger(path=logging_path, 
-    #                           epoch=epoch, 
-    #                           train_loss=train_loss, 
-    #                           val_loss=val_loss,
-    #                           train_metrics=train_metrics,
-    #                           val_metrics=val_metrics)
+        ###################################################################
+        # Save Scores in logs                                             #
+        ###################################################################
+        train_loss = train_loss / n_train
+        val_loss = val_loss / n_val
+        train_metrics = train_metrics / n_train
+        val_metrics = val_metrics / n_val
+
+        if save_experiment:
+            train_step_logger(path=logging_path, 
+                              epoch=epoch, 
+                              train_loss=train_loss, 
+                              val_loss=val_loss,
+                              train_metrics=train_metrics,
+                              val_metrics=val_metrics)
             
-    #         if val_loss < best_val_loss:
-    #             print('save model weights')
-    #             torch.save(model.get_only_learned_parameters(),
-    #                        os.path.join(logging_path, 'checkpoint.pt'))
-    #             best_val_loss = val_loss
+            if val_loss < best_val_loss:
+                print('save model weights')
+                torch.save(res_model.get_only_learned_parameters(),
+                           os.path.join(logging_path, 'res_checkpoint.pt'))
+                torch.save(adv_model.get_only_learned_parameters(),
+                           os.path.join(logging_path, 'adv_checkpoint.pt'))
+                best_val_loss = val_loss
 
-    #         print(f'{best_val_loss = }')
+            print(f'{best_val_loss = }')
 
-    # stop_time = time.time()
-    # print(f"training time: {stop_time - start_time}secondes for {config.learning.epochs} epochs")
+    stop_time = time.time()
+    print(f"training time: {stop_time - start_time}secondes for {config.learning.epochs} epochs")
     
-    # if save_experiment:
-    #     plot_learning_curves.save_learning_curves(path=logging_path)
+    if save_experiment:
+        plot_learning_curves.save_learning_curves(path=logging_path)
 
 
 if __name__ == '__main__':
