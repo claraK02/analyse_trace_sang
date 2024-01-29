@@ -37,3 +37,4 @@ learning:
   save_checkpoint: true
   loss: crossentropy
   num_workers: 2
+  alpha: 0.1 # weight of the adversarial loss

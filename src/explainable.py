@@ -13,30 +13,31 @@ import numpy as np
 
 
 
-def launch():
-    #torch.backends.cudnn.enabled = False
-    torch.cuda.empty_cache()
+def segment_image(image_path):
+    """
+    Open the image and segment the blood stain in the image using the red colour
+    """
+    #open the image
+    img = Image.open(image_path)
+    #convert the image to numpy array
+    img = np.array(img)
+    #convert the image to RGB
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = SamModel.from_pretrained("facebook/sam-vit-base").to(device)
-    processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
+    #make a segmentation mask using a threshold of red colour in percent of the maximum red value to find the blood stain
+    threshold = 0.45
+    mask = (img[:,:,0] > threshold * img[:,:,0].max()).astype(np.uint8) * 255
 
-    img_url = "https://huggingface.co/ybelkada/segment-anything/resolve/main/assets/car.png"
-    raw_image = Image.open(requests.get(img_url, stream=True).raw).convert("RGB")
-    #print the shape of the image
-    print(raw_image.size)
-    #reduce the size of the image to 128x128
-    raw_image = raw_image.resize((64,64))
-    input_points = [[[12, 12]]]  # 2D location of a window in the image
+    #plot the original image and the mask
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(10, 10))
+    plt.subplot(1, 2, 1)
+    plt.imshow(img)
+    plt.subplot(1, 2, 2)
+    plt.imshow(mask, cmap='gray')
+    plt.show()
 
-    inputs = processor(raw_image, input_points=input_points, return_tensors="pt").to(device)
-    with torch.no_grad():
-        outputs = model(**inputs)
 
-    masks = processor.image_processor.post_process_masks(
-        outputs.pred_masks.cpu(), inputs["original_sizes"].cpu(), inputs["reshaped_input_sizes"].cpu()
-    )
-    return masks
 
 
 
@@ -136,7 +137,7 @@ def calculate_satellite_ratio(mask):
 
 if __name__ == "__main__":
     
-    launch()
+    
     #generate a random mask
     # mask = generate_random_mask(512, 10,diversity=1)
 
@@ -161,3 +162,12 @@ if __name__ == "__main__":
     # #calculate the satellite ratio
     # satellite_ratio = calculate_satellite_ratio(mask)
     # print("satellite_ratio:",satellite_ratio)
+
+    #open one path from the test_paths.txt file
+    with open('src/test_paths.txt','r',encoding='utf-8') as f:
+        test_paths = f.readlines()
+    
+    #segment the image
+    image_path = test_paths[0].strip()
+    print("IMAGE PATH:",image_path)
+    segment_image(image_path)
