@@ -37,7 +37,7 @@ def train(config: EasyDict) -> None:
 
     # Loss
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
-    alpha = 0.1
+    alpha = 1 #0.1 avant
 
     # Optimizer and Scheduler
     resnet_optimizer = Adam(res_model.get_learned_parameters(),
