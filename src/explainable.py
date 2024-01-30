@@ -1,5 +1,4 @@
 import torch
-from segment_anything import sam_model_registry
 import cv2
 from segment_anything import SamAutomaticMaskGenerator
 from segment_anything import SamPredictor, sam_model_registry
@@ -7,7 +6,6 @@ from PIL import Image
 import requests
 from transformers import SamModel, SamProcessor
 import torch
-import cv2
 import numpy as np
 from easydict import EasyDict
 import yaml
@@ -16,6 +14,14 @@ import xgboost as xgb
 import os
 import shap
 import matplotlib.pyplot as plt
+import requests
+from PIL import Image
+import torch
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from transformers import OwlViTProcessor, OwlViTForObjectDetection
+
+
 
 def segment_image(image_path):
     """
@@ -44,6 +50,100 @@ def segment_image(image_path):
 
     return mask
 
+
+
+def detect_and_plot_objects(image_np):
+    """
+    Detects and plots objects in an image using the OwlViT model.
+
+    Args:
+        image_np (numpy.ndarray): The input image as a NumPy array.
+
+    Returns:
+        list: A list of tuples containing the detected objects. Each tuple contains the label, confidence score, and bounding box coordinates.
+
+    """
+    processor = OwlViTProcessor.from_pretrained("google/owlvit-base-patch32")
+    model = OwlViTForObjectDetection.from_pretrained("google/owlvit-base-patch32")
+
+    image = Image.fromarray(image_np).convert("RGB")
+    texts = [["ruler" ,"ketchup"]]
+    inputs = processor(text=texts, images=image, return_tensors="pt")
+    outputs = model(**inputs)
+
+    target_sizes = torch.Tensor([image.size[::-1]])
+    results = processor.post_process_object_detection(outputs=outputs, threshold=0.05, target_sizes=target_sizes)
+
+    i = 0
+    text = texts[i]
+    boxes, scores, labels = results[i]["boxes"], results[i]["scores"], results[i]["labels"]
+
+    detected_objects = []
+    for box, score, label in zip(boxes, scores, labels):
+        box = [round(i, 2) for i in box.tolist()]
+        detected_objects.append((text[label], round(score.item(), 3), box))
+        print(f"Detected {text[label]} with confidence {round(score.item(), 3)} at location {box}")
+
+    fig, ax = plt.subplots(1)
+    ax.imshow(image)
+    for box, score, label in zip(boxes, scores, labels):
+        box = [round(i, 2) for i in box.tolist()]
+        rect = patches.Rectangle((box[0], box[1]), box[2] - box[0], box[3] - box[1], linewidth=1, edgecolor="r", facecolor="none")
+        ax.add_patch(rect)
+        ax.text(box[0], box[1], f"{text[label]} {round(score.item(), 3)}", bbox=dict(facecolor="white", alpha=0.5))
+    plt.axis("off")
+    plt.show()
+
+    return detected_objects
+
+
+def segment_rectangular_objects(image):
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Apply edge detection
+    edges = cv2.Canny(gray, 30, 250)
+
+    # Perform a dilation and erosion to close gaps in between object edges
+    edges = cv2.dilate(edges, None, iterations=2)
+    edges = cv2.erode(edges, None, iterations=1)
+
+    # Find contours in the edge map
+    contours, _ = cv2.findContours(edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    rects = []
+
+    # Loop over the contours
+    for contour in contours:
+        # Approximate the contour
+        peri = cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
+
+        # If the approximated contour has four points, then it is a rectangle
+        if len(approx) == 4:
+            rects.append(approx)
+
+    return rects
+
+
+
+def replace_black_white_pixels(image):
+    # Convert image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Find black and white pixels
+    black_pixels = np.where(gray < 75)
+    white_pixels = np.where(gray > 235)
+
+    # Calculate the mean pixel value of original image
+    mean_pixel_value = image.mean()
+
+    # Replace black and white pixels with the mean pixel value
+    image[black_pixels] = mean_pixel_value
+    image[white_pixels] = mean_pixel_value
+
+    return image
+
 def segment_image_file(image):
     """
     Open the image and segment the blood stain in the image using the red colour
@@ -53,20 +153,16 @@ def segment_image_file(image):
     img = np.array(image)
     #convert the image to RGB
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    #img = replace_black_white_pixels(img)
+    print("max pixel value:",img[:,:,0].max())
+    print("min pixel value:",img[:,:,0].min())
 
     #make a segmentation mask using a threshold of red colour in percent of the maximum red value to find the blood stain
-    threshold = 0.45
-    mask = (img[:,:,0] > threshold * img[:,:,0].max()).astype(np.uint8) * 255
-
-    # #plot the original image and the mask
-    # import matplotlib.pyplot as plt
-    # plt.figure(figsize=(10, 10))
-    # plt.subplot(1, 2, 1)
-    # plt.imshow(img)
-    # plt.subplot(1, 2, 2)
-    # plt.imshow(mask, cmap='gray')
-    # plt.show()
-
+    threshold_red = 0.45
+    threshold_green_blue = 0.7
+    threshold_global = 0.1
+    mask = (img[:,:,0] > threshold_red * img[:,:,0].max()) # La composante rouge est importante
+   
     return mask
 
 
@@ -95,9 +191,10 @@ def train_xgboost():
             ovality = calculate_ovality(mask)
             satellites = count_satellites(mask)
             irregularity = calculate_irregularity(mask)
+            ratio=calculate_satellite_ratio(mask)
 
             # Append the features and label to their respective lists
-            features.append([ovality, satellites, irregularity])
+            features.append([ovality, satellites, irregularity, ratio])
             labels.append(label)
 
     # Convert lists to numpy arrays
@@ -123,9 +220,10 @@ def train_xgboost():
             ovality = calculate_ovality(mask)
             satellites = count_satellites(mask)
             irregularity = calculate_irregularity(mask)
+            ratio=calculate_satellite_ratio(mask)
 
             # Append the features and label to their respective lists
-            test_features.append([ovality, satellites, irregularity])
+            test_features.append([ovality, satellites, irregularity, ratio])
             test_labels.append(label)
 
     # Convert lists to numpy arrays
@@ -141,6 +239,7 @@ def train_xgboost():
     print("Feature 0: Ovality")
     print("Feature 1: Satellites")
     print("Feature 2: Irregularity")
+    print("Feature 3: Satellite Ratio")
     for i, score in enumerate(model.feature_importances_):
         print(f"Feature {i}: {score}")
 
@@ -177,9 +276,10 @@ def train_xgboost():
         ovality = calculate_ovality(mask)
         satellites = count_satellites(mask)
         irregularity = calculate_irregularity(mask)
+        ratio=calculate_satellite_ratio(mask)
 
         # Append the features and label to their respective lists
-        features=np.array([ovality, satellites, irregularity])
+        features=np.array([ovality, satellites, irregularity, ratio])
 
         #compute XGBoost prediction
         prediction = model.predict(np.reshape(features, (1, -1)))
@@ -203,7 +303,7 @@ def train_xgboost():
         # Plot the SHAP values with a bar plot on the second subplot
         axs[1].barh(range(len(shap_values[0])), shap_values[0])
         axs[1].set_yticks(range(len(shap_values[0])))
-        axs[1].set_yticklabels(["Ovality", "Satellites", "Irregularity"])
+        axs[1].set_yticklabels(["Ovality", "Satellites", "Irregularity", "Satellite Ratio"])
         axs[1].set_title('SHAP Values')
 
         # PLot the segmented image on the third subplot
@@ -253,6 +353,7 @@ def calculate_ovality(mask):
     Returns:
     - ovality: The ovality value, which is the ratio of the maximum and minimum ellipse diameters.
     """
+    mask = mask.astype(np.uint8)
     try:
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         main_stain = max(contours, key=cv2.contourArea)
@@ -272,6 +373,7 @@ def count_satellites(mask):
     Returns:
     int: Number of satellite stains.
     """
+    mask = mask.astype(np.uint8)
     num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask, connectivity=8)
     satellites = num_labels - 1  # Subtract 1 to exclude the main stain itself
     return satellites
@@ -286,6 +388,7 @@ def calculate_irregularity(mask):
     Returns:
     - irregularity: The irregularity value of the mask.
     """
+    mask = mask.astype(np.uint8)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     main_stain = max(contours, key=cv2.contourArea)
     perimeter = cv2.arcLength(main_stain, True)
@@ -304,6 +407,8 @@ def calculate_satellite_ratio(mask):
     Returns:
     float: Average ratio of the size of satellite stains to the size of the main stain.
     """
+
+    mask = mask.astype(np.uint8)
     num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask, connectivity=8)
     if num_labels < 2:  # If there are no satellites, return 0
         return 0
@@ -323,7 +428,7 @@ def calculate_satellite_ratio(mask):
 
 if __name__ == "__main__":
     
-    train_xgboost()
+    #train_xgboost()
     #generate a random mask
     # mask = generate_random_mask(512, 10,diversity=1)
 
@@ -354,5 +459,46 @@ if __name__ == "__main__":
     with open('src/test_paths.txt', 'r', encoding='utf-8') as f:
         test_paths = f.readlines()
 
-    #create a csv file to save the attributes and class of each image
+    #On parcours les images du dossier et on détecte les régions rectangulaires
+    
+    for path in test_paths:
+        print("Treating image:",path)
+        path = path.strip()
+        if os.path.isfile(path):
+            image = Image.open(path)
+            detect_and_plot_objects(np.array(image))
+            #segment_image_file(image)
+        else:
+            print(f"Invalid file path: {path}")
+    
+
+
+    #open the first image
+    image = Image.open(test_paths[0].strip())
+    #image=image.resize((128,128))
+
+    #convert the image to numpy array
+    image = np.array(image)
+
+    #segment rectangular objects
+    rects = segment_rectangular_objects(image)
+    print("rects:",rects)
+
+        # Draw each rectangle on the image
+    for rect in rects:
+        cv2.polylines(image, [rect], True, (0, 255, 0), 2)
+
+    # Display the image
+    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    #get the mask and plot image and mask side by side
+    # mask = segment_image_file(image)
+    # import matplotlib.pyplot as plt
+    # plt.figure(figsize=(10, 10))
+    # plt.subplot(1, 2, 1)
+    # plt.imshow(image)
+    # plt.subplot(1, 2, 2)
+    # plt.imshow(mask, cmap='gray')
+    # plt.show()
     
