@@ -20,8 +20,9 @@ import torch
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from transformers import OwlViTProcessor, OwlViTForObjectDetection
+from scipy import ndimage
 
-
+from scipy.ndimage import center_of_mass as calculate_center_of_mass
 
 def segment_image(image_path):
     """
@@ -142,7 +143,53 @@ def replace_black_white_pixels(image):
     image[black_pixels] = mean_pixel_value
     image[white_pixels] = mean_pixel_value
 
+    
     return image
+
+from skimage import feature, io
+
+template_path="src/template.jpeg"
+
+def detect_and_plot_template(image, template_paths, threshold=0.5):
+    # Convert the image to grayscale
+    image = np.array(image)
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    for template_path in template_paths:
+        # Load and convert the template to grayscale
+        template = cv2.imread(template_path)
+       
+        if template is None:
+            print(f"Invalid template path: {template_path}")
+            continue
+        #template = np.array(template)
+        template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+        w, h = template_gray.shape[::-1]
+
+        # Check if the template image is larger than the source image
+        # Check if the template image is larger than the source image
+        if image_gray.shape[0] < h or image_gray.shape[1] < w:
+            print(f"Template image {template_path} is larger than the source image. Resizing...")
+            scale = min(image_gray.shape[0]/h, image_gray.shape[1]/w)
+            template_gray = cv2.resize(template_gray, None, fx=scale, fy=scale, interpolation = cv2.INTER_AREA)
+            w, h = template_gray.shape[::-1]  
+
+        # Perform template matching
+        res = cv2.matchTemplate(image_gray, template_gray, cv2.TM_CCOEFF_NORMED)
+  
+        loc = np.where(res >= threshold)
+
+        for pt in zip(*loc[::-1]):
+            # Draw a red rectangle around the matched template
+            cv2.rectangle(image, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
+            # Draw a red cross at the center of the matched template
+            cv2.drawMarker(image, (pt[0] + w//2, pt[1] + h//2), (0, 0, 255), markerType=cv2.MARKER_CROSS, markerSize=10, thickness=2, line_type=cv2.LINE_8)
+
+    # Display the image
+    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    return loc
 
 def segment_image_file(image):
     """
@@ -154,8 +201,8 @@ def segment_image_file(image):
     #convert the image to RGB
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     #img = replace_black_white_pixels(img)
-    print("max pixel value:",img[:,:,0].max())
-    print("min pixel value:",img[:,:,0].min())
+    #print("max pixel value:",img[:,:,0].max())
+    #print("min pixel value:",img[:,:,0].min())
 
     #make a segmentation mask using a threshold of red colour in percent of the maximum red value to find the blood stain
     threshold_red = 0.45
@@ -301,9 +348,7 @@ def train_xgboost():
         axs[0].set_title('Processed Image')
 
         # Plot the SHAP values with a bar plot on the second subplot
-        axs[1].barh(range(len(shap_values[0])), shap_values[0])
-        axs[1].set_yticks(range(len(shap_values[0])))
-        axs[1].set_yticklabels(["Ovality", "Satellites", "Irregularity", "Satellite Ratio"])
+        axs[1].bar(["Ovality", "Satellites", "Irregularity", "Satellite Ratio"], shap_values[0])
         axs[1].set_title('SHAP Values')
 
         # PLot the segmented image on the third subplot
@@ -362,6 +407,44 @@ def calculate_ovality(mask):
     except:
         ovality = 0
     return ovality
+
+
+
+def classify_distribution(segmentation_mask):
+    # Convert the image to a numpy array
+    img = np.array(segmentation_mask)
+
+    # If the image is not binary, convert it to grayscale and threshold it
+    if np.unique(img).size > 2:
+        if len(img.shape) == 3:
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        _, blood_pixels = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+    else:
+        blood_pixels = img
+
+    # Convert the binary mask to boolean
+    blood_pixels = blood_pixels.astype(bool)
+
+    # Calculate the center of mass of the blood stain
+    center_of_mass = calculate_center_of_mass(blood_pixels)
+
+    # Calculate the distance of each blood pixel to the center of mass
+    y_indices, x_indices = np.indices(blood_pixels.shape)
+    distances = np.sqrt((x_indices - center_of_mass[0])**2 + (y_indices - center_of_mass[1])**2)
+    
+    # Calculate the mean and standard deviation of the distances
+    mean_distance = distances[blood_pixels].mean()
+    std_distance = distances[blood_pixels].std()
+
+    # Classify the distribution based on the mean and standard deviation
+    if std_distance < mean_distance * 0.5:
+        return 0  # Central distribution
+    elif std_distance < mean_distance:
+        return 1  # Linear distribution
+    elif std_distance < mean_distance * 1.5:
+        return 2  # Curvilinear distribution
+    else:
+        return 3  # Burst distribution
 
 def count_satellites(mask):
     """
@@ -428,6 +511,8 @@ def calculate_satellite_ratio(mask):
 
 if __name__ == "__main__":
     
+    template_path="src/template.jpeg"
+    list_template_paths=["src/template.jpeg","src/template_2.jpeg","src/template_3.jpeg","src/template_4.jpeg"]
     #train_xgboost()
     #generate a random mask
     # mask = generate_random_mask(512, 10,diversity=1)
@@ -455,50 +540,64 @@ if __name__ == "__main__":
     # print("satellite_ratio:",satellite_ratio)
 
     #open one path from the test_paths.txt file
-    # Open the test_paths.txt file
+    #Open the test_paths.txt file
     with open('src/test_paths.txt', 'r', encoding='utf-8') as f:
         test_paths = f.readlines()
 
+    #obtain the segmentation mask of the image
+    #open image
+    image = Image.open(test_paths[0].strip())
+    mask = segment_image_file(image)
+    #plot the mask and print the distribution associated
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(10, 10))
+    plt.imshow(mask, cmap='gray')
+    plt.show()
+    print("Distribution:",classify_distribution(mask))
+
+    #tableau de correspondance: 0: central, 1: linear, 2: curvilinear, 3: burst
+
     #On parcours les images du dossier et on détecte les régions rectangulaires
     
-    for path in test_paths:
-        print("Treating image:",path)
-        path = path.strip()
-        if os.path.isfile(path):
-            image = Image.open(path)
-            detect_and_plot_objects(np.array(image))
-            #segment_image_file(image)
-        else:
-            print(f"Invalid file path: {path}")
+    # for path in test_paths:
+    #     print("Treating image:",path)
+    #     path = path.strip()
+    #     if os.path.isfile(path):
+    #         image = Image.open(path)
+    #         coord=detect_and_plot_template(image, list_template_paths, threshold=0.4)
+    #         print("COORD:",coord)
+    #         #segment_image_file(image)
+    #     else:
+    #         print(f"Invalid file path: {path}")
     
 
 
-    #open the first image
-    image = Image.open(test_paths[0].strip())
-    #image=image.resize((128,128))
+    # #open the first image
+    # image = Image.open(test_paths[0].strip())
+    # #image=image.resize((128,128))
 
-    #convert the image to numpy array
-    image = np.array(image)
+    # #convert the image to numpy array
+    # image = np.array(image)
 
-    #segment rectangular objects
-    rects = segment_rectangular_objects(image)
-    print("rects:",rects)
+    # #segment rectangular objects
+    # rects = segment_rectangular_objects(image)
+    # print("rects:",rects)
 
-        # Draw each rectangle on the image
-    for rect in rects:
-        cv2.polylines(image, [rect], True, (0, 255, 0), 2)
+    #     # Draw each rectangle on the image
+    # for rect in rects:
+    #     cv2.polylines(image, [rect], True, (0, 255, 0), 2)
 
-    # Display the image
-    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    plt.show()
-
-    #get the mask and plot image and mask side by side
-    # mask = segment_image_file(image)
-    # import matplotlib.pyplot as plt
-    # plt.figure(figsize=(10, 10))
-    # plt.subplot(1, 2, 1)
-    # plt.imshow(image)
-    # plt.subplot(1, 2, 2)
-    # plt.imshow(mask, cmap='gray')
+    # # Display the image
+    # plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     # plt.show()
+
+    # #get the mask and plot image and mask side by side
+    # # mask = segment_image_file(image)
+    # # import matplotlib.pyplot as plt
+    # # plt.figure(figsize=(10, 10))
+    # # plt.subplot(1, 2, 1)
+    # # plt.imshow(image)
+    # # plt.subplot(1, 2, 2)
+    # # plt.imshow(mask, cmap='gray')
+    # # plt.show()
     
