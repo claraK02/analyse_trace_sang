@@ -2,20 +2,21 @@ import os
 import random
 from typing import List, Tuple
 
-LABEL = ['1- Modèle Traces passives', "15- Modèle Modèle d'impact", '4- Modèle Transfert glissé']
-BACKGROUND = ['Carrelage', 'Papier', 'Bois', 'Lino']
+import informations as info
 
 random.seed(0)
 DATA_TYPE = List[Tuple[str, str, str]]
  
-def get_data(datapath: str='data') -> List[Tuple[str, str, str]]:
+def get_data(datapath: str,
+             class_labels: List[str],
+             backgrounds: List[str]
+             ) -> List[Tuple[str, str, str]]:
     """ get data
     List of Tuple that containt image_path, label, background"""
     all_image_paths = []
     all_image_labels = []
     all_image_backgrounds = []
 
-    class_labels = sorted(os.listdir(datapath))
     for class_label in class_labels:
         for root, _, files in os.walk(os.path.join(datapath, class_label)):
             for file in files:
@@ -24,14 +25,9 @@ def get_data(datapath: str='data') -> List[Tuple[str, str, str]]:
                     if "Retouches" in path:  # on ne prend pas les images non retouchées
                         all_image_paths.append(path)
                         all_image_labels.append(class_label)
-                        if "Carrelage" in path:
-                            all_image_backgrounds.append("carrelage")
-                        if "Papier" in path:
-                            all_image_backgrounds.append("papier")
-                        if "Bois" in path:
-                            all_image_backgrounds.append("bois")
-                        if "Lino" in path:
-                            all_image_backgrounds.append("lino")
+                        for bg in backgrounds:
+                            if bg in path.lower():
+                                all_image_backgrounds.append(bg)
 
     c = list(zip(all_image_paths, all_image_labels, all_image_backgrounds))
     random.shuffle(c)
@@ -74,13 +70,18 @@ def save_data(data: DATA_TYPE, mode: str, datapath: str) -> None:
         
 
 if __name__ == '__main__':
-    datapath = 'data'
-    data = get_data(datapath)
+    data = get_data(datapath=info.DATAPATH,
+                    class_labels=info.LABELS,
+                    backgrounds=info.BACKGROUND)
+    print(data)
+    print(len(data))
     MODE = ['train', 'val', 'test']
     data_split = split_data(data)
 
     for i in range(3):
-        save_data(data=data_split[i], mode=MODE[i], datapath=datapath)
+        save_data(data=data_split[i],
+                  mode=MODE[i],
+                  datapath=info.DST_PATH)
 
 
     

@@ -2,17 +2,9 @@ import os
 import pandas as pd
 from PIL import Image
 from tqdm import tqdm
-
 from torchvision import transforms
 
-
-DATA_PATH = 'data'
-DATA_TRANSFORM_PATH = 'data_transform'
-IMAGE_SIZE = 128
-
-LABEL = ['1- Modèle Traces passives', '4- Modèle Transfert glissé']
-BACKGROUND = ['carrelage', 'papier', 'bois', 'lino']
-NEW_LABEL = ['traces_passive', 'transfert_glisse']
+import informations as info
 
 
 def create_folder(folderpath: str) -> str:
@@ -23,34 +15,33 @@ def create_folder(folderpath: str) -> str:
 
 def create_all_folder(dst_path: str) -> None:
     create_folder(dst_path)
-    for label in NEW_LABEL:
+    for label in info.LABELS:
         create_folder(os.path.join(dst_path, label))
     
-    for label in NEW_LABEL:
-        for background in BACKGROUND:
+    for label in info.LABELS:
+        for background in info.BACKGROUND:
             create_folder(os.path.join(dst_path, label, background))
 
 
-def get_new_label(old_label: str) -> str:
-    return NEW_LABEL[LABEL.index(old_label)]
-
-
 def main(mode: str) -> None:
-    dst_path = os.path.join(DATA_TRANSFORM_PATH, f'{mode}_{IMAGE_SIZE}')
+    dst_path = os.path.join(info.DST_PATH, f'{mode}_{info.IMAGE_SIZE}')
+    print(f'{dst_path=}')
     create_all_folder(dst_path)
     
     transform = transforms.Compose([
-            transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+            transforms.Resize((info.IMAGE_SIZE, info.IMAGE_SIZE)),
             transforms.ToTensor(),
     ])
 
-    data = pd.read_csv(os.path.join(DATA_PATH, f'{mode}_item.csv'))
+    data = pd.read_csv(os.path.join(info.DST_PATH, f'{mode}_item.csv'))
     for i in tqdm(range(len(data))):
         _, image_path, label, background = data.loc[i]
         img = Image.open(image_path)
+        if img.mode == 'RGBA':
+            img = img.convert('RGB')
         x = transform(img)
 
-        dst_file = os.path.join(dst_path, get_new_label(label), background, f'{i}.jpg')
+        dst_file = os.path.join(dst_path, label, background, f'{i}.jpg')
         transforms.ToPILImage()(x).save(dst_file)
 
 

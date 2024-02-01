@@ -1,12 +1,4 @@
 __pycache__
 
 # data
-data/*
-!split_data.py
-!train_item.csv
-!val_item.csv
-!test_item.csv
-
-# data_transform
-data_transform/*
-!data_transform/get_data_transform.py
+data/data_retouche
