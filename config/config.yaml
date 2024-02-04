@@ -1,7 +1,7 @@
 data:
-  path: data_transform
+  path: data/data_labo
   image_size: 128
-  num_classes: 2
+  num_classes: 19
   background_classes: 4
   transforms:
     run_rotation: false
@@ -14,7 +14,7 @@ data:
       hue: 0.0
 
 model:
-  name: adversarial    # choose between resnet and adversarial
+  name: resnet    # choose between resnet and adversarial
   resnet:
     hidden_size: 64
     p_dropout: 0.1
@@ -22,10 +22,9 @@ model:
     hidden_size: 256
     p_dropout: 0.1
 
-
 learning:
-  batch_size: 32
   epochs: 10
+  batch_size: 32
   learning_rate_resnet: 0.0001
   learning_rate_adversary: 0.001
   shuffle: true 
@@ -37,4 +36,4 @@ learning:
   save_checkpoint: true
   loss: crossentropy
   num_workers: 2
-  alpha: 0.1 # weight of the adversarial loss
+  alpha: 10
