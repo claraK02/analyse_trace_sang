@@ -15,7 +15,13 @@ sys.path.append(up(up(up(os.path.abspath(__file__)))))
 from src.dataloader.transforms import get_transforms
 
 
-LABEL = ['traces_passive', 'transfert_glisse']
+LABELS = ['1- Modèle Traces passives', '2- Modèle Goutte à Goutte', '3- Modèle Transfert par contact',
+          '4- Modèle Transfert glissé', '5- Modèle Altération par contact', '6- Modèle Altération glissée',
+          "7- Modèle d'Accumulation", '8- Modèle Coulée', '9- Modèle Chute de volume',
+          '10- Modèle Sang Propulsé', "11- Modèle d'éjection", '12- Modèle Volume impacté',
+          '13- Modèle Imprégnation', "14- Modèle Zone d'interruption", "15- Modèle Modèle d'impact",
+          "16- Modèle Foyer de modèle d'impact", '17- Modèle Trace gravitationnelle', '18- Modèle Sang expiré',
+          "19- Modèle Trace d'insecte"]
 BACKGROUND = ['carrelage', 'papier', 'bois', 'lino']
 
 
@@ -31,7 +37,7 @@ class DataGenerator(Dataset):
                                     f"with the image_size={config.data.image_size}")
         
         self.data: Tuple[str, str, str] = []
-        for label in LABEL:
+        for label in LABELS:
             for background in BACKGROUND:
                 folder = os.path.join(dst_path, label, background)
                 if not os.path.exists(folder):
@@ -62,9 +68,9 @@ class DataGenerator(Dataset):
         x = self.transform(img)
 
         # Get label
-        if label not in LABEL:
+        if label not in LABELS:
             raise ValueError(f"Expected label in LABEL but found {label}")
-        label = torch.tensor(LABEL.index(label), dtype=torch.int64)
+        label = torch.tensor(LABELS.index(label), dtype=torch.int64)
 
         # Get background
         if background not in BACKGROUND:
