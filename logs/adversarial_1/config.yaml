@@ -1,10 +1,10 @@
-config_metadata: 'Saving time : 01/29/2024, 17:30:21'
+config_metadata: 'Saving time : 02/04/2024, 18:58:09'
 
 # data options
 data:
-    path: 'data_transform'
+    path: 'data/data_labo'
     image_size: 128
-    num_classes: 2
+    num_classes: 19
     background_classes: 4
     transforms:
         run_rotation: false
@@ -28,8 +28,8 @@ model:
 
 # learning options
 learning:
-    batch_size: 32
     epochs: 10
+    batch_size: 32
     learning_rate_resnet: 0.0001
     learning_rate_adversary: 0.001
     shuffle: true
@@ -41,3 +41,4 @@ learning:
     save_checkpoint: true
     loss: 'crossentropy'
     num_workers: 2
+    alpha: 10
