@@ -2,23 +2,28 @@ import os
 import argparse
 
 from config.config import load_config, find_config
-from src import train, train_adversarial2
+from src import train, train_adversarial, test
 
 
 def main(options: dict) -> None:
-    
-    config = load_config(options['config_path'])
 
     if options['mode'] == 'train':
+        config = load_config(options['config_path'])
+
         if config.model.name == 'resnet':
             print('train resnet')
             train.train(config)
         else:
             print('train adversarial')
-            train_adversarial2.train(config)
+            train_adversarial.train(config)
     
     if options['mode'] == 'test':
-        raise NotImplementedError
+        if options['path'] is None:
+            raise ValueError('Please specify the path to the experiments')
+        config_path = find_config(experiment_path=options['path'])
+        config = load_config(config_path)
+        test.test(config=config, logging_path=options['path'])
+
 
 
 if __name__ == "__main__":

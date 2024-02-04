@@ -1,89 +1,78 @@
+import os
+import sys
+from tqdm import tqdm
+from easydict import EasyDict
+from os.path import dirname as up
+# from icecream import ic
 
 import torch
-from torchvision import transforms
-from PIL import Image
-import matplotlib.pyplot as plt
-from model.inceptionresnet import InceptionResNet,AdversarialInceptionResNet
-import os
+from torch import Tensor
 
-#add data to module path
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(up(os.path.abspath(__file__)))
 
-def load_model(weights_path):
-    model = AdversarialInceptionResNet(num_classes=3)
-    model.load_state_dict(torch.load(weights_path))
-    return model
-
-def load_image(image_path):
-    image = Image.open(image_path)
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-    ])
-    image = transform(image).unsqueeze(0)
-    return image
-
-def infer(model, image):
-    model.eval()
-    output = model.forward(image)
-    print("output:",output)
-
-    classes=output[0] # 0 is the class preidiction 1 is the adversarial prediction
-
-    background=output[1]
-   
-    #apply softmax to get probabilities
-    probabilities_class = torch.nn.functional.softmax(classes, dim=1)
-    print("probabilities:",probabilities_class)
-    #get max probability
-    _, predicted = torch.max(probabilities_class, 1)
-
-    probabilities_back = torch.nn.functional.softmax(background, dim=1)
-    print("probabilities back:",probabilities_back)
-
-    _, predicted_back = torch.max(probabilities_back, 1)
+from config.config import test_logger
+from src.dataloader.dataloader import create_dataloader
+from metrics import Metrics
+from src.model import resnet
+from utils import utils
 
 
-    return predicted, predicted_back
+def test(config: EasyDict, logging_path: str) -> None:
 
-def plot_image(image, image_path, prediction):
-    plt.imshow(image.squeeze(0).permute(1, 2, 0))
-    plt.text(5, 5, f'Path: {image_path}\nPrediction: {prediction}', bbox=dict(facecolor='red', alpha=0.5))
-    plt.show()
+    device = utils.get_device(device_config=config.learning.device)
 
-def test_model(weights_path):
-    #load the paths of the images to test from test_paths.txt
-    with open('src/test_paths.txt', 'r', encoding='utf-8') as f:
-        image_paths = f.readlines()
-    image_paths = [path.strip() for path in image_paths]
-    print("image_paths_from_txt:",image_paths)
+    # Get data
+    test_generator = create_dataloader(config=config, mode='test')
+    n_test = len(test_generator)
 
+    # Get model
+    model = resnet.get_resnet(config)
+    model.load_dict_learnable_parameters(state_dict=utils.load_weights(logging_path, device=device),
+                                         strict=True)
+    model = model.to(device)
+    # print(model)
 
+    # Loss
+    criterion = torch.nn.CrossEntropyLoss(reduction='mean')
 
-    #image_paths = ['data/4- Modèle Transfert glissé/2- Carrelage/Retouches/16.jpeg','data/1- Modèle Traces passives/2- Carrelage/Carrelage NH/Retouches/7.jpeg']  # replace with your image paths
+    # Get metrics
+    metrics = Metrics(num_classes=config.data.num_classes, run_argmax_on_y_true=False)
+    metrics.to(device)
 
-    model = load_model(weights_path)
+    test_loss = 0
+    test_metrics = metrics.init_metrics()
+    test_range = tqdm(test_generator)
+
     model.eval()
 
-    #define the correspondence between class labels and class indices
-    class_labels = ['1- Modèle Traces passives', "15- Modèle Modèle d'impact", '4- Modèle Transfert glissé']
+    with torch.no_grad():
+        for i, (x, y_true, _) in enumerate(test_range):
+            x: Tensor = x.to(device)
+            y_true: Tensor = y_true.to(device)
+            # ic(x[0], y_true, x.shape, y_true.shape)
 
-    for image_path in image_paths:
-        image = load_image(image_path)
-        prediction = infer(model, image)[0]
-        print(f'Prediction for {image_path}: {prediction.item()}')
-        
-        print("This images corresponds to the class:",class_labels[prediction.item()])
-        plot_image(image, image_path, class_labels[prediction.item()])
+            y_pred = model.forward(x)
+            # ic(y_pred, y_pred.shape)
 
-if __name__ == '__main__':
+            loss = criterion(y_pred, y_true)
 
-    #class_labels: ['1- Modèle Traces passives', "15- Modèle Modèle d'impact", '4- Modèle Transfert glissé'] 
-    #Donc: - 0 est le modèle de traces passives
-    #     - 1 est le modèle d'impact
-    #     - 2 est le modèle de transfert glissé
+            test_loss += loss.item()
+            test_metrics += metrics.compute(y_pred, y_true)
+            # ic(test_loss)
+            # ic(test_metrics)
+            # exit()
 
-    model_path = 'logs/resnet18_29/checkpoint.pt'
-    test_model(model_path)
+            current_loss = test_loss / (i + 1)
+            test_range.set_description(f"TEST -> loss: {current_loss:.4f}")
+            test_range.refresh()
+            
 
+    ###################################################################
+    # Save Scores in logs                                             #
+    ###################################################################
+    test_loss = test_loss / n_test
+    test_metrics = test_metrics / n_test
+
+    test_logger(path=logging_path,
+                metrics=metrics.get_names(),
+                values=test_metrics)
