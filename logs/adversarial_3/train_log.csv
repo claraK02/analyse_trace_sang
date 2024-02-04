@@ -1,1 +1,0 @@
-step,crossentropy,val crossentropy,res loss,val res loss,adv loss,val adv loss,resnet_acc,val resnet_acc,resnet_precission,val resnet_precission,resnet_recall,val resnet_recall,resnet_f1-score,val resnet_f1-score,adv_acc,val adv_acc,adv_precission,val adv_precission,adv_recall,val adv_recall,adv_f1-score,val adv_f1-score
