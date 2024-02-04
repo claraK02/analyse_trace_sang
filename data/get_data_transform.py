@@ -33,7 +33,7 @@ def main(mode: str) -> None:
             transforms.ToTensor(),
     ])
 
-    data = pd.read_csv(os.path.join(info.DST_PATH, f'{mode}_item.csv'))
+    data = pd.read_csv(os.path.join('data', f'{mode}_item.csv'))
     for i in tqdm(range(len(data))):
         _, image_path, label, background = data.loc[i]
         img = Image.open(image_path)

@@ -1,5 +1,6 @@
 import os
 import random
+from tqdm import tqdm
 from typing import List, Tuple
 
 import informations as info
@@ -9,7 +10,8 @@ DATA_TYPE = List[Tuple[str, str, str]]
  
 def get_data(datapath: str,
              class_labels: List[str],
-             backgrounds: List[str]
+             backgrounds: List[str],
+             only_retouche: bool=True,
              ) -> List[Tuple[str, str, str]]:
     """ get data
     List of Tuple that containt image_path, label, background"""
@@ -18,11 +20,11 @@ def get_data(datapath: str,
     all_image_backgrounds = []
 
     for class_label in class_labels:
-        for root, _, files in os.walk(os.path.join(datapath, class_label)):
+        for root, _, files in tqdm(os.walk(os.path.join(datapath, class_label)), desc='walk in data'):
             for file in files:
                 if file.endswith(('.png', '.jpg', '.jpeg', '.JPG')):  # add or remove file extensions as needed
                     path = os.path.join(root, file)
-                    if "Retouches" in path:  # on ne prend pas les images non retouchées
+                    if (not only_retouche) or "Retouches" in path:  # on ne prend pas les images non retouchées
                         all_image_paths.append(path)
                         all_image_labels.append(class_label)
                         for bg in backgrounds:
@@ -72,7 +74,8 @@ def save_data(data: DATA_TYPE, mode: str, datapath: str) -> None:
 if __name__ == '__main__':
     data = get_data(datapath=info.DATAPATH,
                     class_labels=info.LABELS,
-                    backgrounds=info.BACKGROUND)
+                    backgrounds=info.BACKGROUND,
+                    only_retouche='retouche' in info.DATAPATH)
     print(data)
     print(len(data))
     MODE = ['train', 'val', 'test']
@@ -81,7 +84,7 @@ if __name__ == '__main__':
     for i in range(3):
         save_data(data=data_split[i],
                   mode=MODE[i],
-                  datapath=info.DST_PATH)
+                  datapath='data')
 
 
     

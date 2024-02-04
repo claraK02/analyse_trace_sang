@@ -11,4 +11,4 @@ LABELS = ['1- Modèle Traces passives', '2- Modèle Goutte à Goutte', '3- Modè
 LABELS_PATH = list(map(lambda x: os.path.join(DATAPATH, x), LABELS))
 IMAGE_SIZE = 128
 BACKGROUND = ['carrelage', 'papier', 'bois', 'lino']
-DST_PATH = 'data'
+DST_PATH = 'data/data_labo'

@@ -2,3 +2,5 @@ __pycache__
 
 # data
 data/data_retouche
+data/data_labo
+data/*_item.csv
