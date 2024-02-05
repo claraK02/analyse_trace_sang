@@ -2,6 +2,7 @@ import os
 import sys
 import time
 from tqdm import tqdm
+from icecream import ic
 from easydict import EasyDict
 from os.path import dirname as up
 
@@ -80,6 +81,10 @@ def train(config: EasyDict) -> None:
             train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f}")
             train_range.refresh()
 
+        train_loss = train_loss / n_train
+        train_metrics = train_metrics / n_train
+        print(metrics.get_info(metrics_value=train_metrics))
+
         ###############################################################
         # Start Validation                                            #
         ###############################################################
@@ -107,15 +112,15 @@ def train(config: EasyDict) -> None:
                 val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f}")
                 val_range.refresh()
         
-        scheduler.step()       
+        scheduler.step()
+
+        val_loss = val_loss / n_val
+        val_metrics = val_metrics / n_val   
+        print(metrics.get_info(metrics_value=val_metrics))
 
         ###################################################################
         # Save Scores in logs                                             #
         ###################################################################
-        train_loss = train_loss / n_train
-        val_loss = val_loss / n_val
-        train_metrics = train_metrics / n_train
-        val_metrics = val_metrics / n_val
 
         if save_experiment:
             train_step_logger(path=logging_path, 
