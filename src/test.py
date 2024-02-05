@@ -3,7 +3,7 @@ import sys
 from tqdm import tqdm
 from easydict import EasyDict
 from os.path import dirname as up
-# from icecream import ic
+from icecream import ic
 
 import torch
 from torch import Tensor
@@ -27,9 +27,10 @@ def test(config: EasyDict, logging_path: str) -> None:
 
     # Get model
     model = resnet.get_resnet(config)
-    model.load_dict_learnable_parameters(state_dict=utils.load_weights(logging_path, device=device),
-                                         strict=True)
+    weight = utils.load_weights(logging_path, device=device)
+    model.load_dict_learnable_parameters(state_dict=weight, strict=True)
     model = model.to(device)
+    del weight
     # print(model)
 
     # Loss
@@ -72,6 +73,7 @@ def test(config: EasyDict, logging_path: str) -> None:
     ###################################################################
     test_loss = test_loss / n_test
     test_metrics = test_metrics / n_test
+    print(metrics.get_info(metrics_value=test_metrics))
 
     test_logger(path=logging_path,
                 metrics=metrics.get_names(),
