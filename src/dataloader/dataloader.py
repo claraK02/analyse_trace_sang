@@ -32,6 +32,7 @@ class DataGenerator(Dataset):
         self.mode = mode
 
         dst_path = os.path.join(config.data.path, f'{mode}_{config.data.image_size}')
+        print(f'dataloader for {mode}, datapath:{dst_path}')
         if not os.path.exists(dst_path):
             raise FileNotFoundError(f"{dst_path} wans't found. Make sure that you have run get_data_transform",
                                     f"with the image_size={config.data.image_size}")
