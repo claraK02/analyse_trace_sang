@@ -68,12 +68,12 @@ def detect_and_plot_objects(image_np):
     model = OwlViTForObjectDetection.from_pretrained("google/owlvit-base-patch32")
 
     image = Image.fromarray(image_np).convert("RGB")
-    texts = [["ruler" ,"ketchup"]]
+    texts = [["ruler" ,"ketchup","blood"]]
     inputs = processor(text=texts, images=image, return_tensors="pt")
     outputs = model(**inputs)
 
     target_sizes = torch.Tensor([image.size[::-1]])
-    results = processor.post_process_object_detection(outputs=outputs, threshold=0.05, target_sizes=target_sizes)
+    results = processor.post_process_object_detection(outputs=outputs, threshold=0.01, target_sizes=target_sizes)
 
     i = 0
     text = texts[i]
@@ -445,6 +445,63 @@ def classify_distribution(segmentation_mask):
         return 2  # Curvilinear distribution
     else:
         return 3  # Burst distribution
+    
+
+
+def calculate_homogeneity(mask):
+    """
+    Calculates the homogeneity of the distribution of millimetric traces around the centimetric trace.
+
+    Parameters:
+    mask (numpy.ndarray): Binary mask representing the stained regions.
+
+    Returns:
+    float: Homogeneity of the distribution of millimetric traces.
+    """
+    mask = mask.astype(np.uint8)
+    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask, connectivity=8)
+    if num_labels < 3:  # If there are no satellites, return 0
+        return 0
+
+    # The first label is the background, so the main stain is the second label
+    main_stain_centroid = centroids[1]
+
+    # The rest of the labels are the satellites
+    satellite_centroids = centroids[2:]
+
+    # Calculate the distance from each satellite to the main stain
+    distances = np.sqrt(np.sum((satellite_centroids - main_stain_centroid)**2, axis=1))
+
+    # Calculate the variance of the distances
+    variance = np.var(distances)
+
+    # A lower variance means a more homogeneous distribution
+    homogeneity = 1 / variance if variance != 0 else 0
+
+    return homogeneity
+
+def count_internal_striations(mask):
+    """
+    Counts the number of internal striations in the given mask.
+
+    Parameters:
+    mask (numpy.ndarray): Binary mask representing the stained regions.
+
+    Returns:
+    int: Number of internal striations.
+    """
+    try:
+        mask = mask.astype(np.uint8)
+        contours, hierarchy = cv2.findContours(mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # The hierarchy returned by cv2.findContours has the following form:
+        # [Next, Previous, First_Child, Parent]
+        # If the Parent is not -1, then the contour is internal
+        internal_striations = sum(1 for contour, info in zip(contours, hierarchy[0]) if info[3] != -1)
+        
+        return internal_striations
+    except:
+        return 0
 
 def count_satellites(mask):
     """
@@ -541,19 +598,27 @@ if __name__ == "__main__":
 
     #open one path from the test_paths.txt file
     #Open the test_paths.txt file
-    with open('src/test_paths.txt', 'r', encoding='utf-8') as f:
+    with open('test_paths.txt', 'r', encoding='utf-8') as f:
         test_paths = f.readlines()
 
     #obtain the segmentation mask of the image
     #open image
-    image = Image.open(test_paths[0].strip())
-    mask = segment_image_file(image)
-    #plot the mask and print the distribution associated
-    import matplotlib.pyplot as plt
-    plt.figure(figsize=(10, 10))
-    plt.imshow(mask, cmap='gray')
-    plt.show()
-    print("Distribution:",classify_distribution(mask))
+    for k in range(len(test_paths)):
+        image = Image.open(test_paths[k].strip())
+        mask = segment_image_file(image)
+        #calculate the number of internal striations
+        internal_striations = count_internal_striations(mask)
+        #calculate the homogeneity
+        homogeneity = calculate_homogeneity(mask)
+        print("homogeneity:",homogeneity)
+        print("internal_striations:",internal_striations)
+        # object=detect_and_plot_objects(np.array(image))
+        # #plot the mask and print the distribution associated
+        # import matplotlib.pyplot as plt
+        plt.figure(figsize=(10, 10))
+        plt.imshow(mask, cmap='gray')
+        plt.show()
+    # print("Distribution:",classify_distribution(mask))
 
     #tableau de correspondance: 0: central, 1: linear, 2: curvilinear, 3: burst
 

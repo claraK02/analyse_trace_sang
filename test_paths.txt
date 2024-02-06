@@ -1,0 +1,3 @@
+C:/Users/Yanis/Documents/Cours Centrale Marseille/Projet 3A/data/data_labo/train_128/4- Modèle Transfert glissé/carrelage/397.jpg
+C:/Users/Yanis/Documents/Cours Centrale Marseille/Projet 3A/data/data_labo/train_128/3- Modèle Transfert par contact/lino/266.jpg
+C:/Users/Yanis/Documents/Cours Centrale Marseille/Projet 3A/data/data_labo/train_128/1- Modèle Traces passives/bois/60.jpg
