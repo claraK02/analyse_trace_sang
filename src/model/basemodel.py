@@ -1,5 +1,6 @@
 from typing import Iterator, Tuple
 
+import torch
 from torch import nn
 from torch.nn import Parameter
 
@@ -61,7 +62,8 @@ class Model(nn.Module):
             # if name in keys
             if name in state_dict.keys():
                 if param.requires_grad:
-                    param = state_dict[name]
+                    with torch.no_grad():
+                        param.copy_(state_dict[name])
                     loaded_keys.append(name)
                 elif strict or verbose:
                     error_message = f'parameter:{name} is in state_dict.keys ' + \

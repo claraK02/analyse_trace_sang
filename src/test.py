@@ -31,7 +31,6 @@ def test(config: EasyDict, logging_path: str) -> None:
     model.load_dict_learnable_parameters(state_dict=weight, strict=True)
     model = model.to(device)
     del weight
-    # print(model)
 
     # Loss
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
@@ -50,18 +49,13 @@ def test(config: EasyDict, logging_path: str) -> None:
         for i, (x, y_true, _) in enumerate(test_range):
             x: Tensor = x.to(device)
             y_true: Tensor = y_true.to(device)
-            # ic(x[0], y_true, x.shape, y_true.shape)
 
             y_pred = model.forward(x)
-            # ic(y_pred, y_pred.shape)
 
             loss = criterion(y_pred, y_true)
 
             test_loss += loss.item()
             test_metrics += metrics.compute(y_pred, y_true)
-            # ic(test_loss)
-            # ic(test_metrics)
-            # exit()
 
             current_loss = test_loss / (i + 1)
             test_range.set_description(f"TEST -> loss: {current_loss:.4f}")
