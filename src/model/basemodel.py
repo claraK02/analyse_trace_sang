@@ -64,19 +64,19 @@ class Model(nn.Module):
                     param = state_dict[name]
                     loaded_keys.append(name)
                 elif strict or verbose:
-                    error_message = f'parameter:{name} is in state_dict.keys \
-                                    but this param has requires_grad=False'
+                    error_message = f'parameter:{name} is in state_dict.keys ' + \
+                                    f'but this param has requires_grad=False'
                     print_error_message(error_message, strict, verbose)
             
             # if name not in keys but param is requires_grad
             elif param.requires_grad:
-                error_message = f'parameter:{name} not in state_dict.keys \
-                                but this param has requires_grad=True'
+                error_message = f'parameter:{name} not in state_dict.keys ' + \
+                                f'but this param has requires_grad=True'
                 print_error_message(error_message, strict, verbose)
 
         # if loaded_keys != state_dict.keys()   (we know that: state_dict.keys() c loaded_keys)
         if len(loaded_keys) != len(state_dict):
-            missing_keys = [key for key in range(state_dict.keys()) if key not in loaded_keys]
+            missing_keys = [key for key in state_dict.keys() if key not in loaded_keys]
             error_message = f"the following parameter wasn't load: {missing_keys}"
             print_error_message(error_message, strict, verbose)
         
