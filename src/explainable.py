@@ -292,7 +292,7 @@ def train_xgboost():
 
 
     #Open the test_paths.txt file
-    with open('src/test_paths.txt', 'r', encoding='utf-8') as f:
+    with open('test_paths.txt', 'r', encoding='utf-8') as f:
         test_paths = f.readlines()
     
     #load all the images
@@ -358,6 +358,37 @@ def train_xgboost():
 
         # Display the plots
         plt.show()
+
+    return model
+
+def inference_xgboost(model, image):
+    """
+    input: image, a numpy array
+    output: the prediction of the model
+    """
+    # Segment the image
+    mask = segment_image_file(image)
+
+    # Extract features
+    ovality = calculate_ovality(mask)
+    satellites = count_satellites(mask)
+    irregularity = calculate_irregularity(mask)
+    ratio=calculate_satellite_ratio(mask)
+
+    # Append the features and label to their respective lists
+    features = np.array([ovality, satellites, irregularity, ratio])
+
+    # Compute XGBoost prediction
+    prediction = model.predict(np.reshape(features, (1, -1)))
+                    
+    #compute the SHAP values
+    # Create a SHAP explainers
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(np.reshape(features, (1, -1)))
+
+
+    return prediction, shap_values
+
         
 
 
@@ -447,6 +478,7 @@ def classify_distribution(segmentation_mask):
         return 3  # Burst distribution
     
 
+import numpy as np
 
 def calculate_homogeneity(mask):
     """
@@ -570,7 +602,27 @@ if __name__ == "__main__":
     
     template_path="src/template.jpeg"
     list_template_paths=["src/template.jpeg","src/template_2.jpeg","src/template_3.jpeg","src/template_4.jpeg"]
-    #train_xgboost()
+    model=train_xgboost() #get the trained model
+
+    with open('test_paths.txt', 'r', encoding='utf-8') as f:
+        test_paths = f.readlines()
+
+    #make an inference
+    #open the first image
+        
+    path=test_paths[0].strip()
+
+    if os.path.isfile(path):
+        image = Image.open(path)
+        image = np.array(image)
+        prediction, shap_values = inference_xgboost(model, image)
+        print("Prediction:",prediction)
+        print("SHAP values:",shap_values)
+
+
+
+
+
     #generate a random mask
     # mask = generate_random_mask(512, 10,diversity=1)
 

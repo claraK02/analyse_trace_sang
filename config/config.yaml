@@ -1,5 +1,5 @@
 data:
-  path: data/data_retouche
+  path: data/data_labo
   image_size: 128
   num_classes: 19
   background_classes: 4
