@@ -29,6 +29,7 @@ class Resnet(Model):
 
         for param in self.resnet_begin.parameters():
             param.requires_grad = False
+        self.resnet_begin.eval()
         
         self.fc1 = nn.Linear(in_features=512, out_features=hidden_size)
         self.relu = nn.ReLU()
