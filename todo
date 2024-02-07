@@ -1,6 +1,0 @@
-MODEL et TRAIN
-- faire un script pour voir les meilleurs hyperparamètres
-- voir la backbonne de RESNET
-- peut-être reduire le hidden layers
-- tester d'autre architercture
-
