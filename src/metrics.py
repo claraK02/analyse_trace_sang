@@ -9,25 +9,19 @@ from torchmetrics import Accuracy, F1Score, Precision, Recall
 class Metrics:
     def __init__(self,
                  num_classes: int,
-                 average: str='micro',
-                run_argmax_on_y_true: bool=True) -> None:
-        self.num_classes = num_classes
-        self.metrics = {'acc': Accuracy(task='multiclass',
-                                        average=average,
-                                        num_classes=num_classes),
-                        'precission': Precision(task='multiclass',
-                                                average=average,
-                                                num_classes=num_classes),
-                        'recall': Recall(task='multiclass',
-                                         average=average,
-                                         num_classes=num_classes),
-                        'f1-score': F1Score(task='multiclass',
-                                            average=average,
-                                            num_classes=num_classes)}
-        self.metrics_onehot = {'top k': Accuracy(task='multiclass',
-                                                 average=average,
-                                                 num_classes=num_classes,
-                                                 top_k=3)}
+                 run_argmax_on_y_true: bool=True) -> None:
+
+        micro = {'task': 'multiclass', 'average': 'micro', 'num_classes': num_classes}
+        macro = {'task': 'multiclass', 'average': 'macro', 'num_classes': num_classes}
+
+        self.metrics = {'acc micro': Accuracy(**micro),
+                        'acc macro': Accuracy(**macro) ,
+                        'precission macro': Precision(**macro),
+                        'recall macro': Recall(**macro),
+                        'f1-score macro': F1Score(**macro)}
+        
+        self.metrics_onehot = {'top k micro': Accuracy(top_k=3, **micro),
+                               'top k macro': Accuracy(top_k=3, **macro)}
         
         self.num_metrics = len(self.metrics_onehot) + len(self.metrics)
         self.metrics_name = list(self.metrics_onehot.keys()) + list(self.metrics.keys())
@@ -70,19 +64,20 @@ class Metrics:
             raise ValueError(f'metrics_value doesnt have the same length as num_metrics.',
                              f'{len(metrics_value) = }\t and \t{self.num_metrics = }')
         
-        output = 'Metrics :\n'
+        output = 'Metrics \t: Values\n'
+        output += '-' * 15 + ' | ' + '-' * 4 + '\n'
         for i, metric_name in enumerate(self.metrics_name):
-            output += f'{metric_name[:7]}\t: {metrics_value[i]:.2f}\n'
+            output += f'{metric_name[:14]}\t: {metrics_value[i]:.2f}\n'
         return output
 
 
 if __name__ == '__main__':
-    batch_size = 10
-    num_classes = 3
+    batch_size = 32
+    num_classes = 5
     y_pred = torch.rand(size=(batch_size, num_classes))
     y_true = torch.randint(num_classes, size=(batch_size,))
-    print('y_true', y_true)
-    print('y_pred', y_pred)
+    print('y_true', y_true.shape)
+    print('y_pred', y_pred.shape)
     
     metrics = Metrics(num_classes=num_classes, run_argmax_on_y_true=False)
     metrics_value = metrics.compute(y_pred, y_true)
