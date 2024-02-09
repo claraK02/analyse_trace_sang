@@ -150,9 +150,12 @@ def count_satellites(mask):
     Returns:
     int: Number of satellite stains.
     """
-    mask = mask.astype(np.uint8)
-    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask, connectivity=8)
-    satellites = num_labels - 1  # Subtract 1 to exclude the main stain itself
+    try:
+        mask = mask.astype(np.uint8)
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask, connectivity=8)
+        satellites = num_labels - 1  # Subtract 1 to exclude the main stain itself
+    except:
+        satellites = 0
     return satellites
 
 
@@ -166,13 +169,16 @@ def calculate_irregularity(mask):
     Returns:
     - irregularity: The irregularity value of the mask.
     """
-    mask = mask.astype(np.uint8)
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    main_stain = max(contours, key=cv2.contourArea)
-    perimeter = cv2.arcLength(main_stain, True)
-    area = cv2.contourArea(main_stain)
-    perfect_circle_perimeter = 2 * np.pi * (area / np.pi)**0.5
-    irregularity = perimeter - perfect_circle_perimeter
+    try:
+        mask = mask.astype(np.uint8)
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        main_stain = max(contours, key=cv2.contourArea)
+        perimeter = cv2.arcLength(main_stain, True)
+        area = cv2.contourArea(main_stain)
+        perfect_circle_perimeter = 2 * np.pi * (area / np.pi)**0.5
+        irregularity = perimeter - perfect_circle_perimeter
+    except:
+        irregularity = 0
     return irregularity
 
 
@@ -187,19 +193,33 @@ def calculate_satellite_ratio(mask):
     float: Average ratio of the size of satellite stains to the size of the main stain.
     """
 
-    mask = mask.astype(np.uint8)
-    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask, connectivity=8)
-    if num_labels < 2:  # If there are no satellites, return 0
-        return 0
+    try:
+        mask = mask.astype(np.uint8)
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(mask, connectivity=8)
+        if num_labels < 2:  # If there are no satellites, return 0
+            return 0
 
-    # The first label is the background, so the main stain is the second label
-    main_stain_size = stats[1, cv2.CC_STAT_AREA]
+        # The first label is the background, so the main stain is the second label
+        main_stain_size = stats[1, cv2.CC_STAT_AREA]
 
-    # The rest of the labels are the satellites
-    satellite_sizes = stats[2:, cv2.CC_STAT_AREA]
+        # The rest of the labels are the satellites
+        satellite_sizes = stats[2:, cv2.CC_STAT_AREA]
 
-    # Calculate the ratio for each satellite and return the average
-    ratios = satellite_sizes / main_stain_size
+        # Calculate the ratio for each satellite and return the average
+        ratios = satellite_sizes / main_stain_size
+    except:
+        ratios = np.array([0])
 
 
     return ratios.mean()
+
+if __name__=='__main__':
+    mask = generate_random_mask(100, 10)
+    print("shape:", mask.shape)
+    print(f"Ovality: {calculate_ovality(mask)}")
+    print(f"Classification: {classify_distribution(mask)}")
+    print(f"Homogeneity: {calculate_homogeneity(mask)}")
+    print(f"Internal striations: {count_internal_striations(mask)}")
+    print(f"Satellites: {count_satellites(mask)}")
+    print(f"Irregularity: {calculate_irregularity(mask)}")
+    print(f"Satellite ratio: {calculate_satellite_ratio(mask)}")

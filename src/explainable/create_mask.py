@@ -8,51 +8,75 @@ from typing import Tuple
 import matplotlib.pyplot as plt
 
 
-def segment_image_file(image: ndarray) -> ndarray:
+# def segment_image_file(image: ndarray) -> ndarray:
+#     """
+#     Open the image and segment the blood stain in the image using the red colour
+#     """
+#     if image.max() < 10:
+#         print("Attention, l'image doit être codé en int")
+
+#     masked_image = np.zeros_like(image, dtype=int)
+#     for i in range(image.shape[0]):
+#         for j in range(image.shape[1]):
+#             masked_image[i, j] = mask_red_pixel(image[i, j])
+
+#     return masked_image
+
+
+# # def mask_red_pixel(pixel: Tuple[int, int, int],
+# #                    seuil: Tuple[int, int, int]=(58, 50, 50)
+# #                    ) -> bool:
+# #     red = (pixel[0] > seuil[0])
+# #     green = (pixel[1] > seuil[1])
+# #     blue = (pixel[2] > seuil[2])
+# #     return red and not(green) and not(blue)
+
+# def mask_red_pixel(pixel: Tuple[int, int, int]) -> bool:
+#     r, g, b = pixel
+#     if max(pixel) != r:
+#         return False
+
+#     red_seuil = (r > 70)
+#     green_seuil = (g < 100)
+#     blue_seuil = (b < 100)
+
+#     dif_r_mean_gb = r - (g + b) / 2
+#     test_diff = dif_r_mean_gb > 70
+#     # r > 20 + bg/2 
+
+#     tests = (red_seuil, green_seuil, blue_seuil, test_diff)
+#     nb_true = 0
+#     for test in tests:
+#         if test:
+#             nb_true += 1
+    
+#     return nb_true >= 3
+    
+
+
+def segment_image_file(image: np.ndarray) -> np.ndarray:
     """
     Open the image and segment the blood stain in the image using the red colour
     """
     if image.max() < 10:
         print("Attention, l'image doit être codé en int")
 
-    masked_image = np.zeros_like(image, dtype=int)
-    for i in range(image.shape[0]):
-        for j in range(image.shape[1]):
-            masked_image[i, j] = mask_red_pixel(image[i, j])
-
+    masked_image = mask_red_pixel(image)
     return masked_image
 
-
-# def mask_red_pixel(pixel: Tuple[int, int, int],
-#                    seuil: Tuple[int, int, int]=(58, 50, 50)
-#                    ) -> bool:
-#     red = (pixel[0] > seuil[0])
-#     green = (pixel[1] > seuil[1])
-#     blue = (pixel[2] > seuil[2])
-#     return red and not(green) and not(blue)
-
-def mask_red_pixel(pixel: Tuple[int, int, int]) -> bool:
-    r, g, b = pixel
-    if max(pixel) != r:
-        return False
-
+def mask_red_pixel(image: np.ndarray) -> np.ndarray:
+    r, g, b = np.split(image, 3, axis=-1)
     red_seuil = (r > 70)
     green_seuil = (g < 100)
     blue_seuil = (b < 100)
 
     dif_r_mean_gb = r - (g + b) / 2
     test_diff = dif_r_mean_gb > 70
-    # r > 20 + bg/2 
 
-    tests = (red_seuil, green_seuil, blue_seuil, test_diff)
-    nb_true = 0
-    for test in tests:
-        if test:
-            nb_true += 1
-    
+    tests = np.array([red_seuil, green_seuil, blue_seuil, test_diff])
+    nb_true = np.sum(tests, axis=0)
+
     return nb_true >= 3
-    
-
 
 
 def plot_img_and_mask(img: ndarray, mask: ndarray) -> None:
