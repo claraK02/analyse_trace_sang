@@ -290,21 +290,15 @@ def train_xgboost():
     for i, score in enumerate(model.feature_importances_):
         print(f"Feature {i}: {score}")
 
-
-    #Open the test_paths.txt file
-    with open('test_paths.txt', 'r', encoding='utf-8') as f:
-        test_paths = f.readlines()
+    #create the test dataloader
+    test_generator = create_dataloader(config=config, mode='test')
     
     #load all the images
     images = []
-    for path in test_paths:
-        path = path.strip()
-        print("PATH:",path)
-        if os.path.isfile(path):
-            image = Image.open(path)
-            images.append(image)
-        else:
-            print(f"Invalid file path: {path}")
+    for i, (batch_x, batch_y,_) in enumerate(test_generator):
+        for image, label in zip(batch_x, batch_y):
+            images.append(image.permute(1,2,0).numpy())
+    
 
     # Create a SHAP explainer
     explainer = shap.TreeExplainer(model)
