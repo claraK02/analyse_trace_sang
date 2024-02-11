@@ -8,50 +8,41 @@ from typing import Tuple
 import matplotlib.pyplot as plt
 
 
-# def segment_image_file(image: ndarray) -> ndarray:
-#     """
-#     Open the image and segment the blood stain in the image using the red colour
-#     """
-#     if image.max() < 10:
-#         print("Attention, l'image doit être codé en int")
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+import numpy as np
+import matplotlib.pyplot as plt
 
-#     masked_image = np.zeros_like(image, dtype=int)
-#     for i in range(image.shape[0]):
-#         for j in range(image.shape[1]):
-#             masked_image[i, j] = mask_red_pixel(image[i, j])
-
-#     return masked_image
-
-
-# # def mask_red_pixel(pixel: Tuple[int, int, int],
-# #                    seuil: Tuple[int, int, int]=(58, 50, 50)
-# #                    ) -> bool:
-# #     red = (pixel[0] > seuil[0])
-# #     green = (pixel[1] > seuil[1])
-# #     blue = (pixel[2] > seuil[2])
-# #     return red and not(green) and not(blue)
-
-# def mask_red_pixel(pixel: Tuple[int, int, int]) -> bool:
-#     r, g, b = pixel
-#     if max(pixel) != r:
-#         return False
-
-#     red_seuil = (r > 70)
-#     green_seuil = (g < 100)
-#     blue_seuil = (b < 100)
-
-#     dif_r_mean_gb = r - (g + b) / 2
-#     test_diff = dif_r_mean_gb > 70
-#     # r > 20 + bg/2 
-
-#     tests = (red_seuil, green_seuil, blue_seuil, test_diff)
-#     nb_true = 0
-#     for test in tests:
-#         if test:
-#             nb_true += 1
+def segment_image_kmeans(image: np.ndarray, max_clusters: int = 10) -> list:
+    # Reshape the image to be a list of RGB values
+    pixels = image.reshape(-1, 3)
     
-#     return nb_true >= 3
+    # List to hold the variance for each number of clusters
+    variances = []
     
+    # Calculate variance for each number of clusters
+    for n_clusters in range(1, max_clusters + 1):
+        kmeans = KMeans(n_clusters=n_clusters,  n_init=10, random_state=0).fit(pixels)
+        variances.append(kmeans.inertia_)
+    
+    # Plot the variance as a function of the number of clusters
+    plt.plot(range(1, max_clusters + 1), variances)
+    plt.show()
+    
+    # Determine the optimal number of clusters as the elbow point in the plot
+    optimal_clusters = variances.index(min(variances)) + 1
+    print(f"Optimal number of clusters: {optimal_clusters}")
+    
+    # Apply KMeans with the optimal number of clusters
+    kmeans = KMeans(n_clusters=optimal_clusters, random_state=0).fit(pixels)
+    
+    # Create a mask for each cluster
+    masks = []
+    for cluster in range(optimal_clusters):
+        mask = kmeans.labels_.reshape(image.shape[:2]) == cluster
+        masks.append(mask)
+    
+    return masks
 
 
 def segment_image_file(image: np.ndarray) -> np.ndarray:
@@ -60,9 +51,42 @@ def segment_image_file(image: np.ndarray) -> np.ndarray:
     """
     if image.max() < 10:
         print("Attention, l'image doit être codé en int")
+        image = image * 255
 
     masked_image = mask_red_pixel(image)
     return masked_image
+
+import torch
+
+def batched_segmentation(batch_tensor: torch.Tensor) -> torch.Tensor:
+    """
+    Takes a tensor batch of images as input and returns a tensor batch of masks.
+    Input shape can be something like this:  torch.Size([32, 3, 128, 128])
+    """
+    # Convert the tensor to numpy array
+    batch_array = batch_tensor.numpy()
+
+    # Apply the mask_red_pixel function to each image in the batch
+    masked_batch = np.array([mask_red_pixel_batched(image) for image in batch_array])
+
+    # Convert the numpy array back to tensor
+    masked_tensor = torch.from_numpy(masked_batch)
+
+    return masked_tensor
+
+def mask_red_pixel_batched(image: np.ndarray) -> np.ndarray:
+    r, g, b = np.split(image, 3, axis=0)
+    red_seuil = (r > 70)
+    green_seuil = (g < 100)
+    blue_seuil = (b < 100)
+
+    dif_r_mean_gb = r - (g + b) / 2
+    test_diff = dif_r_mean_gb > 70
+
+    tests = np.array([red_seuil, green_seuil, blue_seuil, test_diff])
+    nb_true = np.sum(tests, axis=0)
+
+    return (nb_true >= 3).astype(int)  # Convert boolean array to int
 
 def mask_red_pixel(image: np.ndarray) -> np.ndarray:
     r, g, b = np.split(image, 3, axis=-1)
@@ -109,5 +133,9 @@ def get_random_img(data_path: str) -> ndarray:
 if __name__ == '__main__':
     test_path = os.path.join('data', 'data_labo', 'test_128')
     image = get_random_img(test_path)
-    mask = segment_image_file(image=image)
-    plot_img_and_mask(image, mask)
+    #mask = segment_image_file(image=image)
+    mask_list = segment_image_kmeans(image=image, max_clusters=10)
+    plot_img_and_mask(image, mask_list[0])
+    plot_img_and_mask(image, mask_list[1])
+    plot_img_and_mask(image, mask_list[2])
+    plot_img_and_mask(image, mask_list[3])
