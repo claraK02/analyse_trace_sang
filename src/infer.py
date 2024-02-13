@@ -1,7 +1,5 @@
 import os
 import sys
-from tqdm import tqdm
-from typing import List
 from easydict import EasyDict
 from os.path import dirname as up
 
@@ -9,7 +7,6 @@ import torch
 from torch import Tensor
 from torch.utils.data import DataLoader
 
-sys.path.append(up(os.path.abspath(__file__)))
 sys.path.append(up(up(os.path.abspath(__file__))))
 
 from src.dataloader.dataloader import LABELS
