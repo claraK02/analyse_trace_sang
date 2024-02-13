@@ -33,7 +33,7 @@ from utils import utils, plot_learning_curves
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-def train(config: EasyDict, unet: UNet, classifier: Classifier, k: float, pretrain_epochs: int,train_epochs: int) -> None:
+def train(config: EasyDict, unet: UNet, classifier: Classifier, k: float, pretrain_epochs: int,train_epochs: int,fine_tuning: bool = True) -> None:
     # Get data
     train_generator = create_dataloader(config=config, mode='train')
     val_generator = create_dataloader(config=config, mode='val')
@@ -98,70 +98,73 @@ def train(config: EasyDict, unet: UNet, classifier: Classifier, k: float, pretra
     del x, segm_mask, pred, loss
     torch.cuda.empty_cache()
 
-    # Train unet and classifier on the remaining data
-    for epoch in tqdm(range(1,train_epochs + 1)):
-        train_loss = 0
-        train_range = tqdm(train_generator)
-        
 
-        unet.train()
-        classifier.train()
-        for i, (x, y,back_true) in enumerate(train_range):
-            if i < pretrain_batches:
-                continue
+    if fine_tuning:
+        # Train unet and classifier on the remaining data
+        for epoch in tqdm(range(1,train_epochs + 1)):
+            train_loss = 0
+            train_range = tqdm(train_generator)
             
-            x,back_true, y = x.to(device),back_true.to(device), y.to(device)
-            pred = unet(x)
-            #print("shape de pred:",pred.shape)
-            #print("shape de y:",y.shape)
-            #print("valeurs de y:",y)
-           
-            # Compute the loss and backpropagate through both networks
-            class_pred = classifier(pred)
-            loss = criterion_classif(class_pred, y) 
-            loss.backward()
-            classifier_optimizer.step()
-            classifier_optimizer.zero_grad()
 
-            # Now compute the loss again, this time only backpropagate through the U-Net
-            class_pred = classifier(pred.detach())
-            loss = criterion_classif(class_pred, y)
-            loss.backward()
-            unet_optimizer.step()
-            unet_optimizer.zero_grad()
+            unet.train()
+            classifier.train()
+            for i, (x, y,back_true) in enumerate(train_range):
+                if i < pretrain_batches:
+                    continue
+                
+                x,back_true, y = x.to(device),back_true.to(device), y.to(device)
+                pred = unet(x)
+                #print("shape de pred:",pred.shape)
+                #print("shape de y:",y.shape)
+                #print("valeurs de y:",y)
+            
+                # Compute the loss and backpropagate through both networks
+                class_pred = classifier(pred)
+                loss = criterion_classif(class_pred, y) 
+                loss.backward()
+                classifier_optimizer.step()
+                classifier_optimizer.zero_grad()
 
-            train_loss += loss.item()
+                # Now compute the loss again, this time only backpropagate through the U-Net
+                class_pred = classifier(pred.detach())
+                loss = criterion_classif(class_pred, y)
+                loss.backward()
+                unet_optimizer.step()
+                unet_optimizer.zero_grad()
 
-            current_loss = train_loss / (i + 1 - pretrain_batches)
-            train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f}")
-            train_range.refresh()
+                train_loss += loss.item()
 
-        train_losses.append(train_loss / (n_train - pretrain_batches))
+                current_loss = train_loss / (i + 1 - pretrain_batches)
+                train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f}")
+                train_range.refresh()
 
-        # Validation
-        # val_loss = 0
-        # val_range = tqdm(val_generator)
+            train_losses.append(train_loss / (n_train - pretrain_batches))
 
-        # unet.eval()
-        # classifier.eval()
-        # with torch.no_grad():
-        #     for i, (x, y,back_true) in enumerate(val_range):
-        #         x, y = x.to(device), y.to(device)
-        #         pred = unet(x)
-        #         class_pred = classifier(pred)
-        #         loss = criterion(class_pred, y)
-        #         val_loss += loss.item()
+            # Validation
+            # val_loss = 0
+            # val_range = tqdm(val_generator)
 
-        #         current_loss = val_loss / (i + 1)
-        #         val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f}")
-        #         val_range.refresh()
+            # unet.eval()
+            # classifier.eval()
+            # with torch.no_grad():
+            #     for i, (x, y,back_true) in enumerate(val_range):
+            #         x, y = x.to(device), y.to(device)
+            #         pred = unet(x)
+            #         class_pred = classifier(pred)
+            #         loss = criterion(class_pred, y)
+            #         val_loss += loss.item()
 
-        # val_losses.append(val_loss / n_val)
+            #         current_loss = val_loss / (i + 1)
+            #         val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f}")
+            #         val_range.refresh()
+
+            # val_losses.append(val_loss / n_val)
 
     # Plotting
     plt.figure(figsize=(12, 6))
     plt.plot(range(1, pretrain_epochs + 1), pretrain_losses, label='Pretraining Loss')
-    plt.plot(range(1, train_epochs + 1), train_losses, label='Training Loss')
+    if fine_tuning:
+        plt.plot(range(1, train_epochs + 1), train_losses, label='Training Loss')
     #plt.plot(range(1, config.learning.epochs + 1), val_losses, label='Validation Loss')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
@@ -202,5 +205,5 @@ if __name__=="__main__":
     unet=UNet()
     classifier=Classifier(num_classes=19)
     config = EasyDict(yaml.safe_load(open('config/config.yaml')))  # Load config file
-    train(config=config, unet=unet, classifier=classifier, k=0.8,pretrain_epochs=5,train_epochs=1)
+    train(config=config, unet=unet, classifier=classifier, k=0.8,pretrain_epochs=5,train_epochs=1,fine_tuning=False)  # Train the model
 

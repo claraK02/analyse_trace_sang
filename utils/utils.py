@@ -36,11 +36,29 @@ def get_metrics_name_for_adv(resnet_metrics: Metrics, adv_metrics: Metrics) -> L
     return metrics_name
 
 
+import torch
+import os
+from torch.nn.parameter import Parameter
+from typing import Dict
+
 def load_weights(logging_path: str,
                  model_name: str='res',
                  device: torch.device=torch.device('cpu'),
                  endfile: str='.pt'
-                 ) -> dict[str, Parameter]:
+                 ) -> Dict[str, Parameter]:
+    """
+    Load weights from the specified logging path for a given model.
+
+    Args:
+        logging_path (str): The path where the weight files are stored.
+        model_name (str, optional): The name of the model. Defaults to 'res'.
+        device (torch.device, optional): The device to load the weights onto. Defaults to torch.device('cpu').
+        endfile (str, optional): The file extension of the weight files. Defaults to '.pt'.
+
+    Returns:
+        dict[str, Parameter]: A dictionary containing the loaded weights.
+
+    """
     weight_files = list(filter(lambda x: x.endswith(endfile), os.listdir(logging_path)))
     
     if len(weight_files) == 1:

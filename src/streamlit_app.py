@@ -18,20 +18,19 @@ from src.dataloader.dataloader import create_dataloader
 from metrics import Metrics
 from src.model import resnet
 from utils import utils
-
-
-# Define the transformation
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-])
+import numpy as np
 
 
 st.title("Image Classification App")
 
 # Path to the training data
-train_data_path = 'data/data_retouche/train_128'
+train_data_path = 'data/data_retouche/train_512'
+
+#make a list of all the paths of the folders in data/data_labo the path should have the shape data/data_labo/train_512, data/data_labo/val_512, data/data_labo/test_512
+list_paths = [os.path.join('data/data_labo', folder) for folder in os.listdir('data/data_labo')]
+
+#make a choice box to select the path
+train_data_path = st.selectbox("Select the training data path", list_paths)
 
 # Get the list of directories in the training data path
 class_names = [name for name in os.listdir(train_data_path) if os.path.isdir(os.path.join(train_data_path, name))]
@@ -69,16 +68,22 @@ if st.button("Inference"):
 
         print("config_file: ", config_file)
         config_in_log_dir = os.path.dirname(config_file)
-        weight = utils.load_weights(config_in_log_dir, device=device)
-        print("config_in_log: ", config_in_log_dir)
+        print("config_in_log_dir: ", config_in_log_dir)
         model = resnet.get_resnet(config)
         weight = utils.load_weights(config_in_log_dir, device=device)
         model.load_dict_learnable_parameters(state_dict=weight, strict=True)
         model = model.to(device)
         del weight
 
+        print("max of image: ", np.array(image).max())
+        print("min of image: ", np.array(image).min())
+       
         # Prepare image
-        image = transform(image).unsqueeze(0).to(device)
+        image = torch.from_numpy(np.array(image)/255).float()
+        image = image.permute(2, 0, 1).unsqueeze(0).to(device)
+       
+        print("image.shape: ", image.shape)
+        print("image", image)
 
         # Inference
         model.eval()
