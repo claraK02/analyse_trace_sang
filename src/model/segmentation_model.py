@@ -34,6 +34,9 @@ class UNet(nn.Module):
         x = torch.sigmoid(self.conv4(x))
         
         return x
+    
+    def count_parameters(self):
+        return sum(p.numel() for p in self.parameters())
 
 class Classifier(nn.Module):
     def __init__(self, num_classes):
@@ -47,6 +50,9 @@ class Classifier(nn.Module):
         x = x.view(x.shape[0], -1)
         x = self.fc(x)
         return x
+    
+    def count_parameters(self):
+        return sum(p.numel() for p in self.parameters()) 
     
 if __name__ == "__main__":
     # Create a random tensor representing a batch of images with size 128x128 and 3 channels

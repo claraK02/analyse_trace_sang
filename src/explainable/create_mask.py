@@ -6,7 +6,7 @@ from numpy import ndarray
 from PIL import Image
 from typing import Tuple
 import matplotlib.pyplot as plt
-
+import torch
 
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
@@ -56,7 +56,6 @@ def segment_image_file(image: np.ndarray) -> np.ndarray:
     masked_image = mask_red_pixel(image)
     return masked_image
 
-import torch
 
 def batched_segmentation(batch_tensor: torch.Tensor) -> torch.Tensor:
     """
@@ -75,6 +74,12 @@ def batched_segmentation(batch_tensor: torch.Tensor) -> torch.Tensor:
     return masked_tensor
 
 def mask_red_pixel_batched(image: np.ndarray) -> np.ndarray:
+    """
+    create the red mask
+    """
+    # Check if the pixel values are between 0 and 1 and scale them up to 0-255 if they are
+    if image.max() <= 1.0:
+        image = image * 255   
     r, g, b = np.split(image, 3, axis=0)
     red_seuil = (r > 70)
     green_seuil = (g < 100)
@@ -133,9 +138,16 @@ def get_random_img(data_path: str) -> ndarray:
 if __name__ == '__main__':
     test_path = os.path.join('data', 'data_labo', 'test_128')
     image = get_random_img(test_path)
-    #mask = segment_image_file(image=image)
-    mask_list = segment_image_kmeans(image=image, max_clusters=10)
-    plot_img_and_mask(image, mask_list[0])
-    plot_img_and_mask(image, mask_list[1])
-    plot_img_and_mask(image, mask_list[2])
-    plot_img_and_mask(image, mask_list[3])
+
+
+    # Convert the image to a tensor, add an extra dimension to simulate a batch, and transpose to PyTorch format
+    image_tensor = torch.from_numpy(image.transpose((2, 0, 1))).unsqueeze(0)
+
+    # Apply batched segmentation
+    mask_tensor = batched_segmentation(image_tensor)
+
+    # Convert the mask tensor back to a numpy array, remove the extra dimension, and transpose back to image format
+    mask = mask_tensor.numpy().squeeze(0).transpose((1, 2, 0))
+
+    # Plot the image and the mask
+    plot_img_and_mask(image, mask)

@@ -47,7 +47,6 @@ def extract_features_and_labels(generator):
             mask = mask[:,:,0]
 
 
-
             # Extract features
             ovality = calculate_ovality(mask)
             satellites = count_satellites(mask)
@@ -70,7 +69,7 @@ def extract_features_and_labels(generator):
 
 def train_xgboost(dataloader):
     # Create a xgboost model
-    model = xgb.XGBClassifier()
+    model = xgb.XGBClassifier(tree_method='gpu_hist') #GPU acceleration !
 
     # Extract the features and labels from the images
     features, labels = extract_features_and_labels(dataloader)

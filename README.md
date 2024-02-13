@@ -24,3 +24,16 @@ Here's the command to train the model:
 
 ```bash
 python main.py train --config_path path_to_your_config_file
+```
+
+Exemple of command to train the model:
+
+```bash
+python main.py train --config_path config/config.yaml
+```
+
+To launch the test:
+    
+```bash
+python main.py test --config_path config/config.yaml
+```
