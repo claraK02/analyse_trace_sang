@@ -199,6 +199,28 @@ def inference_xgboost(model, image):
     return prediction, shap_values
 
 
+def save_xgboost_model(model, path):
+    """
+    Save the XGBoost model to the specified path and create the directory if it does not exist
+    """
+    # Create the directory if it does not exist
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    # Save the model
+    model.save_model(path)
+
+def load_xgboost_model(path):
+    """
+    Load the XGBoost model from the specified path and return it
+    """
+    # Create a new XGBoost model
+    model = xgb.XGBClassifier()
+
+    # Load the model
+    model.load_model(path)
+
+    return model
+
 if __name__ == "__main__":
 
     #config

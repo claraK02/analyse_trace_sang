@@ -120,8 +120,8 @@ if __name__ == '__main__':
     x, label, background = next(iter(dataloader))
     stop_time = time.time()
     print(f'time to load a batch: {stop_time - start_time:2f}s for a batchsize={config.learning.batch_size}')
-    ic(x.shape, x.dtype)
-    ic(label, label.shape, label.dtype)
-    ic(background, background.shape, background.dtype)
+    print(x.shape, x.dtype)
+    print(label, label.shape, label.dtype)
+    print(background, background.shape, background.dtype)
 
     plot_batch(x=x)

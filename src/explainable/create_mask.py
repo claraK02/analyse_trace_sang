@@ -136,8 +136,17 @@ def get_random_img(data_path: str) -> ndarray:
 
 
 if __name__ == '__main__':
-    test_path = os.path.join('data', 'data_labo', 'test_128')
+    test_path = os.path.join('data', 'data_labo', 'test_256')
     image = get_random_img(test_path)
+
+    #use the kmeans algorithm to segment the image
+    masks = segment_image_kmeans(image)
+
+    # Plot the image and the masks
+    plot_img_and_mask(image, masks[0])
+    plot_img_and_mask(image, masks[1])
+    plot_img_and_mask(image, masks[2])
+
 
 
     # Convert the image to a tensor, add an extra dimension to simulate a batch, and transpose to PyTorch format

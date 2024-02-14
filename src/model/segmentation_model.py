@@ -31,7 +31,7 @@ class UNet(nn.Module):
         x = torch.cat([x, c1], axis=1)
         
         # Final output
-        x = torch.sigmoid(self.conv4(x))
+        x = self.conv4(x)
         
         return x
     
@@ -41,7 +41,7 @@ class UNet(nn.Module):
 class Classifier(nn.Module):
     def __init__(self, num_classes):
         super(Classifier, self).__init__()
-        self.conv = nn.Conv2d(1, 64, 3, padding=1)
+        self.conv = nn.Conv2d(3, 64, 3, padding=1)
         self.fc = nn.Linear(64, num_classes)
 
     def forward(self, x):
