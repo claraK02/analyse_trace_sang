@@ -44,7 +44,9 @@ def get_saliency_map(model: FineTuneResNet,
 
     true_resnet = get_original_resnet(model) # les parametres sont tous apprenable
 
-    target_layer = true_resnet.layer4[1].conv2
+    print("true_resnet:", true_resnet)
+
+    target_layer = true_resnet.layer4[0].conv2 #c'était layer4[1].conv2 avant
     print(target_layer)
 
     cam = GradCAM(model=true_resnet, target_layers=[target_layer])
@@ -69,7 +71,7 @@ def get_saliency_map(model: FineTuneResNet,
 
 if __name__ == '__main__':
     # config_path = 'config/config.yaml'  
-    config_path = os.path.join('logs', 'resnet_7') 
+    config_path = os.path.join('logs', 'resnet_img256_1') 
     config = EasyDict(yaml.safe_load(open(os.path.join(config_path, 'config.yaml'))))
 
     from src.model.finetune_resnet import get_finetuneresnet
@@ -77,6 +79,7 @@ if __name__ == '__main__':
 
     # config_path = os.path.join('logs', 'resnet_2')
     model = get_finetuneresnet(config)
+    print("MODEL:", model)
     weight = utils.load_weights(config_path, device=torch.device('cpu'))
     model.load_dict_learnable_parameters(state_dict=weight, strict=True)
     del weight
