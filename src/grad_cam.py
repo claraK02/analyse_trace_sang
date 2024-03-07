@@ -15,12 +15,12 @@ sys.path.append(up(up(os.path.abspath(__file__))))
 
 from src.model.finetune_resnet import FineTuneResNet
 from src.model.resnet import get_original_resnet
+from src.model.finetune_resnet import get_finetuneresnet
 from utils import utils
 
 
 def get_saliency_map(model: FineTuneResNet,
                      image: np.ndarray | Tensor,
-                     plot_map: bool = False,
                      return_label: bool = False
                      ) -> np.ndarray | tuple[np.ndarray, Tensor]:
     """
@@ -46,7 +46,7 @@ def get_saliency_map(model: FineTuneResNet,
 
     print("true_resnet:", true_resnet)
 
-    target_layer = true_resnet.layer4[0].conv2 #c'était layer4[1].conv2 avant
+    target_layer = true_resnet.layer4[1].conv2 #c'était layer4[1].conv2 avant
     print(target_layer)
 
     cam = GradCAM(model=true_resnet, target_layers=[target_layer])
@@ -58,36 +58,40 @@ def get_saliency_map(model: FineTuneResNet,
 
     visualization = show_cam_on_image(rgb_img, grayscale_cam)
 
-    if plot_map:
-        plt.figure(figsize=(8, 8))
-        plt.imshow(visualization)
-        plt.show()
-
     if return_label:
         return visualization, output
     else:
         return visualization
 
+def plot_saliency_maps(model, k: int):
+    """
+    Plots k saliency maps for random images.
+
+    Args:
+        model: The model used for generating the saliency maps.
+        k: The number of saliency maps to plot.
+    """
+    rows = k // 3 + (k % 3 > 0)
+    fig, axs = plt.subplots(rows, 3, figsize=(20, 20))
+    fig.suptitle('Saliency Maps for layer4[1].conv2')
+
+    for i in range(k):
+        x, _ = utils.get_random_img(image_type='torch')
+        x: Tensor = x.unsqueeze(dim=0)
+        saliency_map = get_saliency_map(model, image=x)
+        axs[i // 3, i % 3].imshow(saliency_map)
+        axs[i // 3, i % 3].axis('off')
+    
+    
+    plt.show()
 
 if __name__ == '__main__':
-    # config_path = 'config/config.yaml'  
     config_path = os.path.join('logs', 'resnet_img256_1') 
     config = EasyDict(yaml.safe_load(open(os.path.join(config_path, 'config.yaml'))))
 
-    from src.model.finetune_resnet import get_finetuneresnet
-    from utils import utils
-
-    # config_path = os.path.join('logs', 'resnet_2')
     model = get_finetuneresnet(config)
-    print("MODEL:", model)
     weight = utils.load_weights(config_path, device=torch.device('cpu'))
     model.load_dict_learnable_parameters(state_dict=weight, strict=True)
     del weight
 
-    x, label = utils.get_random_img(image_type='torch')
-    x: Tensor = x.unsqueeze(dim=0)
-    print("x shape:", x.shape)
-    print('y_true:', label)
-
-    saliency_map = get_saliency_map(model, image=x, plot_map=True)
-    print("saliency_map shape:", saliency_map.shape)
+    plot_saliency_maps(model, k=9)
