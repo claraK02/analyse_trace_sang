@@ -8,7 +8,7 @@ from src.train import train_resnet
 from src import test, infer
 
 
-MODE_IMPLEMENTED = ['train', 'test', 'infer', 'random_search']
+MODE_IMPLEMENTED = ['train', 'test', 'infer', 'random_search', 'grid_search']
 # MODEL_IMPLEMENTED = ['resnet', 'unet', 'adversarial']
 MODEL_IMPLEMENTED = ['resnet']
 
@@ -33,18 +33,24 @@ def main(options: dict) -> None:
         # if config.model.name == 'unet':
         #     train_segmentator_v2.train(config)
     
-    if options['mode'] == 'random_search':
-        random_search = Search(config_yaml_file=options['config_path'], name='random_search')
-        num_run: int = max(options['num_run'], len(random_search))
+    if options['mode'] in ['random_search', 'grid_search']:
+        search = Search(config_yaml_file=options['config_path'],
+                        name=options['mode'])
+
+        num_run: int = len(search)
+        if options['mode'] == 'random_search':
+            num_run = max(options['num_run'], len(search))
+        print(f'{num_run = }')
 
         for n_run in range(num_run):
             print(f"\nexperiment n°{n_run + 1}/{options['num_run']}\n")
-            config = random_search.get_new_config()
+            config = search.get_new_config()
             if config.model.name == 'resnet':
-                train_resnet.train(config, logspath=random_search.get_directory())
+                train_resnet.train(config, logspath=search.get_directory())
             else:
                 raise NotImplementedError
-
+        
+        search.compare_experiments()
     
     # TESTING
     if options['mode'] == 'test':

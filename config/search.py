@@ -12,6 +12,7 @@ from os.path import dirname as up
 sys.path.append(up(up(os.path.abspath(__file__))))
 
 from config.utils import number_folder
+from config.compare_experiments import compare_experiments
 
 
 class Search:
@@ -77,6 +78,17 @@ class Search:
     def get_directory(self) -> str:
         """ get logs path like logs/folder_name where the experiments will be save in"""
         return self.folder_name
+    
+    def compare_experiments(self) -> None:
+
+        hyperparameters: dict[str, list[str]] = {}
+        for item in self.items:
+            hyperparameters[item.keys[-1]] = item.keys
+
+        compare_experiments(csv_output='compare',
+                            logs_path=self.folder_name,
+                            hyperparameters=hyperparameters,
+                            compare_on='val')
     
     def __update_index(self) -> None:
         self.index += 1
