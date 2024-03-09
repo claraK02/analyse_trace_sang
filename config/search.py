@@ -141,10 +141,10 @@ if __name__ == '__main__':
         config = search.get_new_config()
     
   
-    # item = Item(keys=['learning', 'learning_rate_resnet'],
+    # item = Item(keys=['learning', 'learning_rate'],
     #             possibles_values=[0.1, 0.2, 0.3])
     # config_path = os.path.join('config', 'config.yaml')
     # config = EasyDict(yaml.safe_load(open(config_path, 'r')))
 
     # item.change_config(config, index_value=2)
-    # print(config.learning.learning_rate_resnet)
+    # print(config.learning.learning_rate)

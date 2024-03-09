@@ -41,7 +41,7 @@ def train(config: EasyDict,
 
     # Optimizer and Scheduler
     optimizer = torch.optim.Adam(model.get_learned_parameters(),
-                                 lr=config.learning.learning_rate_resnet)
+                                 lr=config.learning.learning_rate)
 
     # Get metrics
     metrics = Metrics(num_classes=config.data.num_classes, run_argmax_on_y_true=False)

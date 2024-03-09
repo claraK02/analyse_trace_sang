@@ -9,7 +9,7 @@ HYPERPARAMETERS: dict[str, list[str]] = {
         'p_dropout': ['model', 'resnet', 'p_dropout'],
         'epochs': ['learning', 'epochs'],
         'batch_size': ['learning', 'batch_size'],
-        'learning_rate_resnet': ['learning', 'learning_rate_resnet'],
+        'learning_rate': ['learning', 'learning_rate'],
     }
 
 

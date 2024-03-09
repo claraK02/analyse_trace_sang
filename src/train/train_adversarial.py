@@ -40,7 +40,7 @@ def train(config: EasyDict) -> None:
 
     # Optimizer and Scheduler
     resnet_optimizer = Adam(res_model.get_learned_parameters(),
-                            lr=config.learning.learning_rate_resnet)
+                            lr=config.learning.learning_rate)
     adv_optimizer = Adam(chain(adv_model.parameters(), res_model.get_intermediare_parameters()),
                          lr=config.learning.learning_rate_adversary)
 

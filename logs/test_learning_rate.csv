@@ -1,4 +1,4 @@
-logs,acc micro,acc macro,image_size,brightness,contrast,hidden_size,p_dropout,epochs,batch_size,learning_rate_resnet
+logs,acc micro,acc macro,image_size,brightness,contrast,hidden_size,p_dropout,epochs,batch_size,learning_rate
 resnet_0,0.878,0.545,512,0.5,0.5,64,0.1,10,32,0.0001
 resnet_1,0.934,0.896,256,0.5,0.5,64,0.1,10,8,0.001
 resnet_2,0.842,0.782,256,0.5,0.5,64,0.1,10,8,0.01
