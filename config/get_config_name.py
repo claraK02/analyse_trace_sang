@@ -21,7 +21,7 @@ def get_config_name_resnet(config: EasyDict) -> str:
 
     if 'resume_training' in resnet.keys() and resnet.resume_training.do_resume:
         model = 'retrain_resnet'
-        freeze_param = resnet.freeze_param
+        freeze_param = resnet.resume_training.freeze_param
     
     if not freeze_param:
         name = f'{model}_allw_img{config.data.image_size}'
