@@ -1,4 +1,4 @@
-config_metadata: 'Saving time : 03/06/2024, 19:25:38'
+config_metadata: 'Saving time : 03/06/2024, 22:12:28'
 
 # data options
 data:
@@ -22,7 +22,7 @@ model:
     resnet:
         hidden_size: 64
         p_dropout: 0.1
-        freeze_resnet: false
+        freeze_resnet: true
         resume_training:
             do_resume: false
             path: 'logs/resnet_7'

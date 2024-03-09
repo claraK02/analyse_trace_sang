@@ -23,7 +23,7 @@ def get_config_name_resnet(config: EasyDict) -> str:
         model = 'retrain_resnet'
         freeze_param = resnet.freeze_param
     
-    if freeze_param:
+    if not freeze_param:
         name = f'{model}_allw_img{config.data.image_size}'
     else:
         name = f'{model}_img{config.data.image_size}'

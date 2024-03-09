@@ -86,7 +86,7 @@ def plot_saliency_maps(model, k: int):
     plt.show()
 
 if __name__ == '__main__':
-    config_path = os.path.join('logs', 'resnet_img256_1') 
+    config_path = os.path.join('logs', 'resnet_allw_img256_1') 
     config = EasyDict(yaml.safe_load(open(os.path.join(config_path, 'config.yaml'))))
 
     model = get_finetuneresnet(config)

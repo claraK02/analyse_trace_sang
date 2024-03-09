@@ -1,0 +1,3 @@
+logs,acc micro,acc macro,image_size,brightness,contrast,hidden_size,p_dropout,epochs,batch_size,learning_rate
+resnet_allw_img256_1,0.981,0.971,256,2,2,64,0.1,10,8,0.0001
+resnet_img256_0,0.948,0.918,256,2,2,64,0.1,10,8,0.001
