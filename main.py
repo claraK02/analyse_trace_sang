@@ -43,7 +43,7 @@ def main(options: dict) -> None:
         print(f'{num_run = }')
 
         for n_run in range(num_run):
-            print(f"\nexperiment n°{n_run + 1}/{options['num_run']}\n")
+            print(f"\nexperiment n°{n_run + 1}/{num_run}\n")
             config = search.get_new_config()
             if config.model.name == 'resnet':
                 train_resnet.train(config, logspath=search.get_directory())
