@@ -2,6 +2,7 @@ import os
 import sys
 import cv2
 import numpy as np
+import pandas as pd
 import streamlit as st
 from os.path import dirname as up
 from PIL import Image, ImageEnhance
@@ -11,37 +12,33 @@ from torchvision import transforms
 
 sys.path.append(up(up(os.path.abspath(__file__))))
 
-from src.model import resnet
 from src.dataloader.dataloader import LABELS
 from src.explainable.create_mask import mask_red_pixel_hsv
 from utils import utils
 from config.utils import load_config
+from src.model import finetune_resnet
+import torch.nn.functional as F
 
 st.title("Image Classification App")
 
 st.sidebar.title("Image Transformations")
 
-# Ajoutez ces lignes après les autres contrôles de la barre latérale
-#hue_min = st.sidebar.slider('Hue Min', min_value=0, max_value=180, value=0)
-#hue_max = st.sidebar.slider('Hue Max', min_value=0, max_value=180, value=180)
+
 plot_mask = st.sidebar.checkbox('Plot Mask', value=False)
 # Ajoutez cette ligne après les autres contrôles de la barre latérale
 hue_range = st.sidebar.slider('Hue Range', min_value=0, max_value=180, value=(0, 180))
 
-# Path to the training data
-train_data_path = 'data/data_retouche/train_512'
-
 #make a list of all the paths of the folders in data/data_labo the path should have the shape data/data_labo/train_512, data/data_labo/val_512, data/data_labo/test_512
 list_paths = [os.path.join('data/data_labo', folder) for folder in os.listdir('data/data_labo')]
 
-#make a choice box to select the path
-train_data_path = st.selectbox("Select the training data path", list_paths)
-
-# Get the list of directories in the training data path
 #class_names = [name for name in os.listdir(train_data_path) if os.path.isdir(os.path.join(train_data_path, name))]
 class_names = LABELS
 #print the class names
 print(class_names)
+
+# Ajoutez cette case à cocher dans la barre latérale
+plot_saliency = st.sidebar.checkbox('Plot Saliency Map', value=True)
+
 
 
 # Recursive function to find .yaml files in a directory
@@ -100,43 +97,82 @@ if image_file is not None:
         # Convertissez l'image numpy en image PIL pour l'afficher avec Streamlit
         image = Image.fromarray(image_np)
 
-    st.image(image, caption='Uploaded Image.', use_column_width=True)
 
-# Inference button
+    st.image(image, caption='Uploaded Image.',width=500)
+
+
 if st.button("Inference"):
     if image_file is not None:
-        # Load config
-        config = load_config(config_file)
 
-        # Get device
-        device = utils.get_device(device_config=config.learning.device)
+        #affiche une icone de chargement
+        with st.spinner('Inferring...'):
+            config = load_config(config_file)
 
-        print("config_file: ", config_file)
-        config_in_log_dir = os.path.dirname(config_file)
-        print("config_in_log_dir: ", config_in_log_dir)
-        model = resnet.get_resnet(config)
-        weight = utils.load_weights(config_in_log_dir, device=device)
-        model.load_dict_learnable_parameters(state_dict=weight, strict=True)
-        model = model.to(device)
-        del weight
+            # Get device
+            device = utils.get_device(device_config=config.learning.device)
 
+            print("config_file: ", config_file)
+            config_in_log_dir = os.path.dirname(config_file)
+            print("config_in_log_dir: ", config_in_log_dir)
+            model = finetune_resnet.get_finetuneresnet(config) #to get the model
 
-        # Prepare image
-        transform = transforms.Compose([transforms.ToTensor()])
-        #apply the transform to the image
-        image = transform(image).unsqueeze(0).to(device)
+            weight = utils.load_weights(config_in_log_dir, device=device)
+            model.load_dict_learnable_parameters(state_dict=weight, strict=True)
+            model = model.to(device)
+            del weight
 
-        print("image.shape: ", image.shape)
-        print("image", image)
+            # Prepare image
+            transform = transforms.Compose([transforms.ToTensor()])
+            #apply the transform to the image
+            image = transform(image).unsqueeze(0).to(device)
 
-        # Inference
-        model.eval()
-        with torch.no_grad():
-            y_pred = model.forward(image)
+            print("image.shape: ", image.shape)
+            print("image", image)
 
-        #st.balloons()
+            # Inference
+            model.eval()
+            with torch.no_grad():
+                y_pred = model.forward(image)
 
-        # Display result
-        res=class_names[y_pred.argmax(dim=-1).item()]
-        st.success(f"**This image is classified as:** {res}")
+            #we print y_pred:
+            print("y_pred: ", y_pred)
 
+            # Apply softmax to get probability distribution
+            y_pred_prob = F.softmax(y_pred, dim=-1)
+
+            print("y_pred_prob: ", y_pred_prob)
+            
+            numpy_y_pred_prob = y_pred_prob.cpu().numpy()[0]
+
+            print("numpy_y_pred_prob: ", numpy_y_pred_prob)
+
+            # Reshape the array to be 2D with one row
+            numpy_y_pred_prob = numpy_y_pred_prob.reshape(1, -1)
+
+            # Convert the output tensor to a DataFrame
+            y_pred_df = pd.DataFrame(numpy_y_pred_prob, columns=class_names)
+
+            # Transpose the DataFrame so that each class has its own row
+            y_pred_df = y_pred_df.T
+
+            # Plot the probability distribution
+            st.bar_chart(y_pred_df)
+
+            # Display result
+            res=class_names[y_pred.argmax(dim=-1).item()]
+            st.success(f"**This image is classified as:** {res}")
+
+                    # Générer et afficher la carte de saillance si la case est cochée
+            if plot_saliency:
+                #put the image on cpu before using it
+                image = image.cpu()
+                model = model.cpu()
+                from src.grad_cam import get_saliency_map
+                saliency_map, _ = get_saliency_map(model, image, return_label=True)
+
+                # Create two columns
+                col1, col2 = st.columns(2)
+
+                # Display the original image and the saliency map side by side
+                col1.image(image_np, caption='Original Image', use_column_width=True)
+                col2.image(saliency_map, caption='Saliency Map', use_column_width=True)
