@@ -4,7 +4,7 @@ scorecam (plus lent mais mielleur) -> post oc
 repo: jakob-gil
 weakly sepervise object detection
 
-sciency map: object detection pour retailler les images -> discuter avec philipe de ce qui veut
+saliency map: object detection pour retailler les images -> discuter avec philipe de ce qui veut
 
 meilleur fine-tun le resnet
 
