@@ -91,9 +91,11 @@ class DataGenerator(Dataset):
 
 
 def create_dataloader(config: EasyDict,
-                      mode: str,
-                      use_background: bool = True
+                      mode: str
                       ) -> DataLoader:
+    
+    use_background = 'real' in config.data.path
+
     generator = DataGenerator(
         config=config,
         mode=mode,
