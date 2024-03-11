@@ -62,12 +62,12 @@ def train(config: EasyDict, unet: UNet, classifier: Classifier, k: float, pretra
         epoch_loss = 0
         train_range = tqdm(train_generator, total=len(train_generator))
 
-        for i, (x, y,back_true) in enumerate(train_generator):
+        for i, item in enumerate(train_generator):
             if i >= pretrain_batches:
                 break
 
-            segm_mask=batched_segmentation(x).long()
-            x,segm_mask = x.to(device), segm_mask.to(device) # Move to device the image and the segmentation mask
+            segm_mask = batched_segmentation(item['image']).long()
+            x, segm_mask = item['image'].to(device), segm_mask.to(device) # Move to device the image and the segmentation mask
             pred = unet(x) # Forward pass with Unet
             loss = criterion_unet(pred, segm_mask.float()) # Compute loss BCElogits
             loss.backward()
@@ -83,7 +83,7 @@ def train(config: EasyDict, unet: UNet, classifier: Classifier, k: float, pretra
    
         pretrain_losses.append(epoch_loss / pretrain_batches)
      # Delete tensors and free GPU memory
-    del x, segm_mask, pred, loss
+    del x, segm_mask, pred, loss, item
     torch.cuda.empty_cache()
 
 
@@ -100,7 +100,7 @@ def train(config: EasyDict, unet: UNet, classifier: Classifier, k: float, pretra
                 if i < pretrain_batches:
                     continue
                 
-                x,back_true, y = x.to(device),back_true.to(device), y.to(device)
+                x, back_true, y = item['image'].to(device), item['background'].to(device), item['label'].to(device)
                 pred = unet(x)
                 #print("shape de pred:",pred.shape)
                 #print("shape de y:",y.shape)

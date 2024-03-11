@@ -15,29 +15,39 @@ from src.dataloader.labels import LABELS, BACKGROUND
 
 
 class DataGenerator(Dataset):
-    def __init__(self, config: EasyDict, mode: str) -> None:
+    def __init__(self, config: EasyDict, mode: str, use_background: bool) -> None:
         if mode not in ["train", "val", "test"]:
             raise ValueError(
                 f"Error, expected mode is train, val, or test but found: {mode}"
             )
         self.mode = mode
+        self.use_background = use_background
 
         dst_path = os.path.join(config.data.path, f"{mode}_{config.data.image_size}")
         print(f"dataloader for {mode}, datapath: {dst_path}")
         if not os.path.exists(dst_path):
             raise FileNotFoundError(
-                f"{dst_path} wans't found. Make sure that you have run get_data_transform",
+                f"{dst_path} wans't found. ",
+                f"Make sure that you have run get_data_transform correctly",
                 f"with the image_size={config.data.image_size}",
             )
 
-        self.data: tuple[str, str, str] = []
+        self.data: list[tuple[str, str, str]] = []
         for label in LABELS:
-            for background in BACKGROUND:
-                folder = os.path.join(dst_path, label, background)
+            # add background
+            if self.use_background:
+                for background in BACKGROUND:
+                    folder = os.path.join(dst_path, label, background)
+                    if not os.path.exists(folder):
+                        raise FileNotFoundError(f"{folder} wasn't found")
+                    for image_name in os.listdir(folder):
+                        self.data.append((os.path.join(folder, image_name), label, background))
+            else:
+                folder = os.path.join(dst_path, label)
                 if not os.path.exists(folder):
                     raise FileNotFoundError(f"{folder} wasn't found")
                 for image_name in os.listdir(folder):
-                    self.data.append((os.path.join(folder, image_name), label, background))
+                    self.data.append((os.path.join(folder, image_name), label, None))
 
         self.transform = get_transforms(transforms_config=config.data.transforms,
                                         mode=mode)
@@ -46,7 +56,7 @@ class DataGenerator(Dataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, index: int) -> tuple[Tensor, Tensor, Tensor]:
+    def __getitem__(self, index: int) -> dict[str, Tensor]:
         """
         input: index of the image to load
         output: tuple (x, label, background)
@@ -58,25 +68,38 @@ class DataGenerator(Dataset):
         """
         image_path, label, background = self.data[index]
 
+        item: dict[str, Tensor] = {}
+
         # Get image
         img = Image.open(image_path)
-        x = self.transform(img)
+        item['image'] = self.transform(img)
 
         # Get label
         if label not in LABELS:
             raise ValueError(f"Expected label in LABEL but found {label}")
-        label = torch.tensor(LABELS.index(label), dtype=torch.int64)
+        item['label'] = torch.tensor(LABELS.index(label), dtype=torch.int64)
 
         # Get background
-        if background not in BACKGROUND:
-            raise ValueError(f"Expected background in {BACKGROUND} but found {background}")
-        background = torch.tensor(BACKGROUND.index(background), dtype=torch.int64)
+        if self.use_background:
+            if background not in BACKGROUND:
+                raise ValueError(f"Expected background in {BACKGROUND}",
+                                 f" but found {background}")
+            item['background'] = torch.tensor(BACKGROUND.index(background),
+                                              dtype=torch.int64)
 
-        return x, label, background
+        return item
 
 
-def create_dataloader(config: EasyDict, mode: str) -> DataLoader:
-    generator = DataGenerator(config=config, mode=mode)
+def create_dataloader(config: EasyDict,
+                      mode: str,
+                      use_background: bool = True
+                      ) -> DataLoader:
+    generator = DataGenerator(
+        config=config,
+        mode=mode,
+        use_background=use_background
+    )
+
     dataloader = DataLoader(
         dataset=generator,
         batch_size=config.learning.batch_size,
@@ -108,12 +131,15 @@ if __name__ == "__main__":
     # ic(label, label.shape, label.dtype)
     # ic(background, background.shape, background.dtype)
 
-    dataloader = create_dataloader(config=config, mode="train")
+    dataloader = create_dataloader(config=config, mode="train", use_background=True)
     print(dataloader.batch_size)
 
     start_time = time.time()
-    x, label, background = next(iter(dataloader))
+    item: dict[str, Tensor] = next(iter(dataloader))
     stop_time = time.time()
+    x = item['image']
+    label = item['label']
+    background = item['background']
 
     print(f"time to load a batch: {stop_time - start_time:2f}s", end='')
     print(f"for a batchsize={config.learning.batch_size}")

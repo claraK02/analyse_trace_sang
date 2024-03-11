@@ -25,8 +25,8 @@ def train(config: EasyDict) -> None:
         raise ValueError(f"Expected model.name=adversarial but found {config.model.name}.")
 
     # Get data
-    train_generator = create_dataloader(config=config, mode='train')
-    val_generator = create_dataloader(config=config, mode='val')
+    train_generator = create_dataloader(config=config, mode='train', use_background=True)
+    val_generator = create_dataloader(config=config, mode='val', use_background=True)
     n_train, n_val = len(train_generator), len(val_generator) 
     print(f"Found {n_train} training batches and {n_val} validation batches")
 
@@ -75,10 +75,10 @@ def train(config: EasyDict) -> None:
         # Training
         res_model.train()
         adv_model.train()
-        for i, (x, res_true, adv_true) in enumerate(train_range):
-            x: Tensor = x.to(device)
-            res_true: Tensor = res_true.to(device)
-            adv_true: Tensor = adv_true.to(device)
+        for i, item in enumerate(train_range):
+            x: Tensor = item['image'].to(device)
+            res_true: Tensor = item['label'].to(device)
+            adv_true: Tensor = item['background'].to(device)
 
             inter, res_pred = res_model.forward_and_get_intermediare(x)
             adv_pred = adv_model.forward(x=inter)
@@ -118,10 +118,10 @@ def train(config: EasyDict) -> None:
         adv_model.eval()
         with torch.no_grad():
             
-            for i, (x, res_true, adv_true) in enumerate(val_range):
-                x: Tensor = x.to(device)
-                res_true: Tensor = res_true.to(device)
-                adv_true: Tensor = adv_true.to(device)
+            for i, item in enumerate(val_range):
+                x: Tensor = item['image'].to(device)
+                res_true: Tensor = item['label'].to(device)
+                adv_true: Tensor = item['background'].to(device)
 
                 inter, res_pred = res_model.forward_and_get_intermediare(x)
                 adv_pred = adv_model.forward(x=inter)

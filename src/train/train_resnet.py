@@ -70,10 +70,10 @@ def train(config: EasyDict,
 
         # Training
         model.train()
-        for i, (x, y_true, _) in enumerate(train_range):
-            x = x.to(device)            # x shape: torch.Size([32, 3, 128, 128])
-            y_true = y_true.to(device)  # y_true shape: torch.Size([32])
-            y_pred = model.forward(x)   # y_pred shape: torch.Size([32, 2])
+        for i, item in enumerate(train_range):
+            x = item['image'].to(device)        # x shape: torch.Size([32, 3, 256, 256])
+            y_true = item['label'].to(device)   # y_true shape: torch.Size([32])
+            y_pred = model.forward(x)           # y_pred shape: torch.Size([32, 2])
             loss = criterion(y_pred, y_true)
 
             loss.backward()
@@ -103,9 +103,9 @@ def train(config: EasyDict,
 
         with torch.no_grad():
             
-            for i, (x, y_true, _) in enumerate(val_range):
-                x = x.to(device)
-                y_true = y_true.to(device)
+            for i, item in enumerate(val_range):
+                x = item['image'].to(device)
+                y_true = item['label'].to(device)
 
                 y_pred = model.forward(x)
 

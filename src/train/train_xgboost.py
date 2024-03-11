@@ -21,9 +21,9 @@ def extract_features_and_labels(generator):
     labels = []
     criteres = Critieres()
 
-    for i, (batch_x, batch_y, _) in enumerate(generator):
+    for i, item in enumerate(generator):
         print("Treating batch:", i, "out of", len(generator))
-        for image, label in zip(batch_x, batch_y):
+        for image, label in zip(item['image'], item['background']):
             image=image.permute(1, 2, 0).numpy()
             image = image * 255
             # Segment the image
