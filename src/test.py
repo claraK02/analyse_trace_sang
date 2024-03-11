@@ -16,12 +16,17 @@ from src.model import finetune_resnet
 from utils import utils
 
 
-def test(config: EasyDict, logging_path: str) -> None:
+def test(config: EasyDict,
+         logging_path: str,
+         run_real_data: bool = False
+         ) -> None:
 
     device = utils.get_device(device_config=config.learning.device)
 
     # Get data
-    test_generator = create_dataloader(config=config, mode='test')
+    test_generator = create_dataloader(config=config,
+                                       mode='test',
+                                       run_real_data=run_real_data)
     n_test = len(test_generator)
 
     # Get model
@@ -47,9 +52,9 @@ def test(config: EasyDict, logging_path: str) -> None:
     model.eval()
 
     with torch.no_grad():
-        for i, (x, y_true, _) in enumerate(test_range):
-            x: Tensor = x.to(device)
-            y_true: Tensor = y_true.to(device)
+        for i, item in enumerate(test_range):
+            x: Tensor = item['image'].to(device)
+            y_true: Tensor = item['label'].to(device)
 
             y_pred = model.forward(x)
 
@@ -70,6 +75,9 @@ def test(config: EasyDict, logging_path: str) -> None:
     test_metrics = test_metrics / n_test
     print(metrics.get_info(metrics_value=test_metrics))
 
+    dst_file: str = 'test_log.txt' if not run_real_data else 'test_real_log.txt'
+    
     test_logger(path=logging_path,
                 metrics=metrics.get_names(),
-                values=test_metrics)
+                values=test_metrics,
+                dst_test_name=dst_file)

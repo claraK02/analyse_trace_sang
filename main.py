@@ -56,10 +56,15 @@ def main(options: dict) -> None:
     if options['mode'] == 'test':
         if options['path'] is None:
             raise ValueError('Please specify the path to the experiments')
+        
         config = load_config(find_config(experiment_path=options['path']))
+
         if config.model.name != 'resnet':
             print(f'Attention pas sur que le test va marcher car il est addapter pour resnet et pas pour {config.model.name}.')
-        test.test(config=config, logging_path=options['path'])
+        
+        test.test(config=config,
+                  logging_path=options['path'],
+                  run_real_data=options['run_on_real_data'])
     
     # INEFRENCE
     if options['mode'] == 'infer':
@@ -78,15 +83,26 @@ if __name__ == "__main__":
     # Options
     parser.add_argument('--mode', '-m', default=None, type=str,
                         choices=MODE_IMPLEMENTED, help='chose between train and test')
+    # For training
     parser.add_argument('--config_path', '-c', default=os.path.join('config', 'config.yaml'),
                         type=str, help="path to config (for training)")
     parser.add_argument('--num_run', '-n', default=10, type=int,
                         help='number of experiment for random search')
+    
+    # For testing
     parser.add_argument('--path', '-p', type=str,
-                        help="experiment path (for test)")
+                        help="experiment path (for test and infer)")
+    parser.add_argument('--run_on_real_data', '-r', type=str, default='false',
+                        help='run on the real data or not')
+    
+    # For inference
     parser.add_argument('--inferpath', '-i', type=str,
-                        help="experiment path (for test)")
+                        help="data path to run the inference (for infer)")
     args = parser.parse_args()
     options = vars(args)
 
+    print(type(options['run_on_real_data']), options['run_on_real_data'])
+    options['run_on_real_data'] = (options['run_on_real_data'].lower() == 'true')
+    print(type(options['run_on_real_data']), options['run_on_real_data'])
+    
     main(options)

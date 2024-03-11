@@ -1,6 +1,7 @@
 import os
 import sys
 from PIL import Image
+from typing import Literal
 from easydict import EasyDict
 from os.path import dirname as up
 
@@ -15,43 +16,52 @@ from src.dataloader.labels import LABELS, BACKGROUND
 
 
 class DataGenerator(Dataset):
-    def __init__(self, config: EasyDict, mode: str, use_background: bool) -> None:
+    def __init__(self,
+                 data_path: str,
+                 mode: Literal['train', 'val', 'test'],
+                 image_size: int,
+                 use_background: bool,
+                 transforms: EasyDict
+                 ) -> None:
         if mode not in ["train", "val", "test"]:
-            raise ValueError(
-                f"Error, expected mode is train, val, or test but found: {mode}"
-            )
+            raise ValueError(f"Error, expected mode is train, val, or test",
+                             f" but found: {mode}")
         self.mode = mode
         self.use_background = use_background
 
-        dst_path = os.path.join(config.data.path, f"{mode}_{config.data.image_size}")
-        print(f"dataloader for {mode}, datapath: {dst_path}")
-        if not os.path.exists(dst_path):
+        if not os.path.exists(data_path):
             raise FileNotFoundError(
-                f"{dst_path} wans't found. ",
+                f"{data_path} wans't found. ",
                 f"Make sure that you have run get_data_transform correctly",
-                f"with the image_size={config.data.image_size}",
+                f"with the image_size={image_size}",
             )
 
         self.data: list[tuple[str, str, str]] = []
         for label in LABELS:
-            # add background
-            if self.use_background:
-                for background in BACKGROUND:
-                    folder = os.path.join(dst_path, label, background)
-                    if not os.path.exists(folder):
-                        raise FileNotFoundError(f"{folder} wasn't found")
+            # find images in background folder
+            for background in BACKGROUND:
+                folder = os.path.join(data_path, label, background)
+                if os.path.exists(folder):
                     for image_name in os.listdir(folder):
-                        self.data.append((os.path.join(folder, image_name), label, background))
-            else:
-                folder = os.path.join(dst_path, label)
-                if not os.path.exists(folder):
+                        image_path = os.path.join(folder, image_name)
+                        if image_path.endswith(('.png', '.jpg', '.jpeg', '.JPG')):
+                            self.data.append((image_path, label, background))
+                elif self.use_background:
                     raise FileNotFoundError(f"{folder} wasn't found")
-                for image_name in os.listdir(folder):
-                    self.data.append((os.path.join(folder, image_name), label, None))
+                
+            # find images directly in the path
+            folder = os.path.join(data_path, label)
+            for image_name in os.listdir(folder):
+                image_path = os.path.join(folder, image_name)
+                if not os.path.exists(image_path) and not self.use_background:
+                    raise FileNotFoundError(f"{folder} wasn't found")
+                if image_path.endswith(('.png', '.jpg', '.jpeg', '.JPG')):
+                    self.data.append((image_path, label, None))
 
-        self.transform = get_transforms(transforms_config=config.data.transforms,
+        print(f"dataloader for {mode}, datapath: {data_path}, with {len(self.data)} images")
+
+        self.transform = get_transforms(transforms_config=transforms,
                                         mode=mode)
-        print(self.transform)
 
     def __len__(self) -> int:
         return len(self.data)
@@ -91,15 +101,17 @@ class DataGenerator(Dataset):
 
 
 def create_dataloader(config: EasyDict,
-                      mode: str
+                      mode: str,
+                      run_real_data: bool = False
                       ) -> DataLoader:
-    
-    use_background = 'real' in config.data.path
+    data_path = config.data.path if not run_real_data else config.data.real_data_path
 
     generator = DataGenerator(
-        config=config,
+        data_path=os.path.join(data_path, f"{mode}_{config.data.image_size}"),
         mode=mode,
-        use_background=use_background
+        image_size=config.data.image_size,
+        use_background=(not run_real_data),
+        transforms=config.data.transforms
     )
 
     dataloader = DataLoader(
@@ -126,14 +138,7 @@ if __name__ == "__main__":
     config = EasyDict(yaml.safe_load(open(config_path)))
     config.learning.num_workers = 1
 
-    # generator = DataGenerator(config=config, mode='train')
-    # print(len(generator))
-    # x, label, background = generator.__getitem__(index=3)
-    # ic(x.shape, x.dtype)
-    # ic(label, label.shape, label.dtype)
-    # ic(background, background.shape, background.dtype)
-
-    dataloader = create_dataloader(config=config, mode="train", use_background=True)
+    dataloader = create_dataloader(config=config, mode="test", run_real_data=False)
     print(dataloader.batch_size)
 
     start_time = time.time()

@@ -103,12 +103,16 @@ def train_step_logger(path: str,
     file.close()
 
 
-def test_logger(path: str, metrics: list[str], values: list[float]) -> None:
+def test_logger(path: str,
+                metrics: list[str],
+                values: list[float],
+                dst_test_name: str = 'test_log.txt'
+                ) -> None:
     """
     creates a file 'test_log.txt' in the path
     containing for each line: metrics[i]: values[i]
     """
-    with open(os.path.join(path, 'test_log.txt'), 'a', encoding='utf8') as f:
+    with open(os.path.join(path, dst_test_name), 'a', encoding='utf8') as f:
         for i in range(len(metrics)):
             f.write(metrics[i] + ': ' + str(values[i]) + '\n')
 

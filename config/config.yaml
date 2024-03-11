@@ -1,5 +1,6 @@
 data:
   path: data/data_labo
+  real_data_path: data/data_real
   image_size: 256
   num_classes: 18
   background_classes: 4
