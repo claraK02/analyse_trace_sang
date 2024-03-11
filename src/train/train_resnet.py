@@ -39,9 +39,17 @@ def train(config: EasyDict,
     # Loss
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
 
-    # Optimizer and Scheduler
-    optimizer = torch.optim.Adam(model.get_learned_parameters(),
-                                 lr=config.learning.learning_rate)
+    # Optimizer
+    # optimizer: torch.optim = None
+    if config.learning.optimizer == 'adam':
+        optimizer = torch.optim.Adam(model.get_learned_parameters(),
+                                     lr=config.learning.learning_rate)
+    elif config.learning.optimizer == 'sgd':
+        optimizer = torch.optim.SGD(model.get_learned_parameters(),
+                                     lr=config.learning.learning_rate)
+    else:
+        raise ValueError(f"please select an optimizer {config.learning.optimize}")
+    
 
     # Get metrics
     metrics = Metrics(num_classes=config.data.num_classes, run_argmax_on_y_true=False)

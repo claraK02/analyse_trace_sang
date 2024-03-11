@@ -39,5 +39,6 @@ learning:
   save_experiment: true
   save_checkpoint: true
   loss: crossentropy
+  optimizer: adam
   num_workers: 4
   alpha: 10
