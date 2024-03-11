@@ -46,7 +46,7 @@ def train(config: EasyDict,
                                      lr=config.learning.learning_rate)
     elif config.learning.optimizer == 'sgd':
         optimizer = torch.optim.SGD(model.get_learned_parameters(),
-                                     lr=config.learning.learning_rate)
+                                    lr=config.learning.learning_rate)
     else:
         raise ValueError(f"please select an optimizer {config.learning.optimize}")
     
