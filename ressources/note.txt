@@ -1,11 +1,8 @@
 crop avec la science map
 gradcam (++)
 scorecam (plus lent mais mielleur) -> post oc
-repo: jakob-gil
-weakly sepervise object detection
+tester le model sur toutes les données réeles
+finetune un resnet sur les données réeles
 
-saliency map: object detection pour retailler les images -> discuter avec philipe de ce qui veut
-
-meilleur fine-tun le resnet
-
--> lui redemander des images réeles
+-> voir avec philipe s'il a plus de données réeles
+-> faire du MLops et avoir un retour de philipe
