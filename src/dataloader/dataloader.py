@@ -119,6 +119,10 @@ def create_dataloader(config: EasyDict,
     )
 
     config_info: EasyDict = config.learning if mode != 'test' else config.test
+    if len(generator) < config_info.batch_size:
+        print(f'UserWarning: batchsize > num data !')
+        print(f'chnage batch size to {config_info.batch_size} from {len(generator)}')
+        config_info.batch_size = len(generator)
 
     dataloader = DataLoader(
         dataset=generator,
