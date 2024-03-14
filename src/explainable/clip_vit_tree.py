@@ -10,7 +10,7 @@ import numpy as np
 import numpy as np
 
 data_list = [
-    "Altération glissée 1",
+    "Altération glissée",
     "Trace à l'intérieur d'un canon d'arme à feu",
     "sang aspiré",
     "Trace jaunâtre accolé à une trace rougeâtre",
@@ -84,6 +84,7 @@ data_list = [
     "Projection ovoïde",
     "Projection circulaire"
 ]
+
 
 
 def classify_image_with_vit(np_image, class_choices):
