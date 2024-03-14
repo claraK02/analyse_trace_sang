@@ -108,7 +108,6 @@ def create_dataloader(config: EasyDict,
         data_path = os.path.join(config.data.path , f"{mode}_{config.data.image_size}")
     else:
         data_path = config.data.real_data_path
-        config.test.batch_size = 210
 
     generator = DataGenerator(
         data_path=data_path,
@@ -120,8 +119,8 @@ def create_dataloader(config: EasyDict,
 
     config_info: EasyDict = config.learning if mode != 'test' else config.test
     if len(generator) < config_info.batch_size:
-        print(f'UserWarning: batchsize > num data !')
-        print(f'chnage batch size to {config_info.batch_size} from {len(generator)}')
+        print(f'UserWarning: batchsize > num data !', end=' ')
+        print(f'Change batch size to {config_info.batch_size} from {len(generator)}')
         config_info.batch_size = len(generator)
 
     dataloader = DataLoader(

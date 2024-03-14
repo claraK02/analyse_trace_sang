@@ -1,4 +1,4 @@
 logs,acc micro,acc macro,f1-score macro,top k macro,image_size,hidden_size,p_dropout,epochs,batch_size,learning_rate,freeze
-resnet_allw_img256_1,0.981,0.975,0.977,0.971,256,64,0.1,10,8,0.0001,False
-resnet_allw_img256_2,0.977,0.974,0.966,1.000,256,64,0.1,20,8,0.0001,False
-resnet_img256_0,0.945,0.937,0.933,0.971,256,64,0.1,10,8,0.001,True
+resnet_allw_img256_1,0.981,0.965,0.971,0.998,256,64,0.1,10,8,0.0001,False
+resnet_allw_img256_2,0.973,0.971,0.962,0.998,256,64,0.1,20,8,0.0001,False
+resnet_img256_0,0.952,0.943,0.947,0.998,256,64,0.1,10,8,0.001,True

@@ -131,3 +131,4 @@ def list_into_str(l: list, sep: str=',', round_up: bool=False) -> str:
 
 if __name__ == '__main__':
     compare_experiments(compare_on='val')
+    compare_experiments(compare_on='test')
