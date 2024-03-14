@@ -104,10 +104,14 @@ def create_dataloader(config: EasyDict,
                       mode: str,
                       run_real_data: bool = False
                       ) -> DataLoader:
-    data_path = config.data.path if not run_real_data else config.data.real_data_path
+    if not run_real_data:
+        data_path = os.path.join(config.data.path , f"{mode}_{config.data.image_size}")
+    else:
+        data_path = config.data.real_data_path
+        config.test.batch_size = 210
 
     generator = DataGenerator(
-        data_path=os.path.join(data_path, f"{mode}_{config.data.image_size}"),
+        data_path=data_path,
         mode=mode,
         image_size=config.data.image_size,
         use_background=(not run_real_data),
