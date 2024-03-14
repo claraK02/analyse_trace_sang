@@ -88,3 +88,7 @@ if __name__ == '__main__':
         save_data(data=data_split[i],
                   mode=MODE[i],
                   datapath=os.path.join('data', 'process_real_data'))
+    
+    save_data(data=data,
+              mode='all',
+              datapath=os.path.join('data', 'process_real_data'))

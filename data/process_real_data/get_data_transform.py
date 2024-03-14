@@ -1,4 +1,3 @@
-# Import necessary libraries
 import os
 import sys
 import pandas as pd
@@ -57,9 +56,16 @@ def main(mode: str,
 
 
 if __name__ == '__main__':
-    for mode in ['train', 'test', 'val']:
-        print(f'{mode = }')
-        main(mode=mode,
-             dst_path=os.path.join('data', 'data_real'),
-             image_size=256,
-             item_path=os.path.join('data', 'process_real_data'))
+    # for mode in ['train', 'test', 'val']:
+    #     print(f'{mode = }')
+    #     main(mode=mode,
+    #          dst_path=os.path.join('data', 'data_real'),
+    #          image_size=256,
+    #          item_path=os.path.join('data', 'process_real_data'))
+    
+    mode = 'all'
+    print(f'{mode = }')
+    main(mode=mode,
+            dst_path=os.path.join('data', 'data_real'),
+            image_size=256,
+            item_path=os.path.join('data', 'process_real_data'))
