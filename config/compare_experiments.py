@@ -32,6 +32,7 @@ def compare_experiments(csv_output: str='compare',
         logs = filter(lambda x: 'test_log.txt' in os.listdir(x), logs)
 
     elif compare_on == 'val':
+        logs = filter(lambda x: 'train_log.csv' in os.listdir(x), logs)
         metrics_name = list(map(lambda x: f'val {x}', metrics_name))
     
     logs = list(logs)
