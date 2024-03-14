@@ -59,9 +59,15 @@ def train(config: EasyDict,
     save_experiment = config.learning.save_experiment
     print(f'{save_experiment = }')
     if save_experiment:
+        if 'real' not in config.data.path:
+            train_log_name = 'train_log.csv'
+        else:
+            train_log_name = 'train_real_log.csv'
+        
         logging_path = train_logger(config,
                                     metrics_name=metrics.get_names(),
-                                    logspath=logspath)
+                                    logspath=logspath,
+                                    train_log_name=train_log_name)
         best_val_loss = 10e6
 
 
@@ -153,7 +159,7 @@ def train(config: EasyDict,
     stop_time = time.time()
     print(f"training time: {stop_time - start_time}s for {config.learning.epochs} epochs")
 
-    if save_experiment:
+    if save_experiment and config.learning.plot_learning_curves:
         plot_learning_curves.save_learning_curves(path=logging_path)
 
 

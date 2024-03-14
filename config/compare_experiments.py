@@ -23,16 +23,18 @@ def compare_experiments(csv_output: str='compare',
                         config_name: str= 'config.yaml',
                         hyperparameters: dict[str, list[str]] = HYPERPARAMETERS,
                         metrics_name: list[str] = METRICS_NAME,
-                        compare_on: Literal['val', 'test'] = 'test'
+                        compare_on: Literal['val', 'test'] = 'test',
+                        test_file_name: str='test_log.txt',
+                        train_log_name: str='train_log.csv'
                         ) -> None:
     logs = filter(lambda x: '.' not in x, os.listdir(logs_path))
     logs = map(lambda x: os.path.join(logs_path, x), logs)
 
     if compare_on == 'test':
-        logs = filter(lambda x: 'test_log.txt' in os.listdir(x), logs)
+        logs = filter(lambda x: test_file_name in os.listdir(x), logs)
 
     elif compare_on == 'val':
-        logs = filter(lambda x: 'train_log.csv' in os.listdir(x), logs)
+        logs = filter(lambda x: train_log_name in os.listdir(x), logs)
         metrics_name = list(map(lambda x: f'val {x}', metrics_name))
     
     logs = list(logs)
@@ -43,9 +45,9 @@ def compare_experiments(csv_output: str='compare',
     for log in logs:
         log_name = log.split(os.sep)[-1]
         if compare_on == 'test':
-            results = get_test_results(log)
+            results = get_test_results(log, test_file_name=test_file_name)
         else:
-            results = get_val_results(log)
+            results = get_val_results(log, train_log_name=train_log_name)
         
         config = get_config(log, hyperparameters, config_name)
         results_metrics = list(map(lambda metric_name: results[metric_name],
@@ -132,3 +134,6 @@ def list_into_str(l: list, sep: str=',', round_up: bool=False) -> str:
 if __name__ == '__main__':
     compare_experiments(compare_on='val')
     compare_experiments(compare_on='test')
+    compare_experiments(compare_on='test',
+                        test_file_name='test_real_log.txt',
+                        csv_output='compare_real')
