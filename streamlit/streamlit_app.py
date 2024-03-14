@@ -7,6 +7,7 @@ import streamlit as st
 from os.path import dirname as up
 from PIL import Image, ImageEnhance
 import io
+from scipy.special import softmax
 
 import torch
 from torchvision import transforms
@@ -64,7 +65,22 @@ vflip = st.sidebar.checkbox('Vertical Flip', value=False)
 contrast = st.sidebar.slider('Contrast', min_value=-3.0, max_value=3.0, value=1.0)
 brightness = st.sidebar.slider('Brightness', min_value=-3.0, max_value=3.0, value=1.0)
 
+# Initialisation de st.session_state si nécessaire
+if "image_files" not in st.session_state:
+    st.session_state["image_files"] = None
+if "barchart_placeholder" not in st.session_state:
+    st.session_state["barchart_placeholder"] = st.empty()
+
+
+
 if image_files is not None:
+    st.session_state["image_files"] = image_files
+
+# Utilisation de st.session_state pour stocker le placeholder du graphique barchart
+barchart_placeholder = st.session_state["barchart_placeholder"]
+
+# Utilisation de st.session_state pour récupérer les images
+if st.session_state["image_files"] is not None:
     for i, image_file in enumerate(image_files):
             
         image = Image.open(image_file)
@@ -104,12 +120,14 @@ if image_files is not None:
 
         st.image(image, caption=f'Uploaded Image {i+1}.',width=500)
 
-
+# Add a slider in Streamlit to control the temperature parameter
+temperature = st.slider('Temperature', min_value=0.01, max_value=3.0, value=1.0)
+        
 if st.button("Inference"):
-    if image_files is not None:
+    if st.session_state["image_files"] is not None:
         config = load_config(config_file)
-        # Get device
-        device = utils.get_device(device_config=config.learning.device)
+        # Get device (the first GPU if available, otherwise the CPU)
+        device = utils.get_device(device_config="cuda:0")
         print("config_file: ", config_file)
         config_in_log_dir = os.path.dirname(config_file)
         print("config_in_log_dir: ", config_in_log_dir)
@@ -126,10 +144,7 @@ if st.button("Inference"):
         # Create an empty DataFrame to store image names and predicted labels
         results_df = pd.DataFrame(columns=['Image Name', 'Predicted Label'])
 
-        
-
-        
-
+        # Loop through the uploaded images           
         for i,image in enumerate(image_files):
             #we print in the app that we are inferring on the image
             st.write(f"Inferring on image {i+1}...")
@@ -153,12 +168,11 @@ if st.button("Inference"):
                 #we print y_pred:
                 print("y_pred: ", y_pred)
 
-                # Apply softmax to get probability distribution
-                y_pred_prob = F.softmax(y_pred, dim=-1)
+              
+                numpy_y_pred_prob = y_pred.cpu().numpy()[0]
 
-                print("y_pred_prob: ", y_pred_prob)
-                
-                numpy_y_pred_prob = y_pred_prob.cpu().numpy()[0]
+                # Apply the softmax function with the temperature parameter
+                numpy_y_pred_prob = softmax(numpy_y_pred_prob/temperature)
 
                 print("numpy_y_pred_prob: ", numpy_y_pred_prob)
 
@@ -172,7 +186,8 @@ if st.button("Inference"):
                 y_pred_df = y_pred_df.T
 
                 # Plot the probability distribution
-                st.bar_chart(y_pred_df)
+                # Mettez à jour le graphique barchart en utilisant le placeholder
+                barchart_placeholder.bar_chart(y_pred_df)
 
                 # Display result
                 res=class_names[y_pred.argmax(dim=-1).item()]
@@ -182,21 +197,28 @@ if st.button("Inference"):
                 results_df = results_df.append({'Image Name': image_files[i].name, 'Predicted Label': res}, ignore_index=True)
 
                 # Générer et afficher la carte de saillance si la case est cochée
+                # Generate and display the saliency map if the checkbox is checked
+
                 if plot_saliency:
-                    #put the image on cpu before using it
+                    # Put the image and model on cpu before using them
                     image = image.cpu()
                     model = model.cpu()
-                    from src.grad_cam import get_saliency_map, region_growing_segmentation
+                    from src.grad_cam import get_saliency_map, threshold_and_find_contour, get_bounding_box_and_plot
+
+                    # Generate the saliency map
                     saliency_map, _ = get_saliency_map(model, image, return_label=True)
 
 
+                    # Segment the saliency map
+                    segmented_image = threshold_and_find_contour(saliency_map, threshold_value=125)
 
                     # Create two columns
                     col1, col2 = st.columns(2)
 
-                    # Display the original image and the saliency map side by side
-                    col1.image(image_np, caption='Original Image', use_column_width=True)
-                    col2.image(saliency_map, caption='Saliency Map', use_column_width=True)
+                    # Display the saliency map and the original image with the bounding box side by side
+                    col1.image(saliency_map, caption='Saliency Map', use_column_width=True)
+                    col2.image(image_np, caption='Original Image', use_column_width=True)
+
         # Display the results DataFrame after the loop
         print("results_df: ", results_df)
         st.dataframe(results_df)

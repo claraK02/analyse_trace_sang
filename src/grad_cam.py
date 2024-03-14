@@ -57,6 +57,10 @@ def get_saliency_map(model: FineTuneResNet,
 
     grayscale_cam = grayscale_cam[0, :]
 
+    # Invert the colors
+    grayscale_cam = grayscale_cam.max() - grayscale_cam
+
+
     rgb_img = utils.convert_tensor_to_rgb(image=image[0], normelize=True)
 
     visualization = show_cam_on_image(rgb_img, grayscale_cam)
@@ -71,6 +75,7 @@ from skimage.feature import peak_local_max
 from scipy import ndimage as ndi
 
 import cv2
+
 
 def threshold_and_find_contour(heatmap: np.ndarray, threshold_value: int = 125) -> np.ndarray:
     """
@@ -104,6 +109,32 @@ def threshold_and_find_contour(heatmap: np.ndarray, threshold_value: int = 125) 
     cv2.drawContours(contour_image, contours, -1, (255, 0, 0), 1)
 
     return contour_image
+
+def get_bounding_box_and_plot(image: np.ndarray, contour_image: np.ndarray) -> tuple:
+    """
+    Finds the largest contour from the segmented image, computes its bounding box, and returns the coordinates.
+    It also plots the bounding box on the original image.
+
+    Args:
+        image: (numpy.ndarray): The original image.
+        contour_image: (numpy.ndarray): The segmented image with contours.
+
+    Returns:
+        tuple: The coordinates of the bounding box in the format (x, y, width, height).
+    """
+    # Find contours
+    contours, _ = cv2.findContours(contour_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Find the largest contour
+    max_contour = max(contours, key=cv2.contourArea)
+
+    # Compute the bounding box around the largest contour
+    x, y, w, h = cv2.boundingRect(max_contour)
+
+    # Draw the bounding box on the original image
+    image_with_bbox = cv2.rectangle(image.copy(), (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+    return (x, y, w, h), image_with_bbox
 
 def plot_saliency_maps(model, k: int):
     """
@@ -145,13 +176,19 @@ if __name__ == '__main__':
     model.load_dict_learnable_parameters(state_dict=weight, strict=True)
     del weight
 
-    saliency_map= get_saliency_map(model, image=x)
+    saliency_map = get_saliency_map(model, image=x)
     segmented_image = threshold_and_find_contour(saliency_map, threshold_value=125)
 
-    #plot saliency map and region growing segmentation
-    _, axes = plt.subplots(1, 2)
+    bbox_coords, image_with_bbox = get_bounding_box_and_plot(x.squeeze().numpy().transpose(1, 2, 0), segmented_image)
+
+    print("Bounding box coordinates: ", bbox_coords)
+
+    # Plot saliency map, region growing segmentation, and image with bounding box
+    _, axes = plt.subplots(1, 3)
     axes[0].imshow(saliency_map)
-    axes[0].set_title('saliency map')
+    axes[0].set_title('Saliency map')
     axes[1].imshow(segmented_image)
-    axes[1].set_title('threshold and find contour')
-    plt.show()  
+    axes[1].set_title('Threshold and find contour')
+    axes[2].imshow(image_with_bbox)
+    axes[2].set_title('Image with bounding box')
+    plt.show()
