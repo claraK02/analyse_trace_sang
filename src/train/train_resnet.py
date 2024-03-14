@@ -146,7 +146,8 @@ def train(config: EasyDict,
                               train_loss=train_loss, 
                               val_loss=val_loss,
                               train_metrics=train_metrics,
-                              val_metrics=val_metrics)
+                              val_metrics=val_metrics,
+                              train_log_name=train_log_name)
             
             if val_loss < best_val_loss:
                 print('save model weights')
