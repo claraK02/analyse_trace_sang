@@ -1,8 +1,13 @@
 import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from os.path import dirname as up
+import matplotlib.pyplot as plt
 
-import informations as info
+sys.path.append(up(up(os.path.abspath(__file__))))
+
+from src.dataloader.labels import LABELS, BACKGROUND
 
 
 def get_distribution(mode: str,
@@ -10,9 +15,9 @@ def get_distribution(mode: str,
                      ) -> np.ndarray[float]:
     datapath = os.path.join(datapath, f'{mode}_128')
     labels_distribution = []
-    for label in info.LABELS:
+    for label in LABELS:
         num_data = 0
-        for bg in info.BACKGROUND:
+        for bg in BACKGROUND:
             num_data += len(os.listdir(os.path.join(datapath, label, bg)))
         labels_distribution.append(num_data)
 
@@ -27,12 +32,14 @@ def plot_distrib(labels_distribution: list[int]):
     total_classes = len(labels_distribution)
     classes_index = range(1, total_classes + 1)
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(15, 12))
     plt.bar(classes_index, labels_distribution)
 
     plt.title('Distribution des classes')
     plt.xlabel('Classe')
     plt.ylabel('Proportion')
+
+    plt.xticks(classes_index, LABELS, rotation=45, ha='right')
 
     plt.savefig('distribution.png')
 
@@ -64,8 +71,8 @@ if __name__ == '__main__':
     test = get_distribution(mode='test')
 
     plot_distrib((train + val + test) / 3)
-    plot_3distribution(train, val, test)
+    # plot_3distribution(train, val, test)
 
-    print('label, train, val, test')
-    for i in range(len(info.LABELS)):
-        print(f'{i + 1:2}: {train[i]:.2f} {val[i]:.2f} {test[i]:.2f}')
+    # print('label, train, val, test')
+    # for i in range(len(info.LABELS)):
+    #     print(f'{i + 1:2}: {train[i]:.2f} {val[i]:.2f} {test[i]:.2f}')
