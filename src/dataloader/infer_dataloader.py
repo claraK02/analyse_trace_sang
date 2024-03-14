@@ -60,10 +60,10 @@ def create_infer_dataloader(config: EasyDict, datapath: str) -> DataLoader:
     generator = InferDataGenerator(datapath, image_size=config.data.image_size)
     dataloader = DataLoader(
         dataset=generator,
-        batch_size=config.learning.batch_size,
+        batch_size=config.test.batch_size,
         shuffle=False,
         drop_last=False,
-        num_workers=config.learning.num_workers,
+        num_workers=config.test.num_workers,
     )
 
     return dataloader
