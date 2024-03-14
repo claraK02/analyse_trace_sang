@@ -104,22 +104,31 @@ def create_dataloader(config: EasyDict,
                       mode: str,
                       run_real_data: bool = False
                       ) -> DataLoader:
-    data_path = config.data.path if not run_real_data else config.data.real_data_path
+    if not run_real_data:
+        data_path = os.path.join(config.data.path , f"{mode}_{config.data.image_size}")
+    else:
+        data_path = config.data.real_data_path
 
     generator = DataGenerator(
-        data_path=os.path.join(data_path, f"{mode}_{config.data.image_size}"),
+        data_path=data_path,
         mode=mode,
         image_size=config.data.image_size,
-        use_background=(not run_real_data),
+        use_background=(not (run_real_data or 'real' in config.data.path)),
         transforms=config.data.transforms
     )
 
+    config_info: EasyDict = config.learning if mode != 'test' else config.test
+    if len(generator) < config_info.batch_size:
+        print(f'UserWarning: batchsize > num data !', end=' ')
+        print(f'Change batch size to {config_info.batch_size} from {len(generator)}')
+        config_info.batch_size = len(generator)
+
     dataloader = DataLoader(
         dataset=generator,
-        batch_size=config.learning.batch_size,
-        shuffle=config.learning.shuffle,
-        drop_last=config.learning.drop_last,
-        num_workers=config.learning.num_workers,
+        batch_size=config_info.batch_size,
+        shuffle=config_info.shuffle,
+        drop_last=config_info.drop_last,
+        num_workers=config_info.num_workers,
     )
 
     return dataloader
@@ -139,7 +148,7 @@ if __name__ == "__main__":
     config.learning.num_workers = 1
 
     dataloader = create_dataloader(config=config, mode="test", run_real_data=False)
-    print(dataloader.batch_size)
+    print(f'{dataloader.batch_size = }')
 
     start_time = time.time()
     item: dict[str, Tensor] = next(iter(dataloader))
@@ -148,11 +157,11 @@ if __name__ == "__main__":
     label = item['label']
     background = item['background']
 
-    print(f"time to load a batch: {stop_time - start_time:2f}s", end='')
-    print(f"for a batchsize={config.learning.batch_size}")
+    print(f"time to load a batch: {stop_time - start_time:2f}s ", end='')
+    print(f"for a batchsize={dataloader.batch_size}")
 
     print(x.shape, x.dtype)
     print(label, label.shape, label.dtype)
     print(background, background.shape, background.dtype)
 
-    plot_batch(x=x)
+    # plot_batch(x=x)

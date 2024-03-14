@@ -45,3 +45,10 @@ learning:
     loss: 'crossentropy'
     num_workers: 4
     alpha: 10
+
+test:
+    batch_size: 244
+    shuffle: true 
+    drop_last: true
+    device: cuda
+    num_workers: 1

@@ -3,7 +3,7 @@ config_metadata: 'Saving time : 03/06/2024, 22:12:28'
 # data options
 data:
     path: 'data/data_labo'
-    real_data_path: data/data_real
+    real_data_path: data/data_real/all_256
     image_size: 256
     num_classes: 18
     background_classes: 4
@@ -46,3 +46,10 @@ learning:
     loss: 'crossentropy'
     num_workers: 4
     alpha: 10
+
+test:
+    batch_size: 244
+    shuffle: true 
+    drop_last: true
+    device: cuda
+    num_workers: 1

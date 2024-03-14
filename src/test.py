@@ -3,6 +3,7 @@ import sys
 from tqdm import tqdm
 from easydict import EasyDict
 from os.path import dirname as up
+from icecream import ic
 
 import torch
 from torch import Tensor
@@ -46,8 +47,10 @@ def test(config: EasyDict,
     metrics.to(device)
 
     test_loss = 0
-    test_metrics = metrics.init_metrics()
     test_range = tqdm(test_generator)
+
+    all_y_true: list[Tensor] = []
+    all_y_pred: list[Tensor] = []
 
     model.eval()
 
@@ -58,21 +61,29 @@ def test(config: EasyDict,
 
             y_pred = model.forward(x)
 
-            loss = criterion(y_pred, y_true)
+            loss: Tensor = criterion(y_pred, y_true)
 
             test_loss += loss.item()
-            test_metrics += metrics.compute(y_pred, y_true)
+
+            all_y_true.append(y_true.to(torch.device('cpu')))
+            all_y_pred.append(y_pred.to(torch.device('cpu')))
 
             current_loss = test_loss / (i + 1)
             test_range.set_description(f"TEST -> loss: {current_loss:.4f}")
             test_range.refresh()
-            
+
 
     ###################################################################
     # Save Scores in logs                                             #
     ###################################################################
+    del model
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
     test_loss = test_loss / n_test
-    test_metrics = test_metrics / n_test
+    y_true: Tensor = torch.concat(all_y_true, dim=0).to(device)
+    y_pred: Tensor = torch.concat(all_y_pred, dim=0).to(device)
+    test_metrics = metrics.compute(y_pred=y_pred, y_true=y_true)
     print(metrics.get_info(metrics_value=test_metrics))
 
     dst_file: str = 'test_log.txt' if not run_real_data else 'test_real_log.txt'

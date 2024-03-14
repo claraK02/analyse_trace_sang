@@ -33,9 +33,9 @@ def get_data(datapath: str,
 
 
 def split_data(data: DATA_TYPE,
-               train_rate: float=0.8,
+               train_rate: float=0.6,
                val_rate: float=0.1,
-               test_rate: float=0.1
+               test_rate: float=0.3
                ) -> tuple[DATA_TYPE, DATA_TYPE, DATA_TYPE]:
     """
     Split the data into training, validation, and testing sets according to the specified proportions.
@@ -88,3 +88,7 @@ if __name__ == '__main__':
         save_data(data=data_split[i],
                   mode=MODE[i],
                   datapath=os.path.join('data', 'process_real_data'))
+    
+    save_data(data=data,
+              mode='all',
+              datapath=os.path.join('data', 'process_real_data'))

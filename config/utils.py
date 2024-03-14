@@ -25,7 +25,9 @@ def number_folder(path: str, name: str) -> str:
 
 def train_logger(config: EasyDict,
                  metrics_name: list[str] = None,
-                 logspath: str = 'logs') -> str:
+                 logspath: str = 'logs',
+                 train_log_name: str = 'train_log.csv'
+                 ) -> str:
     """
     creates a logs folder where we can find the config in confing.yaml and
     create train_log.csv which will contain the loss and metrics values
@@ -40,7 +42,7 @@ def train_logger(config: EasyDict,
     if metrics_name is None:
         metrics_name = list(filter(lambda x: config.metrics[x], config.metrics))
     # create train_log.csv where save the metrics
-    with open(os.path.join(logging_path, 'train_log.csv'), 'w') as f:
+    with open(os.path.join(logging_path, train_log_name), 'w') as f:
         first_line = 'step,' + config.learning.loss + ',val ' + config.learning.loss
         for metric in metrics_name:
             first_line += ',' + metric
@@ -89,12 +91,13 @@ def train_step_logger(path: str,
                       train_loss: float,
                       val_loss: float, 
                       train_metrics: list[float] = [], 
-                      val_metrics: list[float] = []
+                      val_metrics: list[float] = [],
+                      train_log_name: str = 'train_log.csv'
                       ) -> None:
     """
     writes loss and metrics values in the train_log.csv
     """
-    with open(os.path.join(path, 'train_log.csv'), 'a', encoding='utf8') as file:
+    with open(os.path.join(path, train_log_name), 'a', encoding='utf8') as file:
         line = str(epoch) + ',' + str(train_loss) + ',' + str(val_loss)
         for i in range(len(train_metrics)):
             line += ',' + str(train_metrics[i])

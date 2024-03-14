@@ -101,8 +101,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     options = vars(args)
 
-    print(type(options['run_on_real_data']), options['run_on_real_data'])
     options['run_on_real_data'] = (options['run_on_real_data'].lower() == 'true')
-    print(type(options['run_on_real_data']), options['run_on_real_data'])
     
     main(options)
