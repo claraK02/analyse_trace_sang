@@ -20,7 +20,18 @@ class FineTuneResNet(Model):
                  p_dropout: float,
                  freeze_resnet: bool = True,
                  **kwargs
-                 ) -> None:   
+                 ) -> None:
+        """
+        Fine-tuned ResNet model for classification.
+
+        Args:
+            num_classes (int): The number of output classes.
+            hidden_size (int): The size of the hidden layer.
+            p_dropout (float): The dropout probability.
+            freeze_resnet (bool, optional): Whether to freeze the ResNet layers. Defaults to True.
+            **kwargs: Additional keyword arguments.
+
+        """
         super(FineTuneResNet, self).__init__()
 
         resnet = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
@@ -30,7 +41,7 @@ class FineTuneResNet(Model):
             for param in self.resnet_begin.parameters():
                 param.requires_grad = False
         self.resnet_begin.eval()
-        
+
         self.fc1 = nn.Linear(in_features=512, out_features=hidden_size)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(p=p_dropout)
@@ -38,8 +49,14 @@ class FineTuneResNet(Model):
 
     def forward(self, x: Tensor) -> Tensor:
         """
-        input: x is a tensor of shape (batch_size, 3, 128, 128)
-        output: y is a tensor of shape (batch_size, num_classes)
+        Forward pass of the model.
+
+        Args:
+            x (Tensor): Input tensor of shape (batch_size, 3, 128, 128).
+
+        Returns:
+            Tensor: Output tensor of shape (batch_size, num_classes).
+
         """
         x = self.resnet_begin(x)
         x = x.squeeze(-1).squeeze(-1)
@@ -47,11 +64,17 @@ class FineTuneResNet(Model):
         x = self.dropout(self.relu(x))
         x = self.fc2(x)
         return x
-    
+
     def train(self) -> None:
+        """
+        Sets the dropout layer to training mode.
+        """
         self.dropout = self.dropout.train()
-    
+
     def eval(self) -> None:
+        """
+        Sets the dropout layer to evaluation mode.
+        """
         self.dropout = self.dropout.eval()
 
 

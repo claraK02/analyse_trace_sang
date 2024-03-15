@@ -8,7 +8,19 @@ def print_loss_and_metrics(train_loss: float,
                            metrics_name: list[str],
                            train_metrics: list[float],
                            val_metrics: list[float]) -> None:
-    """ print loss and metrics for train and validation """
+    """
+    Prints the loss and metrics for train and validation.
+
+    Args:
+        train_loss (float): The loss value for the training set.
+        val_loss (float): The loss value for the validation set.
+        metrics_name (list[str]): A list of metric names.
+        train_metrics (list[float]): A list of metric values for the training set.
+        val_metrics (list[float]): A list of metric values for the validation set.
+
+    Returns:
+        None
+    """
     print(f"{train_loss = }")
     print(f"{val_loss = }")
     for i in range(len(metrics_name)):

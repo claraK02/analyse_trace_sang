@@ -12,7 +12,18 @@ from src.model.finetune_resnet import FineTuneResNet
 
 
 def get_original_resnet(finetune_resnet: FineTuneResNet) -> ResNet:
-    """ get the orginal resnet with weigth matching """
+    """ 
+    Get the original ResNet with weight matching.
+
+    Args:
+        finetune_resnet (FineTuneResNet): The finetuned ResNet model.
+
+    Raises:
+        ValueError: If the parameter name does not match.
+
+    Returns:
+        ResNet: The original ResNet model with matched weights.
+    """
     resnet = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
     finetune_weigth = finetune_resnet.resnet_begin.state_dict()
 

@@ -14,9 +14,23 @@ MODEL_IMPLEMENTED = ['resnet']
 
 
 def main(options: dict) -> None:
+    """
+    Run the main program with the given options.
+
+    Args:
+        options (dict): A dictionary containing the program options.
+
+    Raises:
+        ValueError: If the mode specified in options is not implemented.
+        ValueError: If the model name specified in the configuration is not implemented.
+        NotImplementedError: If the model name specified in the configuration is not implemented for training.
+
+    Returns:
+        None
+    """
 
     if options['mode'] not in MODE_IMPLEMENTED:
-        raise ValueError(f"Expected mode in {MODE_IMPLEMENTED} but foung {options['mode']}")
+        raise ValueError(f"Expected mode in {MODE_IMPLEMENTED} but found {options['mode']}")
 
     # TRAINING
     if options['mode'] == 'train':
@@ -77,7 +91,32 @@ def main(options: dict) -> None:
                     test_inference=True)
 
 
-if __name__ == "__main__":
+def get_options() -> dict:
+    """
+    Parse command line arguments and return a dictionary of options.
+
+    Args:
+        --mode, -m: str, default=None
+            Chose between train and test.
+
+        --config_path, -c: str, default='config/config.yaml'
+            Path to config file (for training).
+
+        --num_run, -n: int, default=10
+            Number of experiments for random search.
+
+        --path, -p: str
+            Experiment path (for test and infer).
+
+        --run_on_real_data, -r: str, default='false'
+            Run on the real data or not.
+
+        --inferpath, -i: str
+            Data path to run the inference (for infer).
+
+    Returns:
+        dict: A dictionary of options.
+    """
     parser = argparse.ArgumentParser()
 
     # Options
@@ -102,5 +141,10 @@ if __name__ == "__main__":
     options = vars(args)
 
     options['run_on_real_data'] = (options['run_on_real_data'].lower() == 'true')
-    
+
+    return options
+
+
+if __name__ == "__main__":
+    options = get_options()
     main(options)

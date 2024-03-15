@@ -18,7 +18,15 @@ from src.metrics import Metrics
 
 
 def get_device(device_config: str) -> torch.device:
-    """ get device: cuda or cpu """
+    """
+    Get the device to be used for computation.
+
+    Args:
+        device_config (str): The desired device configuration. Valid values are 'cuda' or 'cpu'.
+
+    Returns:
+        torch.device: The device to be used for computation. It will be either 'cuda' if CUDA is available and 'cuda' is specified in device_config, or 'cpu' otherwise.
+    """
     if torch.cuda.is_available() and device_config == 'cuda':
         device = torch.device("cuda")
     else:
@@ -27,7 +35,16 @@ def get_device(device_config: str) -> torch.device:
 
 
 def put_on_device(device: torch.device, *args: Any) -> None:
-    """ put all on device """
+    """
+    Put all arguments on the specified device.
+
+    Args:
+        device (torch.device): The device to move the arguments to.
+        *args (Any): The arguments to be moved to the device.
+
+    Returns:
+        None
+    """
     for arg in args:
         arg = arg.to(device)
 
@@ -35,7 +52,15 @@ def put_on_device(device: torch.device, *args: Any) -> None:
 def get_metrics_name_for_adv(resnet_metrics: Metrics,
                              adv_metrics: Metrics
                              ) -> list[str]:
-    """ get all metrics name """
+    """ get all metrics name
+
+    Args:
+        resnet_metrics (Metrics): The metrics for the resnet model.
+        adv_metrics (Metrics): The metrics for the adv model.
+
+    Returns:
+        list[str]: A list of all metrics names.
+    """
     add_name = lambda model_name, metric_name: f'{model_name}_{metric_name}'
     add_resnet = lambda metric_name: add_name(model_name='resnet', metric_name=metric_name)
     add_adv = lambda metric_name: add_name(model_name='adv', metric_name=metric_name)
@@ -89,7 +114,15 @@ def load_weights(logging_path: str,
 def get_random_img(data_path: str = 'data/data_labo/test_256',
                    image_type: Literal['numpy', 'torch'] = 'torch'
                    ) -> tuple[np.ndarray | Tensor, str]:
-    """ get a random image from the test dataset """
+    """Get a random image from the test dataset.
+
+    Args:
+        data_path (str): The path to the test dataset directory. Defaults to 'data/data_labo/test_256'.
+        image_type (Literal['numpy', 'torch']): The type of image to return. Defaults to 'torch'.
+
+    Returns:
+        tuple[np.ndarray | Tensor, str]: A tuple containing the random image and its label.
+    """
     label = random.choice(os.listdir(data_path))
     background = random.choice(os.listdir(os.path.join(data_path, label)))
     folder_path = os.path.join(data_path, label, background)
@@ -113,8 +146,15 @@ def get_random_img(data_path: str = 'data/data_labo/test_256',
 
 
 def convert_tensor_to_rgb(image: Tensor, normelize: bool = False) -> np.ndarray[float]:
-    """ convert a torch tensor into a numpy array
-    run a permuation in order to have an array with a shape like (256, 256, 3)"""
+    """Converts a torch tensor into a numpy array and rearranges the dimensions to (256, 256, 3).
+
+    Args:
+        image (Tensor): The input torch tensor.
+        normelize (bool, optional): Whether to normalize the output array. Defaults to False.
+
+    Returns:
+        np.ndarray[float]: The converted numpy array.
+    """
     rgb_img: np.ndarray = image.permute(1, 2, 0).numpy()
     rgb_img = rgb_img.astype(np.float32)
     if normelize:
@@ -123,6 +163,16 @@ def convert_tensor_to_rgb(image: Tensor, normelize: bool = False) -> np.ndarray[
 
 
 def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
+    """
+    Resume training from a checkpoint.
+
+    Args:
+        config (EasyDict): The configuration object.
+        model (torch.nn.Module): The model to resume training on.
+
+    Returns:
+        None
+    """
     if 'resume_training' not in config.model.resnet.keys():
         print("didn't find resume_training key")
         return None
