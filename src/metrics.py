@@ -10,6 +10,16 @@ class Accuracy_per_class:
         self.num_classes = num_classes
 
     def __call__(self, y_pred: Tensor, y_true: Tensor) -> list[float]:
+        """
+        Compute the accuracy per class.
+
+        Args:
+            y_pred (Tensor): The predicted labels.
+            y_true (Tensor): The true labels.
+
+        Returns:
+            list[float]: The accuracy per class.
+        """
         # Convert y_true to an integer tensor
         y_true = y_true.long()
 
@@ -24,6 +34,12 @@ class Accuracy_per_class:
         return per_label_accuracies
     
     def get_metrics_name(self) -> list[str]:
+        """
+        Get the names of the metrics.
+
+        Returns:
+            list[str]: The names of the metrics.
+        """
         metrics_name = []
         for i in range(self.num_classes):
             metrics_name.append(f'acc class n°{i + 1}')
@@ -35,7 +51,17 @@ class Metrics:
                  num_classes: int,
                  run_argmax_on_y_true: bool=True,
                  run_acc_per_class: bool=False) -> None:
+        """
+        Initializes the Metrics class.
 
+        Args:
+            num_classes (int): The number of classes.
+            run_argmax_on_y_true (bool, optional): Whether to run argmax on y_true. Defaults to True.
+            run_acc_per_class (bool, optional): Whether to run accuracy per class. Defaults to False.
+        
+        Returns:
+            None
+        """
         micro = {'task': 'multiclass', 'average': 'micro', 'num_classes': num_classes}
         macro = {'task': 'multiclass', 'average': 'macro', 'num_classes': num_classes}
 
@@ -62,8 +88,15 @@ class Metrics:
                 y_pred: Tensor,
                 y_true: Tensor
                 ) -> np.ndarray:
-        """ compute all the metrics 
-        y_pred and y_true must have shape like (B, 2)
+        """
+        Computes all the metrics.
+
+        Args:
+            y_pred (Tensor): The predicted values with shape (B, num_classes).
+            y_true (Tensor): The true values with shape (B, num_classes).
+
+        Returns:
+            np.ndarray: The computed metrics values.
         """
         metrics_value = []
         if self.run_argmax_on_y_true:
@@ -84,18 +117,48 @@ class Metrics:
         return np.array(metrics_value)
     
     def get_names(self) -> list[str]:
+        """
+        Returns the names of the metrics.
+
+        Returns:
+            list[str]: The names of the metrics.
+        """
         return self.metrics_name
     
     def init_metrics(self) -> np.ndarray:
+        """
+        Initializes the metrics.
+
+        Returns:
+            np.ndarray: The initialized metrics.
+        """
         return np.zeros(self.num_metrics)
     
     def to(self, device: torch.device) -> None:
+        """
+        Moves the metrics to the specified device.
+
+        Args:
+            device (torch.device): The device to move the metrics to.
+        """
         for key in self.metrics_onehot.keys():
             self.metrics_onehot[key] = self.metrics_onehot[key].to(device)
         for key in self.metrics.keys():
             self.metrics[key] = self.metrics[key].to(device)
 
     def get_info(self, metrics_value: np.ndarray) -> str:
+        """
+        Get information about the metrics values.
+
+        Args:
+            metrics_value (np.ndarray): An array of metrics values.
+
+        Raises:
+            ValueError: If the length of metrics_value is not equal to num_metrics.
+
+        Returns:
+            str: A string containing the metrics names and their corresponding values.
+        """
         if len(metrics_value) != self.num_metrics:
             raise ValueError(f'metrics_value doesnt have the same length as num_metrics.',
                              f'{len(metrics_value) = } and {self.num_metrics = }')

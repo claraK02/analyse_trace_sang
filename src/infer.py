@@ -20,6 +20,18 @@ def infer(datapath: str,
           config: EasyDict,
           test_inference: bool=False
           ) -> None:
+    """
+    Perform inference on the given dataset using the provided model.
+
+    Args:
+        datapath (str): The path to the dataset.
+        logging_path (str): The path to the logging directory.
+        config (EasyDict): The configuration settings.
+        test_inference (bool, optional): Whether to perform test inference. Defaults to False.
+    
+    Returns:
+        None
+    """
     
     device = utils.get_device(device_config=config.learning.device)
 

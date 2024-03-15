@@ -16,12 +16,22 @@ from src.model import finetune_resnet
 from utils import utils, plot_learning_curves
 
 
-
-
-
 def train(config: EasyDict,
           logspath: str = 'logs'
           ) -> None:
+    """
+    Train the ResNet model.
+
+    Args:
+        config (EasyDict): The configuration object containing the model and training parameters.
+        logspath (str, optional): The path to the logs directory. Defaults to 'logs'.
+
+    Raises:
+        ValueError: If the model name in the config is not 'resnet'.
+
+    Returns:
+        None
+    """
     if config.model.name != 'resnet':
         raise ValueError(f"Expected model.name=resnet but found {config.model.name}.")
     
