@@ -3,6 +3,12 @@ import matplotlib.pyplot as plt
 
 
 def plot_batch(x: Tensor) -> None:
+    """
+    Plot a batch of images.
+
+    Args:
+        x (Tensor): The input tensor containing the images. The shape of the tensor should be (batch_size, channels, height, width).
+    """
 
     num_images = x.shape[0]
     rows = int(num_images**0.5)

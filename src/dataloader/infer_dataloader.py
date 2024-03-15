@@ -10,13 +10,12 @@ from torch.utils.data import Dataset, DataLoader
 class InferDataGenerator(Dataset):
     def __init__(self, datapath: str, image_size: int) -> None:
         """
-        # Arguments:
-        datapath: int
-            can be a folder or a filepath
-        image_size: int
-            size of the image
-        """
+        Initializes the InferDataGenerator class.
 
+        Args:
+        datapath: str, the path to the directory containing the images or the path to a single image file.
+        image_size: int, the desired size of the images (both width and height).
+        """
         self.data: list[str] = []
 
         if not datapath.endswith(("jpeg", "png", "jpg")):
@@ -40,15 +39,20 @@ class InferDataGenerator(Dataset):
         )
 
     def __len__(self) -> int:
+        """
+        Returns the total number of images in the dataset.
+        """
         return len(self.data)
 
     def __getitem__(self, index: int) -> tuple[Tensor, str]:
         """
-        # Arguments:
-        index of the image to load
-        # Outputs:
-        tensor x with shape (3, image_size, image_size) and dtype torch.float32
-        image_path: str path to the image
+        Returns the image and its corresponding path at the given index.
+
+        Args:
+        index: int, the index of the image to load.
+
+        Returns:
+        tuple[Tensor, str], a tuple containing the image tensor and its corresponding path.
         """
         image_path = self.data[index]
         image = Image.open(image_path)
@@ -57,6 +61,16 @@ class InferDataGenerator(Dataset):
 
 
 def create_infer_dataloader(config: EasyDict, datapath: str) -> DataLoader:
+    """
+    Create an inference dataloader.
+
+    Args:
+        config (EasyDict): Configuration object.
+        datapath (str): Path to the data.
+
+    Returns:
+        DataLoader: Inference dataloader.
+    """
     generator = InferDataGenerator(datapath, image_size=config.data.image_size)
     dataloader = DataLoader(
         dataset=generator,

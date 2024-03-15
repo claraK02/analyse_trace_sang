@@ -16,6 +16,9 @@ from src.dataloader.labels import LABELS, BACKGROUND
 
 
 class DataGenerator(Dataset):
+    """
+    A custom dataset class for generating data for training, validation, or testing.
+    """
     def __init__(self,
                  data_path: str,
                  mode: Literal['train', 'val', 'test'],
@@ -23,6 +26,21 @@ class DataGenerator(Dataset):
                  use_background: bool,
                  transforms: EasyDict
                  ) -> None:
+        """
+        Initialize the DataLoader object.
+
+        Args:
+            data_path (str): The path to the data directory.
+            mode (Literal['train', 'val', 'test']): The mode of the DataLoader. Must be one of 'train', 'val', or 'test'.
+            image_size (int): The size of the images.
+            use_background (bool): Whether to use background images.
+            transforms (EasyDict): The transforms configuration.
+
+        Raises:
+            ValueError: If the mode is not one of 'train', 'val', or 'test'.
+            FileNotFoundError: If the data_path or background folders are not found.
+        """
+
         if mode not in ["train", "val", "test"]:
             raise ValueError(f"Error, expected mode is train, val, or test",
                              f" but found: {mode}")
@@ -64,17 +82,30 @@ class DataGenerator(Dataset):
                                         mode=mode)
 
     def __len__(self) -> int:
+        """
+        Returns the length of the data.
+        """
         return len(self.data)
 
     def __getitem__(self, index: int) -> dict[str, Tensor]:
         """
-        input: index of the image to load
-        output: tuple (x, label, background)
+        Retrieves the item at the specified index.
+
+        Args:
+            index (int): The index of the item to retrieve.
+
+        Returns:
+            dict[str, Tensor]: A dictionary containing the retrieved item 
+            with the following keys: 'image', 'label', and 'background'.
+
+        Raises:
+            ValueError: If the label or background is not found in the predefined lists.
+
         -----
-        SHAPE & DTYPE
-        x:      (3, image_size, image_size)     torch.float32
-        label:  (1)                             torch.int64
-        backg:  (1)                             torch.int64
+        KEYS        SHAPE                           DTYPE
+        image:      (3, image_size, image_size)     torch.float32
+        label:      (1)                             torch.int64
+        background: (1)                             torch.int64
         """
         image_path, label, background = self.data[index]
 
@@ -101,9 +132,21 @@ class DataGenerator(Dataset):
 
 
 def create_dataloader(config: EasyDict,
-                      mode: str,
+                      mode: Literal['train', 'val', 'test'],
                       run_real_data: bool = False
                       ) -> DataLoader:
+    """
+    Create a DataLoader object for loading data.
+
+    Args:
+        config (EasyDict): Configuration object containing data and learning settings.
+        mode (Literal['train', 'val', 'test']): Mode of operation ('train', 'val', 'test').
+        run_real_data (bool, optional): Flag indicating whether to run with real data. Defaults to False.
+
+    Returns:
+        DataLoader: DataLoader object for loading data.
+    """
+
     if not run_real_data:
         data_path = os.path.join(config.data.path , f"{mode}_{config.data.image_size}")
     else:

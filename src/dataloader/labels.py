@@ -24,6 +24,18 @@ BACKGROUND = ["carrelage", "papier", "bois", "lino"]
 
 
 def get_label_prediction(y_pred: torch.Tensor) -> tuple[int, str]:
+    """
+    Get the label prediction based on the predicted tensor.
+
+    Args:
+        y_pred (torch.Tensor): The predicted tensor.
+
+    Raises:
+        ValueError: If the shape of y_pred does not match the expected shape.
+
+    Returns:
+        tuple[int, str]: A tuple containing the predicted label index and the corresponding label.
+    """
     if y_pred.shape != (len(LABELS)):
         raise ValueError(f'Expected y_pred with shape of {len(LABELS)}'
                          f'but found {y_pred.shape}')

@@ -11,7 +11,16 @@ from torchvision.transforms import (
 
 
 def get_transforms(transforms_config: EasyDict, mode: str) -> Compose:
-    """Compose transfrom if mode==train"""
+    """
+    Compose transforms if mode==train.
+
+    Args:
+        transforms_config (EasyDict): Configuration for the transforms.
+        mode (str): The mode of operation. Should be "train" or "test".
+
+    Returns:
+        Compose: A composed transform object.
+    """
     transform = []
 
     if mode == "train":
@@ -39,4 +48,15 @@ def get_transforms(transforms_config: EasyDict, mode: str) -> Compose:
 
 
 def get_colorjitter_parameter(value: float) -> int | tuple[float, float]:
+    """
+    Get the color jitter parameter based on the input value.
+
+    Args:
+        value (float): The input value.
+
+    Returns:
+        int or tuple[float, float]: The color jitter parameter. If the input value is greater than 0.5,
+        it returns a tuple with the first element as 0.5 and the second element as the input value. Otherwise,
+        it returns the input value itself.
+    """
     return (0.5, value) if value > 0.5 else value
