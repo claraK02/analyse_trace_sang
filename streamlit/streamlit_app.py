@@ -8,6 +8,7 @@ from os.path import dirname as up
 from PIL import Image, ImageEnhance
 import io
 from scipy.special import softmax
+from streamlit_image_comparison import image_comparison
 
 import torch
 from torchvision import transforms
@@ -20,6 +21,9 @@ from utils import utils
 from config.utils import load_config
 from src.model import finetune_resnet
 import torch.nn.functional as F
+
+# set page config
+st.set_page_config(page_title="Image-Comparison Example", layout="centered")
 
 st.title("Image Classification App")
 
@@ -64,6 +68,10 @@ hflip = st.sidebar.checkbox('Horizontal Flip', value=False)
 vflip = st.sidebar.checkbox('Vertical Flip', value=False)
 contrast = st.sidebar.slider('Contrast', min_value=-3.0, max_value=3.0, value=1.0)
 brightness = st.sidebar.slider('Brightness', min_value=-3.0, max_value=3.0, value=1.0)
+
+#choice to print interpretability criteria or not:
+interpretability = st.checkbox('Print Interpretability Criteria', value=False)
+
 
 # Initialisation de st.session_state si nécessaire
 if "image_files" not in st.session_state:
@@ -121,7 +129,7 @@ if st.session_state["image_files"] is not None:
         st.image(image, caption=f'Uploaded Image {i+1}.',width=500)
 
 # Add a slider in Streamlit to control the temperature parameter
-temperature = st.slider('Temperature', min_value=0.01, max_value=3.0, value=1.0)
+temperature = st.slider('Temperature', min_value=0.01, max_value=3.0, value=1.5)
         
 if st.button("Inference"):
     if st.session_state["image_files"] is not None:
@@ -139,7 +147,13 @@ if st.button("Inference"):
         print("model moved to device: ", device)
         #del weight
         # Prepare image
-        transform = transforms.Compose([transforms.ToTensor()])
+        transform =  transforms.Compose([transforms.ToTensor(),transforms.Resize((256, 256))])
+        print("image resized and transformed")
+
+        #we also resize the numpy image in the same way
+        image_resized_np = np.array(cv2.resize(image_np, (256, 256)))
+        
+        
 
         # Create an empty DataFrame to store image names and predicted labels
         results_df = pd.DataFrame(columns=['Image Name', 'Predicted Label'])
@@ -217,8 +231,28 @@ if st.button("Inference"):
 
                     # Display the saliency map and the original image with the bounding box side by side
                     col1.image(saliency_map, caption='Saliency Map', use_column_width=True)
-                    col2.image(image_np, caption='Original Image', use_column_width=True)
+                    col2.image(image_resized_np, caption='Original Image', use_column_width=True)
+
+                   
+                    # render image-comparison
+                    # image_comparison(
+                    #     img1=saliency_map,
+                    #     img2=image_np,
+                    # )
+
+                if interpretability:
+                    from src.explainable.clip_vit_tree import classify_image_with_vit, get_criterions
+                    with st.spinner('Analysing interpretability criteria...'):
+                        # Get the criterions list
+                        criterions = get_criterions(image_np)
+                        print("criterions: ", criterions)
+                        # Display the criterions as a DataFrame
+                        criterions_df = pd.DataFrame(criterions, columns=['Criterions'])
+                        st.write(criterions_df)
+                        #print dataframe
+                        print("criterions_df: ", criterions_df)
 
         # Display the results DataFrame after the loop
         print("results_df: ", results_df)
         st.dataframe(results_df)
+        

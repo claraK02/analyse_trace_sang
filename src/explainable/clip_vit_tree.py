@@ -9,81 +9,129 @@ import numpy as np
 
 import numpy as np
 
-data_list = [
-    "Altération glissée",
-    "Trace à l'intérieur d'un canon d'arme à feu",
-    "sang aspiré",
+class_french = [
     "Trace jaunâtre accolé à une trace rougeâtre",
-    "Trace de sérum",
     "Trace à la couleur peu prononcée et/ou couleur prononcée uniquement sur le contour",
-    "Altération diluée",
     "Zone d'absence de traces dessinée par des traces en périphérie partielle ou totale",
-    "Zone d'interruption",
     "Trace centimétrique",
     "Association à des traces millimétrique",
-    "Association à des traces centimétrique",
     "Variation continue des diamètres du cm au mm",
     "Forme circulaire",
-    "Variationté continue des diamètres du cm au mm",
     "Présence de points blancs",
     "Traces millimétriques majoritairement ovoïdes",
     "Distribution linéaire",
-    "Sang expiré",
-    "Volume impacté/Sang propulsé (surface secondaire)",
-    "Trace millimétriques très étirées",
     "Altération du contour et/ou dépression centrale et/ou extension linéaire",
-    "Forme ovoïde",
-    "Présence de points blancs",
-    "Trace millimétriques majoritairement ovoïdes",
     "Répartition homogène des traces millimétriques autour de la trace centimétrique",
-    "Projection",
     "Trace d'insecte",
     "Distribution convergente",
-    "Cheminement",
-    "Trace passive (surface horizontale)",
-    "Trace passive (surface non horizontale)",
-    "Forme selon le support",
-    "Sang expiré",
-    "Volume impacté/Sang propulsé (surface secondaire)",
-    "Traces millimétriques très étirées",
-    "Volume impacté (surface primaire)",
+    "Surface horizontale",
     "Trace centimétrique très épineuse",
-    "Goutte à goutte",
-    "Trace passive (surface horizontale) trace d'accompagnement",
-    "Répartition homogène des traces millimétriques autour de la trace centimétrique",
-    "Modèle d'impact",
-    "Distribution linéaire",
     "Surface étudiée poreuse",
     "Forme en bande",
-    "Sang propulsé (surface primaire)",
-    "Chute de volume",
-    "Imprégnation",
-    "Volume impacté (surface primaire)",
-    "Trace centimétrique très épineuse",
-    "Accumulation",
     "Coulée",
-    "Mécanismes transférants",
-    "Goutte à goutte",
-    "Trace d'accompagnement Trace passive (surface horizontale)",
     "Distribution parabolique descendante",
     "Localisée à la convergence de traces millimétriques ovoïdes",
     "Existence d'une striation interne",
-    "Sang propulsé (surface primaire)",
-    "Chute de volume",
-    "Projection gravitationnelle",
-    "Modèle d'éjection",
-    "Foyer de modèle d'impact",
     "Distribution dense",
-    "Trace préexistante",
     "Sang majoritairement  dans la forme",
     "Sang vaporisé",
-    "Forme ovoïde",
-    "Transfert glissé",
-    "Transfert par contact",
-    "Altération par contact",
-    "Projection ovoïde",
-    "Projection circulaire"
 ]
+
+class_english = [
+    "Yellowish trace attached to a reddish trace",
+    "Trace with poorly pronounced color and/or color pronounced only on the outline",
+    "Area without traces drawn by partial or total peripheral traces",
+    "Centimeter-sized trace",
+    "Association with millimeter-sized traces",
+    "Continuous variation of diameters from cm to mm",
+    "Circular shape",
+    "Presence of white dots",
+    "Mainly ovoid millimeter-sized traces",
+    "Linear distribution",
+    "Alteration of the contour and/or central depression and/or linear extension",
+    "Homogeneous distribution of millimeter-sized traces around the centimeter-sized trace",
+    "Insect trace",
+    "Convergent distribution",
+    "Horizontal surface",
+    "Very thorny centimeter-sized trace",
+    "Porous studied surface",
+    "Band shape",
+    "Flow",
+    "Descending parabolic distribution",
+    "Located at the convergence of ovoid millimeter-sized traces",
+    "Existence of an internal striation",
+    "Dense distribution",
+    "Blood mainly in the shape",
+    "Vaporized blood",
+]
+
+binary_list = [
+    ["Yellowish trace attached to a reddish trace", "Trace not attached to a reddish trace"],
+    ["Trace with poorly pronounced color and/or color pronounced only on the outline", "Trace with pronounced color all over"],
+    ["Area without traces drawn by partial or total peripheral traces", "Area with traces drawn by partial or total peripheral traces"],
+    ["Centimeter-sized trace", "Trace not centimeter-sized"],
+    ["Association with millimeter-sized traces", "No association with millimeter-sized traces"],
+    ["Continuous variation of diameters from cm to mm", "No continuous variation of diameters from cm to mm"],
+    ["Circular shape", "Non-circular shape"],
+    ["Presence of white dots", "Absence of white dots"],
+    ["Mainly ovoid millimeter-sized traces", "Mainly non-ovoid millimeter-sized traces"],
+    ["Linear distribution", "Non-linear distribution"],
+    ["Alteration of the contour and/or central depression and/or linear extension", "No alteration of the contour and/or central depression and/or linear extension"],
+    ["Homogeneous distribution of millimeter-sized traces around the centimeter-sized trace", "Non-homogeneous distribution of millimeter-sized traces around the centimeter-sized trace"],
+    ["Insect trace", "Non-insect trace"],
+    ["Convergent distribution", "Non-convergent distribution"],
+    ["Horizontal surface", "Non-horizontal surface"],
+    ["Very thorny centimeter-sized trace", "Centimeter-sized trace not very thorny"],
+    ["Porous studied surface", "Non-porous studied surface"],
+    ["Band shape", "Non-band shape"],
+    ["Flow", "No flow"],
+    ["Descending parabolic distribution", "Non-descending parabolic distribution"],
+    ["Located at the convergence of ovoid millimeter-sized traces", "Not located at the convergence of ovoid millimeter-sized traces"],
+    ["Existence of an internal striation", "No existence of an internal striation"],
+    ["Dense distribution", "Non-dense distribution"],
+    ["Blood mainly in the shape", "Blood not mainly in the shape"],
+    ["Vaporized blood", "Non-vaporized blood"],
+]
+
+
+def get_criterions(np_image):
+    binary_list = [
+    ["Yellowish blood stain attached to a reddish blood stain", "Blood stain not attached to a reddish blood stain"],
+    ["Blood stain with poorly pronounced color and/or color pronounced only on the outline", "Blood stain with pronounced color all over"],
+    ["Area without blood stains drawn by partial or total peripheral blood stains", "Area with blood stains drawn by partial or total peripheral blood stains"],
+    ["Centimeter-sized blood stain", "Blood stain not centimeter-sized"],
+    ["Association with millimeter-sized blood stains", "No association with millimeter-sized blood stains"],
+    ["Continuous variation of diameters from cm to mm of blood stains", "No continuous variation of diameters from cm to mm of blood stains"],
+    ["Circular shape of blood stain", "Non-circular shape of blood stain"],
+    ["Ovoid shape of blood stain", "Non-ovoid shape of blood stain"],
+    ["Presence of white dots in blood stain", "Absence of white dots in blood stain"],
+    ["Mainly ovoid millimeter-sized blood stains", "Mainly non-ovoid millimeter-sized blood stains"],
+    ["Linear distribution of blood stains", "Non-linear distribution of blood stains"],
+    ["Alteration of the contour and/or central depression and/or linear extension of blood stain", "No alteration of the contour and/or central depression and/or linear extension of blood stain"],
+    ["Homogeneous distribution of millimeter-sized blood stains around the centimeter-sized blood stain", "Non-homogeneous distribution of millimeter-sized blood stains around the centimeter-sized blood stain"],
+    ["Insect blood stain", "Non-insect blood stain"],
+    ["stripe-shaped blood stain", "Non-stripe-shaped blood stain"],
+    ["Convergent distribution of blood stains", "Non-convergent distribution of blood stains"],
+    ["Horizontal surface of blood stain", "Non-horizontal surface of blood stain"],
+    ["Very thorny centimeter-sized blood stain", "Centimeter-sized blood stain not very thorny"],
+    ["Porous studied surface of blood stain", "Non-porous studied surface of blood stain"],
+    ["Descending parabolic distribution of blood stains", "Non-descending parabolic distribution of blood stains"],
+    ["Located at the convergence of ovoid millimeter-sized blood stains", "Not located at the convergence of ovoid millimeter-sized blood stains"],
+    ["Existence of an internal striation in blood stain", "No existence of an internal striation in blood stain"],
+    ["Dense distribution of blood stains", "Non-dense distribution of blood stains"],
+    ["Blood mainly in the shape of blood stain", "Blood not mainly in the shape of blood stain"],
+    ["Vaporized blood stain", "Non-vaporized blood stain"],
+]
+    
+    list_criteria = []
+    for k in binary_list:
+        result = classify_image_with_vit(np_image, list(k))
+        if result == 0:
+            list_criteria.append(k[0])
+        
+    
+    return list_criteria
+
 
 
 
@@ -114,36 +162,21 @@ def classify_image_with_vit(np_image, class_choices):
     for class_choice, prob in class_probs.items():
         print(f"Probability of '{class_choice}': {prob}")
 
-    return class_probs
+    # if the first element of binary_list has the highest probability, return 0 else return 1
+    if class_probs[class_choices[0]] > class_probs[class_choices[1]]:
+        return 0
+    else:
+        return 1
 
 if __name__ == "__main__":
 
     #PATH=r"C:\Users\Yanis\Documents\Cours Centrale Marseille\Projet 3A\data\data_labo\test_256\3- Modèle Transfert par contact\lino\461.jpg"
-    PATH=r"C:\Users\Yanis\Documents\Cours Centrale Marseille\Projet 3A\data\data_labo\train_256\11- Modèle d'éjection\lino\3674.jpg"
-    tree = np.array([
-    ["centimetric stain associated with some millimetric stains ", "centimetric stain associated with others centimetrics stains "],
-    ["continuous variation of diameters from cm to mm", "alteration of contour or central depression or linear extension"],
-    ["descending parabolic distribution", "located at the convergence of ovoid millimetric traces"],
-    ["dense distribution", "impact model focal point"],
-    ["milimetric stains mainly ovoid", "presence of white points"],
-    ["milimetric stains very slandered", "Homogeneous distribution of milimetric stains around a centimetric stain"],
-    ["presence of spiked centimetric stains", "no presence of a centimetric stain"],
-    ["shape of the stain impacted by the support", "shape of the stain not impacted by the support"],
-    ["porous surface of support", "striped shaped stain"],
-    ["internal striations", "no internal striations"],
-    ["preexisting stains", "blood mainly in the shape"],
-    ["dense distribution", "not dense distribution"],
-    ["ovoid shape", "not ovoid shape"]
+    PATH=r"C:\Users\Yanis\Documents\Cours Centrale Marseille\Projet 3A\data\data_labo\test_256\1- Modèle Traces passives\carrelage\100.jpg"
 
-])
+    # Load the image
+    image = Image.open(PATH)
+    np_image = np.array(image)
 
-    
-
-
-    open_image = Image.open(PATH)
-    image = np.array(open_image)
-
-
-    for k in tree:
-        print(classify_image_with_vit(image, list(k)))
-        print("\n")
+    # Get the criterions
+    criterions = get_criterions(np_image)
+    print(criterions)
