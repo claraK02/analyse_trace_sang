@@ -16,6 +16,9 @@ from src.model import finetune_resnet
 from utils import utils, plot_learning_curves
 
 
+
+
+
 def train(config: EasyDict,
           logspath: str = 'logs'
           ) -> None:

@@ -58,7 +58,7 @@ def get_saliency_map(model: FineTuneResNet,
     grayscale_cam = grayscale_cam[0, :]
 
     # Invert the colors
-    grayscale_cam = grayscale_cam.max() - grayscale_cam
+    #grayscale_cam = grayscale_cam.max() - grayscale_cam
 
 
     rgb_img = utils.convert_tensor_to_rgb(image=image[0], normelize=True)
