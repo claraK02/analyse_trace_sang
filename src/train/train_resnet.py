@@ -28,9 +28,6 @@ def train(config: EasyDict,
 
     Raises:
         ValueError: If the model name in the config is not 'resnet'.
-
-    Returns:
-        None
     """
     if config.model.name != 'resnet':
         raise ValueError(f"Expected model.name=resnet but found {config.model.name}.")

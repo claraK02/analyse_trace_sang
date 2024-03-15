@@ -12,7 +12,14 @@ from get_config_name import get_config_name
 
 def number_folder(path: str, name: str) -> str:
     """
-    finds a declination of a folder name so that the name is not already taken
+    Finds a declination of a folder name so that the name is not already taken.
+
+    Args:
+        path (str): The path to the directory where the folders are located.
+        name (str): The base name of the folder.
+
+    Returns:
+        str: The new folder name that is not already taken.
     """
     elements = os.listdir(path)
     last_index = -1
@@ -29,8 +36,17 @@ def train_logger(config: EasyDict,
                  train_log_name: str = 'train_log.csv'
                  ) -> str:
     """
-    creates a logs folder where we can find the config in confing.yaml and
-    create train_log.csv which will contain the loss and metrics values
+    Creates a logs folder where we can find the config in confing.yaml and
+    create train_log.csv which will contain the loss and metrics values.
+
+    Args:
+        config (EasyDict): The configuration object.
+        metrics_name (list[str], optional): List of metric names. If None, it will be inferred from the config. Defaults to None.
+        logspath (str, optional): Path to the logs folder. Defaults to 'logs'.
+        train_log_name (str, optional): Name of the train log file. Defaults to 'train_log.csv'.
+
+    Returns:
+        str: The path to the created logging folder.
     """
     if not os.path.exists(logspath):
         os.makedirs(logspath)
@@ -64,7 +80,14 @@ def train_logger(config: EasyDict,
 
 def config_to_yaml(config: dict, space: str='') -> str:
     """
-    transforms a dictionary (config) into a yaml line sequence
+    Transforms a dictionary (config) into a yaml line sequence.
+
+    Args:
+        config (dict): The dictionary to be transformed into yaml.
+        space (str): The indentation space for each level of the yaml.
+
+    Returns:
+        str: The yaml line sequence representing the input dictionary.
     """
     intent = ' ' * 4
     config_str = []
@@ -95,7 +118,16 @@ def train_step_logger(path: str,
                       train_log_name: str = 'train_log.csv'
                       ) -> None:
     """
-    writes loss and metrics values in the train_log.csv
+    Writes loss and metrics values in the train_log.csv.
+
+    Args:
+        path (str): The path to the directory where the train_log.csv file is located.
+        epoch (int): The current epoch number.
+        train_loss (float): The training loss value.
+        val_loss (float): The validation loss value.
+        train_metrics (list[float], optional): The list of training metrics values. Defaults to an empty list.
+        val_metrics (list[float], optional): The list of validation metrics values. Defaults to an empty list.
+        train_log_name (str, optional): The name of the train_log.csv file. Defaults to 'train_log.csv'.
     """
     with open(os.path.join(path, train_log_name), 'a', encoding='utf8') as file:
         line = str(epoch) + ',' + str(train_loss) + ',' + str(val_loss)
@@ -112,8 +144,13 @@ def test_logger(path: str,
                 dst_test_name: str = 'test_log.txt'
                 ) -> None:
     """
-    creates a file 'test_log.txt' in the path
-    containing for each line: metrics[i]: values[i]
+    Creates a file 'test_log.txt' in the specified path and writes the metrics and values to it.
+
+    Args:
+        path (str): The path where the log file will be created.
+        metrics (list[str]): A list of metric names.
+        values (list[float]): A list of corresponding metric values.
+        dst_test_name (str, optional): The name of the log file. Defaults to 'test_log.txt'.
     """
     with open(os.path.join(path, dst_test_name), 'a', encoding='utf8') as f:
         for i in range(len(metrics)):
@@ -121,13 +158,37 @@ def test_logger(path: str,
 
 
 def load_config(path: str='config/config.yaml') -> EasyDict:
-    """ Load a yaml into an EasyDict"""
+    """
+    Load a yaml into an EasyDict.
+
+    Args:
+        path (str): The path to the yaml file. Defaults to 'config/config.yaml'.
+
+    Raises:
+        FileNotFoundError: If the specified file path does not exist.
+
+    Returns:
+        EasyDict: An EasyDict object containing the loaded yaml data.
+    """
     stream = open(path, 'r')
     return EasyDict(yaml.safe_load(stream))
 
 
 def find_config(experiment_path: str) -> str:
-    """ find the .yaml file in a folder and return the .yaml path """
+    """
+    Find the .yaml file in a folder and return the .yaml path.
+
+    Args:
+        experiment_path (str): The path of the folder to search for the .yaml file.
+
+    Raises:
+        FileNotFoundError: If no config.yaml file is found in the specified folder.
+        FileNotFoundError: If multiple .yaml files are found in the specified folder.
+
+    Returns:
+        str: The path of the found .yaml file.
+
+    """
     yaml_in_path = list(filter(lambda x: x[-5:] == '.yaml',
                                os.listdir(experiment_path)))
 
@@ -138,7 +199,7 @@ def find_config(experiment_path: str) -> str:
         raise FileNotFoundError("ERROR: config.yaml wasn't found in", experiment_path)
     
     if len(yaml_in_path) > 0:
-        raise FileNotFoundError("ERROR: a lot a .yaml was found in", experiment_path)
+        raise FileNotFoundError("ERROR: multiple .yaml files were found in", experiment_path)
 
 
 if __name__ == '__main__':

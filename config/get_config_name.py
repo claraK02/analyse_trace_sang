@@ -5,7 +5,18 @@ MODEL_IMPLEMENTED = ['resnet']
 
 
 def get_config_name(config: EasyDict) -> str:
-    """ get an explicite name according the configuration """
+    """
+    Get an explicit name according to the configuration.
+
+    Args:
+        config (EasyDict): The configuration object.
+
+    Raises:
+        ValueError: If the model name is not in MODEL_IMPLEMENTED.
+
+    Returns:
+        str: The explicit name according to the configuration.
+    """
     if config.model.name not in MODEL_IMPLEMENTED:
         raise ValueError(f'Expected model name in {MODEL_IMPLEMENTED} '
                          f'but found {config.model.name}')
@@ -15,6 +26,15 @@ def get_config_name(config: EasyDict) -> str:
 
 
 def get_config_name_resnet(config: EasyDict) -> str:
+    """
+    Get the configuration name for the ResNet model.
+
+    Args:
+        config (EasyDict): The configuration object.
+
+    Returns:
+        str: The configuration name.
+    """
     resnet: EasyDict = config.model.resnet
     model: str = 'resnet'
     freeze_param: bool = resnet.freeze_resnet

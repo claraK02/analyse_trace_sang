@@ -31,9 +31,6 @@ def main(mode: str, bakground_wanted: bool = False) -> None:
 
     Args:
         mode (str): The mode of the data (e.g., train, test, validation).
-
-    Returns:
-        None
     """
     # Define the destination path
     print("DESTINATION PATH:", info.DST_PATH)

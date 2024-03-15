@@ -58,9 +58,6 @@ class Metrics:
             num_classes (int): The number of classes.
             run_argmax_on_y_true (bool, optional): Whether to run argmax on y_true. Defaults to True.
             run_acc_per_class (bool, optional): Whether to run accuracy per class. Defaults to False.
-        
-        Returns:
-            None
         """
         micro = {'task': 'multiclass', 'average': 'micro', 'num_classes': num_classes}
         macro = {'task': 'multiclass', 'average': 'macro', 'num_classes': num_classes}

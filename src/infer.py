@@ -28,11 +28,7 @@ def infer(datapath: str,
         logging_path (str): The path to the logging directory.
         config (EasyDict): The configuration settings.
         test_inference (bool, optional): Whether to perform test inference. Defaults to False.
-    
-    Returns:
-        None
     """
-    
     device = utils.get_device(device_config=config.learning.device)
 
     generator = InferDataGenerator(datapath, image_size=config.data.image_size)

@@ -22,6 +22,19 @@ class Search:
                  logspath: str = 'logs',
                  name: str = 'random_search',
                  ) -> None:
+        """
+        Initialize the Search class.
+
+        Args:
+            config_yaml_file (str): The path to the config YAML file. Defaults to 'config/config.yaml'.
+            search_yaml_file (str): The path to the search YAML file. Defaults to 'config/search.yaml'.
+            logspath (str): The path to the logs directory. Defaults to 'logs'.
+            name (str): The name of the search. Defaults to 'random_search'.
+
+        Raise:
+            FileNotFoundError: If the config YAML file or the search YAML file does not exist.
+            ValueError: If the items list is empty.
+        """
         
         if not os.path.exists(config_yaml_file):
             raise FileNotFoundError(config_yaml_file)
@@ -66,20 +79,34 @@ class Search:
         self.index: int = -1
 
     def get_new_config(self) -> EasyDict:
+        """
+        Get a new configuration based on the current index value.
+
+        Returns:
+            EasyDict: A new configuration based on the current index value.
+        """
         self.__update_index()
         config = copy.copy(self.config)
         possibility: list[int] = self.all_possibilities[self.index]
 
         for item_number, item in enumerate(self.items):
             item.change_config(config, index_value=possibility[item_number])
-                
+
         return EasyDict(config)
     
     def get_directory(self) -> str:
-        """ get logs path like logs/folder_name where the experiments will be save in"""
-        return self.folder_name
+            """
+            Get the logs path where the experiments will be saved.
+            """
+            return self.folder_name
     
     def compare_experiments(self) -> None:
+        """
+        Compare the experiments based on the specified hyperparameters.
+
+        Raise:
+            ValueError: If the end of the traversal is reached.
+        """
 
         hyperparameters: dict[str, list[str]] = {}
         for item in self.items:
@@ -91,16 +118,38 @@ class Search:
                             compare_on='val')
     
     def __update_index(self) -> None:
+        """
+        Update the index by incrementing it by 1.
+
+        Raise:
+            ValueError: If the index reaches the end of the object.
+        """
         self.index += 1
         if self.index == len(self):
             raise ValueError('fin du parcours')
     
     def __loadyaml(self, yaml_file: str) -> EasyDict:
-        """ load an yaml file """
+        """Load a YAML file.
+
+        Args:
+            yaml_file (str): The path to the YAML file.
+
+        Raises:
+            FileNotFoundError: If the specified YAML file does not exist.
+
+        Returns:
+            EasyDict: A dictionary-like object representing the contents of the YAML file.
+                        Returns None if the YAML file is empty.
+        """
         return EasyDict(yaml.safe_load(open(yaml_file, 'r')))
     
     def __get_all_item(self, search: EasyDict, keys: list[str] = []) -> None:
-        """ get all Item class to search in """
+        """Get all Item class to search in.
+
+        Args:
+            search (EasyDict): The dictionary to search in.
+            keys (list[str], optional): The list of keys representing the current path in the dictionary. Defaults to [].
+        """
         for key, value in search.items():
             new_keys: list[str] = keys + [key]
             if type(value) == EasyDict:
@@ -109,9 +158,18 @@ class Search:
                 self.items.append(Item(keys=new_keys, possibles_values=value))
     
     def __get_all_possibilities(self) -> list[tuple[int]]:
-        return list(product(*[range(x) for x in self.possibilities]))
+            """
+            Get all possible combinations of values for each possibility.
+            Returns:
+                A list of tuples representing all possible combinations of values for each possibility.
+                If there are no possibilities, an empty list is returned.
+            """
+            return list(product(*[range(x) for x in self.possibilities]))
     
     def __len__(self) -> int:
+        """
+        Returns the length of the object.
+        """
         return self.len
     
 

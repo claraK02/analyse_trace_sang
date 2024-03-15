@@ -28,11 +28,8 @@ def test(config: EasyDict,
         config (EasyDict): The configuration object.
         logging_path (str): The path to the logging directory.
         run_real_data (bool, optional): Whether to run the test on real data. Defaults to False.
-    
-    Returns:
-        None
     """
-    
+
     device = utils.get_device(device_config=config.learning.device)
 
     # Get data

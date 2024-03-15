@@ -41,9 +41,6 @@ def put_on_device(device: torch.device, *args: Any) -> None:
     Args:
         device (torch.device): The device to move the arguments to.
         *args (Any): The arguments to be moved to the device.
-
-    Returns:
-        None
     """
     for arg in args:
         arg = arg.to(device)
@@ -169,9 +166,6 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
     Args:
         config (EasyDict): The configuration object.
         model (torch.nn.Module): The model to resume training on.
-
-    Returns:
-        None
     """
     if 'resume_training' not in config.model.resnet.keys():
         print("didn't find resume_training key")

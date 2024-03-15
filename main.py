@@ -24,9 +24,6 @@ def main(options: dict) -> None:
         ValueError: If the mode specified in options is not implemented.
         ValueError: If the model name specified in the configuration is not implemented.
         NotImplementedError: If the model name specified in the configuration is not implemented for training.
-
-    Returns:
-        None
     """
 
     if options['mode'] not in MODE_IMPLEMENTED:
