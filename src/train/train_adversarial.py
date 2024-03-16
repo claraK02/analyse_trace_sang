@@ -50,7 +50,7 @@ def train(config: EasyDict) -> None:
     # Optimizer and Scheduler
     resnet_optimizer = Adam(res_model.get_learned_parameters(),
                             lr=config.learning.learning_rate)
-    adv_optimizer = Adam(chain(adv_model.parameters(), res_model.get_intermediare_parameters()),
+    adv_optimizer = Adam(chain(adv_model.parameters(), res_model.get_learned_parameters()),
                          lr=config.learning.adv.learning_rate_adversary)
 
     # Get metrics
@@ -95,7 +95,8 @@ def train(config: EasyDict) -> None:
             res_loss: Tensor = criterion(res_pred, res_true)
             adv_loss: Tensor = criterion(adv_pred, adv_true)
 
-            crossloss = res_loss - alpha * adv_loss
+            # crossloss = res_loss - alpha * adv_loss
+            crossloss = res_loss / (alpha * adv_loss)
 
             adv_loss.backward(retain_graph=True)
             crossloss.backward()
@@ -112,7 +113,7 @@ def train(config: EasyDict) -> None:
                                              adv_metrics.compute(y_pred=adv_pred, y_true=adv_true)))
 
             current_loss = train_loss / (i + 1)
-            train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:.4f}")
+            train_range.set_description(f"TRAIN -> epoch: {epoch} || loss: {current_loss:e} res: {res_loss.item():.2f} adv: {adv_loss.item():.2f}")
             train_range.refresh()
 
         ###############################################################
@@ -138,7 +139,8 @@ def train(config: EasyDict) -> None:
                 res_loss = criterion(res_pred, res_true)
                 adv_loss = criterion(adv_pred, adv_true)
 
-                crossloss = res_loss - alpha * adv_loss
+                # crossloss = res_loss - alpha * adv_loss
+                crossloss = res_loss / (alpha * adv_loss)
 
                 val_loss += crossloss.item()
                 val_metrics += np.concatenate((np.array([res_loss.item(), adv_loss.item()]),
@@ -146,7 +148,7 @@ def train(config: EasyDict) -> None:
                                                adv_metrics.compute(y_pred=adv_pred, y_true=adv_true)))
 
                 current_loss = val_loss / (i + 1)
-                val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.4f}")
+                val_range.set_description(f"VAL   -> epoch: {epoch} || loss: {current_loss:.2f} res: {res_loss.item():.2f} adv: {adv_loss.item():.2f}")
                 val_range.refresh()
           
 
@@ -186,5 +188,5 @@ def train(config: EasyDict) -> None:
 if __name__ == '__main__':
     import yaml
     config = EasyDict(yaml.safe_load(open('config/config.yaml')))  # Load config file
-    config.model.name = 'adversarial' 
+    config.model.name = 'adversarial'
     train(config=config)

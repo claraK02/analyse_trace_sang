@@ -1,6 +1,5 @@
 import os
 import sys
-from itertools import chain
 from typing import Iterator
 from easydict import EasyDict
 from os.path import dirname as up
@@ -32,7 +31,6 @@ class FineTuneResNet(Model):
             p_dropout (float): The dropout probability.
             freeze_resnet (bool, optional): Whether to freeze the ResNet layers. Defaults to True.
             **kwargs: Additional keyword arguments.
-
         """
         super(FineTuneResNet, self).__init__()
 
@@ -69,12 +67,15 @@ class FineTuneResNet(Model):
 
     def forward_and_get_intermediare(self, x: Tensor) -> tuple[Tensor, Tensor]:
         """
-        input:
-            - x is a tensor of shape (batch_size, 3, 128, 128)
-        
-        output:
-            - intermediare is a tensor of shape (batch_size, 1000)
-            - reel_output  is a tensor of shape (batch_size, num_classes) 
+        Forward pass of the model and returns intermediate and final outputs.
+
+        Args:
+            x (Tensor): Input tensor of shape (batch_size, 3, 128, 128).
+
+        Returns:
+            tuple[Tensor, Tensor]: A tuple containing:
+                - intermediare (Tensor): Intermediate tensor of shape (batch_size, hidden_size).
+                - reel_output (Tensor): Final output tensor of shape (batch_size, num_classes).
         """
         x = self.resnet_begin(x)
         x = x.squeeze(-1).squeeze(-1)
@@ -90,7 +91,6 @@ class FineTuneResNet(Model):
         Returns:
             An iterator over the intermediate parameters of the model.
         """
-        # return chain(self.fc1.parameters(), self.fc2.parameters())
         return self.fc1.parameters()
 
     def train(self) -> None:
