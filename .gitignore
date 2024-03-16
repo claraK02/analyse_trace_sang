@@ -11,3 +11,9 @@ data/data_real
 
 # test de yanis
 test_paths.txt
+
+# latex aux files
+/report/*
+!/report/report.tex
+!/report/*.pdf
+!/report/ref.bib
