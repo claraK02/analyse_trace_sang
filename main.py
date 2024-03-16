@@ -48,12 +48,18 @@ def main(options: dict) -> None:
 
         num_run: int = len(search)
         if options['mode'] == 'random_search':
-            num_run = max(options['num_run'], len(search))
-        print(f'{num_run = }')
+            num_run = min(options['num_run'], len(search))
+
+        print(f"{options['mode']} with {num_run = } runs.")
 
         for n_run in range(num_run):
-            print(f"\nexperiment n°{n_run + 1}/{num_run}\n")
+            print(f"\n- - - experiment n°{n_run + 1}/{num_run} - - -\n")
             config = search.get_new_config()
+
+            if config.model.name not in MODEL_IMPLEMENTED:
+                raise ValueError(f'Expected model name in {MODEL_IMPLEMENTED} but found {config.model.name}.')
+            print(f'train {config.model.name}')
+            
             if config.model.name == 'resnet':
                 train_resnet.train(config, logspath=search.get_directory())
             elif config.model.name == 'adversarial':
@@ -94,7 +100,7 @@ def get_options() -> dict:
 
     Args:
         --mode, -m: str, default=None
-            Chose between train and test.
+            Chose between train, test, random_search, grid_search, infer.
 
         --config_path, -c: str, default='config/config.yaml'
             Path to config file (for training).
