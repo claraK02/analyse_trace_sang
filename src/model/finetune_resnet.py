@@ -1,5 +1,7 @@
 import os
 import sys
+from itertools import chain
+from typing import Iterator
 from easydict import EasyDict
 from os.path import dirname as up
 
@@ -65,6 +67,32 @@ class FineTuneResNet(Model):
         x = self.fc2(x)
         return x
 
+    def forward_and_get_intermediare(self, x: Tensor) -> tuple[Tensor, Tensor]:
+        """
+        input:
+            - x is a tensor of shape (batch_size, 3, 128, 128)
+        
+        output:
+            - intermediare is a tensor of shape (batch_size, 1000)
+            - reel_output  is a tensor of shape (batch_size, num_classes) 
+        """
+        x = self.resnet_begin(x)
+        x = x.squeeze(-1).squeeze(-1)
+        intermediare = self.relu(self.fc1(x))
+        x = self.dropout(intermediare)
+        reel_output = self.fc2(x)
+        return intermediare, reel_output
+
+    def get_intermediare_parameters(self) -> Iterator[nn.Parameter]:
+        """
+        Get the intermediate parameters of the model, wicht are the last two fully connected layers.
+
+        Returns:
+            An iterator over the intermediate parameters of the model.
+        """
+        # return chain(self.fc1.parameters(), self.fc2.parameters())
+        return self.fc1.parameters()
+
     def train(self) -> None:
         """
         Sets the dropout layer to training mode.
@@ -79,7 +107,14 @@ class FineTuneResNet(Model):
 
 
 def get_finetuneresnet(config: EasyDict) -> FineTuneResNet:
-    """ return resnet according the configuration """
+    """Return a FineTuneResNet model based on the given configuration.
+
+    Args:
+        config (EasyDict): The configuration object containing the model parameters.
+
+    Returns:
+        FineTuneResNet: The instantiated FineTuneResNet model.
+    """
     resnet = FineTuneResNet(num_classes=config.data.num_classes,
                             **config.model.resnet)
     return resnet
@@ -95,11 +130,20 @@ if __name__ == '__main__':
     model = get_finetuneresnet(config)
     print("Total parameters:", model.get_number_parameters())
     print("Trainable parameters:", model.get_number_learnable_parameters())
-    learnable_param = model.get_dict_learned_parameters()
-    print('learnable parameters', learnable_param)
-    model.load_dict_learnable_parameters(state_dict=learnable_param, strict=True)
+    # learnable_param = model.get_dict_learned_parameters()
+    # print('learnable parameters', learnable_param)
+    # model.load_dict_learnable_parameters(state_dict=learnable_param, strict=True)
 
     x = torch.randn((32, 3, 128, 128))
     y = model.forward(x)
 
     print("y shape:", y.shape)
+
+    intermediare, reel_output = model.forward_and_get_intermediare(x)
+    print("intermediare shape:", intermediare.shape, type(intermediare))
+    print("reel_output shape:", reel_output.shape, type(reel_output))
+
+    inter_param = model.get_intermediare_parameters()
+    print(inter_param, type(inter_param))
+    for param in inter_param:
+        print(param)

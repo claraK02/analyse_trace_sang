@@ -16,37 +16,46 @@ sys.path.append(up(up(up(os.path.abspath(__file__)))))
 from config.utils import train_step_logger, train_logger
 from src.dataloader.dataloader import create_dataloader
 from src.metrics import Metrics
-from src.model import resnet, adversarial
+from src.model import finetune_resnet, adversarial
 from utils import utils, plot_learning_curves
 
 
 def train(config: EasyDict) -> None:
+    """
+    Train the adversarial model.
+
+    Args:
+        config (EasyDict): Configuration object containing the model and training parameters.
+    
+    Raises:
+        ValueError: If the model name is not adversarial.
+    """
     if config.model.name != 'adversarial':
         raise ValueError(f"Expected model.name=adversarial but found {config.model.name}.")
 
     # Get data
-    train_generator = create_dataloader(config=config, mode='train', use_background=True)
-    val_generator = create_dataloader(config=config, mode='val', use_background=True)
+    train_generator = create_dataloader(config=config, mode='train', run_real_data=False)
+    val_generator = create_dataloader(config=config, mode='val', run_real_data=False)
     n_train, n_val = len(train_generator), len(val_generator) 
     print(f"Found {n_train} training batches and {n_val} validation batches")
 
     # Get model
-    res_model = resnet.get_resnet(config)
+    res_model = finetune_resnet.get_finetuneresnet(config)
     adv_model = adversarial.get_adv(config)
 
     # Loss
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
-    alpha = config.learning.alpha # weight of the adversarial loss
+    alpha: float = config.learning.adv.alpha # weight of the adversarial loss
 
     # Optimizer and Scheduler
     resnet_optimizer = Adam(res_model.get_learned_parameters(),
                             lr=config.learning.learning_rate)
     adv_optimizer = Adam(chain(adv_model.parameters(), res_model.get_intermediare_parameters()),
-                         lr=config.learning.learning_rate_adversary)
+                         lr=config.learning.adv.learning_rate_adversary)
 
     # Get metrics
     res_metrics = Metrics(num_classes=config.data.num_classes, run_argmax_on_y_true=False)
-    adv_metrics = Metrics(num_classes=4, run_argmax_on_y_true=False)
+    adv_metrics = Metrics(num_classes=config.data.background_classes, run_argmax_on_y_true=False)
     metrics_name = ['res loss', 'adv loss'] + utils.get_metrics_name_for_adv(res_metrics, adv_metrics)
 
     # Get and put on device
@@ -83,8 +92,8 @@ def train(config: EasyDict) -> None:
             inter, res_pred = res_model.forward_and_get_intermediare(x)
             adv_pred = adv_model.forward(x=inter)
 
-            res_loss = criterion(res_pred, res_true)
-            adv_loss = criterion(adv_pred, adv_true)
+            res_loss: Tensor = criterion(res_pred, res_true)
+            adv_loss: Tensor = criterion(adv_pred, adv_true)
 
             crossloss = res_loss - alpha * adv_loss
 
