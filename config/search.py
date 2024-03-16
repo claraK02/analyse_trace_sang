@@ -87,7 +87,7 @@ class Search:
         """
         self.__update_index()
         config = copy.copy(self.config)
-        possibility: list[int] = self.all_possibilities[self.index]
+        possibility: list[int] = self.all_possibilities[self.indexes[self.index]]
 
         for item_number, item in enumerate(self.items):
             item.change_config(config, index_value=possibility[item_number])
@@ -95,10 +95,10 @@ class Search:
         return EasyDict(config)
     
     def get_directory(self) -> str:
-            """
-            Get the logs path where the experiments will be saved.
-            """
-            return self.folder_name
+        """
+        Get the logs path where the experiments will be saved.
+        """
+        return self.folder_name
     
     def compare_experiments(self) -> None:
         """
@@ -158,13 +158,13 @@ class Search:
                 self.items.append(Item(keys=new_keys, possibles_values=value))
     
     def __get_all_possibilities(self) -> list[tuple[int]]:
-            """
-            Get all possible combinations of values for each possibility.
-            Returns:
-                A list of tuples representing all possible combinations of values for each possibility.
-                If there are no possibilities, an empty list is returned.
-            """
-            return list(product(*[range(x) for x in self.possibilities]))
+        """
+        Get all possible combinations of values for each possibility.
+        Returns:
+            A list of tuples representing all possible combinations of values for each possibility.
+            If there are no possibilities, an empty list is returned.
+        """
+        return list(product(*[range(x) for x in self.possibilities]))
     
     def __len__(self) -> int:
         """
@@ -209,6 +209,7 @@ if __name__ == '__main__':
     
     for i in range(len(search)):
         config = search.get_new_config()
+        print(i, config.learning.learning_rate, config.learning.adv.learning_rate_adversary, config.learning.adv.alpha)
     
   
     # item = Item(keys=['learning', 'learning_rate'],
