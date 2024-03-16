@@ -20,12 +20,13 @@ from src.model import finetune_resnet, adversarial
 from utils import utils, plot_learning_curves
 
 
-def train(config: EasyDict) -> None:
+def train(config: EasyDict, logspath: str = 'logs') -> None:
     """
     Train the adversarial model.
 
     Args:
         config (EasyDict): Configuration object containing the model and training parameters.
+        logspath (str, optional): The path to the logs directory. Defaults to 'logs'.
     
     Raises:
         ValueError: If the model name is not adversarial.
@@ -34,8 +35,12 @@ def train(config: EasyDict) -> None:
         raise ValueError(f"Expected model.name=adversarial but found {config.model.name}.")
 
     # Get data
-    train_generator = create_dataloader(config=config, mode='train', run_real_data=False)
-    val_generator = create_dataloader(config=config, mode='val', run_real_data=False)
+    train_generator = create_dataloader(config=config,
+                                        mode='train',
+                                        run_real_data=False)
+    val_generator = create_dataloader(config=config,
+                                      mode='val',
+                                      run_real_data=False)
     n_train, n_val = len(train_generator), len(val_generator) 
     print(f"Found {n_train} training batches and {n_val} validation batches")
 
@@ -50,12 +55,15 @@ def train(config: EasyDict) -> None:
     # Optimizer and Scheduler
     resnet_optimizer = Adam(res_model.get_learned_parameters(),
                             lr=config.learning.learning_rate)
-    adv_optimizer = Adam(chain(adv_model.parameters(), res_model.get_learned_parameters()),
+    adv_optimizer = Adam(chain(adv_model.parameters(),
+                               res_model.get_learned_parameters()),
                          lr=config.learning.adv.learning_rate_adversary)
 
     # Get metrics
-    res_metrics = Metrics(num_classes=config.data.num_classes, run_argmax_on_y_true=False)
-    adv_metrics = Metrics(num_classes=config.data.background_classes, run_argmax_on_y_true=False)
+    res_metrics = Metrics(num_classes=config.data.num_classes,
+                          run_argmax_on_y_true=False)
+    adv_metrics = Metrics(num_classes=config.data.background_classes,
+                          run_argmax_on_y_true=False)
     metrics_name = ['res loss', 'adv loss'] + utils.get_metrics_name_for_adv(res_metrics, adv_metrics)
 
     # Get and put on device
@@ -66,7 +74,9 @@ def train(config: EasyDict) -> None:
     save_experiment = config.learning.save_experiment
     print(f'{save_experiment = }')
     if save_experiment:
-        logging_path = train_logger(config, metrics_name=metrics_name)
+        logging_path = train_logger(config,
+                                    metrics_name=metrics_name,
+                                    logspath=logspath)
         best_val_loss = 10e6
 
 
@@ -166,7 +176,8 @@ def train(config: EasyDict) -> None:
                               train_loss=train_loss, 
                               val_loss=val_loss,
                               train_metrics=train_metrics,
-                              val_metrics=val_metrics)
+                              val_metrics=val_metrics,
+                              log_name='train_log.csv')
             
             if val_loss < best_val_loss:
                 print('save model weights')
