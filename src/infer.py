@@ -11,7 +11,7 @@ sys.path.append(up(up(os.path.abspath(__file__))))
 
 from src.dataloader.dataloader import LABELS
 from src.dataloader.infer_dataloader import InferDataGenerator
-from src.model import resnet
+from src.model import finetune_resnet
 from utils import utils
 
 
@@ -39,7 +39,7 @@ def infer(datapath: str,
                                  num_workers=config.learning.num_workers)
 
     # Get model
-    model = resnet.get_resnet(config)
+    model = finetune_resnet.get_finetuneresnet(config)
     weight = utils.load_weights(logging_path, device=device)
     model.load_dict_learnable_parameters(state_dict=weight, strict=True)
     model = model.to(device)
