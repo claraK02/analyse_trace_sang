@@ -3,7 +3,6 @@ import sys
 from tqdm import tqdm
 from easydict import EasyDict
 from os.path import dirname as up
-from icecream import ic
 
 import torch
 from torch import Tensor

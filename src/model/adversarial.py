@@ -17,6 +17,16 @@ class AdversarialResNet(Model):
                  p_dropout: float,
                  background_classes: int
                  ) -> None:
+        """
+        Initialize the Adversarial model.
+        2 fully connected layers with dropout and ReLU activation.
+
+        Args:
+            hidden_size (int): The size of the hidden layer.
+            resnet_hidden_size (int): The size of the input layer.
+            p_dropout (float): The dropout probability.
+            background_classes (int): The number of background classes.
+        """
         super().__init__()
         self.fc1 = nn.Linear(in_features=resnet_hidden_size, out_features=hidden_size)
         self.dropout = nn.Dropout(p_dropout)
@@ -25,8 +35,13 @@ class AdversarialResNet(Model):
 
     def forward(self, x: Tensor) -> Tensor:
         """
-        input: x is a tensor of shape (batch_size, resnet_hidden_size)
-        output: y is a tensor of shape (batch_size, background_classes)
+        Forward pass of the AdversarialResNet model.
+
+        Args:
+            x (Tensor): Input tensor of shape (batch_size, resnet_hidden_size).
+
+        Returns:
+            Tensor: Output tensor of shape (batch_size, background_classes).
         """
         x = self.fc1(x)
         x = self.dropout(self.relu(x))
