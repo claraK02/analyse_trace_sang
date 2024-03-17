@@ -16,3 +16,4 @@ shap==0.44.1
 streamlit==1.31.1
 Pillow==10.0.0
 xgboost== 1.7.6
+pandas==2.2.0
