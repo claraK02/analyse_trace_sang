@@ -148,9 +148,11 @@ def create_dataloader(config: EasyDict,
     """
 
     if not run_real_data:
-        data_path = os.path.join(config.data.path , f"{mode}_{config.data.image_size}")
+        data_path = config.data.path
     else:
         data_path = config.data.real_data_path
+
+    data_path = os.path.join(data_path , f"{mode}_{config.data.image_size}")
 
     generator = DataGenerator(
         data_path=data_path,
@@ -190,21 +192,22 @@ if __name__ == "__main__":
     config = EasyDict(yaml.safe_load(open(config_path)))
     config.learning.num_workers = 1
 
-    dataloader = create_dataloader(config=config, mode="test", run_real_data=False)
+    dataloader = create_dataloader(config=config, mode="test", run_real_data=True)
     print(f'{dataloader.batch_size = }')
 
     start_time = time.time()
     item: dict[str, Tensor] = next(iter(dataloader))
     stop_time = time.time()
-    x = item['image']
-    label = item['label']
-    background = item['background']
 
     print(f"time to load a batch: {stop_time - start_time:2f}s ", end='')
     print(f"for a batchsize={dataloader.batch_size}")
 
-    print(x.shape, x.dtype)
-    print(label, label.shape, label.dtype)
-    print(background, background.shape, background.dtype)
+    x = item['image']
+    print('image:', x.shape, x.dtype)
+    label = item['label']
+    print('label:', label.shape, label.dtype)
+    if 'background' in item:
+        background = item['background']
+        print('background:', background.shape, background.dtype)
 
     # plot_batch(x=x)

@@ -3,7 +3,7 @@ config_metadata: 'Saving time : 03/16/2024, 18:43:22'
 # data options
 data:
     path: 'data/data_labo'
-    real_data_path: 'data/data_real/all_256'
+    real_data_path: data/data_real
     image_size: 256
     num_classes: 18
     background_classes: 4
