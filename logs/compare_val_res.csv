@@ -2,4 +2,3 @@ logs,val acc micro,val acc macro,val f1-score macro,val top k macro,image_size,h
 resnet_allw_img256_1,0.973,0.948,0.947,0.532,256,64,0.1,10,8,0.0001,False
 resnet_allw_img256_2,0.978,0.962,0.961,0.529,256,64,0.1,20,8,0.0001,False
 resnet_img256_0,0.925,0.888,0.882,0.494,256,64,0.1,10,8,0.001,True
-retrain_resnet_allw_img256_0,0.161,0.135,0.048,0.351,256,64,0.1,5,8,0.0005,True
