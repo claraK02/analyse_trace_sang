@@ -97,12 +97,12 @@ def load_weights(logging_path: str,
                             map_location=device)
         return weight
 
-    model_name_files = list(filter(lambda x: model_name in x,
-                                   os.listdir(logging_path)))
+    model_name_files = list(filter(lambda x: model_name in x, weight_files))
+
     if len(model_name_files) > 1:
         raise FileExistsError(f'Confused by multiple weights for the {model_name} model')
     if len(model_name_files) < 1:
-        raise FileNotFoundError(f'No weights was found in {logging_path}')
+        raise FileNotFoundError(f'No weights was found in {logging_path} with the name {model_name}')
     weight = torch.load(os.path.join(logging_path, model_name_files[0]),
                         map_location=device)
     return weight
