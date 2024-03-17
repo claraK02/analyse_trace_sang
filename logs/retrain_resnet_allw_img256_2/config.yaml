@@ -1,0 +1,59 @@
+config_metadata: 'Saving time : 03/17/2024, 19:45:42'
+
+# data options
+data:
+    path: 'data/data_real'
+    real_data_path: 'data/data_real'
+    image_size: 256
+    num_classes: 18
+    background_classes: 4
+    transforms:
+        run_rotation: false
+        run_hflip: true
+        run_vflip: true
+        color:
+            brightness: 2
+            contrast: 2
+            saturation: 0.0
+            hue: 0.0
+
+# model options
+model:
+    name: 'resnet'
+    resnet:
+        hidden_size: 64
+        p_dropout: 0.1
+        freeze_resnet: false
+        resume_training:
+            do_resume: true
+            path: 'logs/resnet_allw_img256_2'
+            freeze_param: false
+    adversarial:
+        hidden_size: 256
+        p_dropout: 0.1
+
+# learning options
+learning:
+    epochs: 10
+    batch_size: 42
+    learning_rate: 0.0001
+    loss: 'crossentropy'
+    optimizer: 'adam'
+    device: 'cuda'
+    num_workers: 4
+    shuffle: true
+    drop_last: true
+    save_experiment: true
+    save_checkpoint: true
+    plot_learning_curves: true
+    adv:
+        learning_rate_adversary: 0.0001
+        alpha: 10
+
+# test options
+test:
+    batch_size: 244
+    device: 'cuda'
+    num_workers: 1
+    shuffle: true
+    drop_last: true
