@@ -1,58 +1,53 @@
-config_metadata: 'Saving time : 03/16/2024, 19:38:22'
+data:                                 # data parameters
+  path: data/data_labo                # path to the data
+  real_data_path: data/data_real      # path to the real data
+  image_size: 256                     # size of the images
+  num_classes: 18                     # number of classes                  
+  background_classes: 4               # number of background classes      
+  transforms:                         # data augmentation           
+    run_rotation: false               # rotation       
+    run_hflip: true                   # horizontal flip           
+    run_vflip: true                   # vertical flip      
+    color:                            # color augmentation     
+      brightness: 2                   # brightness
+      contrast: 2                     # contrast                           
+      saturation: 0.0                 # saturation
+      hue: 0.0                        # hue
 
-# data options
-data:
-    path: 'data/data_labo'
-    real_data_path: data/data_real/
-    image_size: 256
-    num_classes: 18
-    background_classes: 4
-    transforms:
-        run_rotation: false
-        run_hflip: true
-        run_vflip: true
-        color:
-            brightness: 2
-            contrast: 2
-            saturation: 0.0
-            hue: 0.0
+model:                                # model parameters
+  name: adversarial                        # name of the model. can be resnet, adversarial
+  resnet:                             # resnet parameters
+    hidden_size: 64                   # hidden size of the resnet
+    p_dropout: 0.1                    # dropout probability
+    freeze_resnet: true              # freeze the convolution layer of the resnet
+    resume_training:                  # resume training from an experiment
+      do_resume: false                # do resume training
+      path: logs/resnet_7             # path to the experiment
+      freeze_param: false             # freeze the parameters for this experiment
+  adversarial:                        # adversarial parameters
+    hidden_size: 256                  # hidden size of the adversarial model
+    p_dropout: 0.1                    # dropout probability
 
-# model options
-model:
-    name: 'adversarial'
-    resnet:
-        hidden_size: 64
-        p_dropout: 0.1
-        freeze_resnet: false
-        resume_training:
-            do_resume: false
-            path: 'logs/resnet_7'
-            freeze_param: false
-    adversarial:
-        hidden_size: 256
-        p_dropout: 0.1
+learning:                             # learning parameters (training and validation)
+  epochs: 5                           # number of epochs
+  batch_size: 42                      # batch size
+  learning_rate: 0.0001               # learning rate
+  loss: crossentropy                  # loss function
+  optimizer: adam                     # optimizer
+  device: cuda                        # device
+  num_workers: 1                      # number of workers 
+  shuffle: true                       # shuffle the data
+  drop_last: true                     # drop the last batch
+  save_experiment: true               # save the experiment
+  save_checkpoint: true               # save the checkpoint
+  plot_learning_curves: true          # plot the learning curves
+  adv:                                # adversarial parameters
+    learning_rate_adversary: 0.0001   # learning rate of the adversary
+    alpha: 10                         # coeficient of the adversarial loss: resnet_loss / (alpha * adversary_loss)
 
-# learning options
-learning:
-    epochs: 5
-    batch_size: 32
-    learning_rate: 0.01
-    loss: 'crossentropy'
-    optimizer: 'adam'
-    device: 'cuda'
-    num_workers: 1
-    shuffle: true
-    drop_last: true
-    save_experiment: true
-    save_checkpoint: true
-    adv:
-        learning_rate_adversary: 0.01
-        alpha: 0.001
-
-# test options
-test:
-    batch_size: 244
-    device: 'cuda'
-    num_workers: 1
-    shuffle: true
-    drop_last: true
+test:                                 # test parameters
+  batch_size: 244                     # batch size
+  device: cuda                        # device
+  num_workers: 1                      # number of workers
+  shuffle: true                       # shuffle the data
+  drop_last: true                     # drop the last batch
