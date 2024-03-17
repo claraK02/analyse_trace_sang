@@ -43,7 +43,11 @@ def save_learning_curves(path: str) -> None:
 
 
 def get_result(path: str) -> tuple[list[float], list[str]]:
-    with open(os.path.join(path, 'train_log.csv'), 'r') as f:
+    train_log_name = 'train_log.csv'
+    if train_log_name not in os.listdir(path):
+        train_log_name = 'train_real_log.csv'
+    
+    with open(os.path.join(path, train_log_name), 'r') as f:
         names = f.readline()[:-1].split(',')
         result = []
         for line in f:
@@ -58,7 +62,7 @@ if __name__ == '__main__':
     import argparse
     
     parser = argparse.ArgumentParser()
-    parser.add_argument('path', type=str,
+    parser.add_argument('--path', '-p', type=str,
                         help="log to plot learning curves")
     args = parser.parse_args()
 
