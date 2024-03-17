@@ -93,6 +93,8 @@ def test(config: EasyDict,
     test_metrics = metrics.compute(y_pred=y_pred, y_true=y_true)
     print(metrics.get_info(metrics_value=test_metrics))
 
+    if 'real' in config.data.path:
+        run_real_data = True
     dst_file: str = 'test_log.txt' if not run_real_data else 'test_real_log.txt'
     
     test_logger(path=logging_path,
