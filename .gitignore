@@ -10,7 +10,7 @@ data/real_data
 data/data_real
 
 # random_search experiments
-logs/random_search_adv_0/adv*
+logs/random_search_adv*/adv*
 
 # test de yanis
 test_paths.txt
