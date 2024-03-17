@@ -40,6 +40,7 @@ learning:                             # learning parameters (training and valida
   drop_last: true                     # drop the last batch
   save_experiment: true               # save the experiment
   save_checkpoint: true               # save the checkpoint
+  plot_learning_curves: true          # plot the learning curves
   adv:                                # adversarial parameters
     learning_rate_adversary: 0.0001   # learning rate of the adversary
     alpha: 10                         # coeficient of the adversarial loss: resnet_loss / (alpha * adversary_loss)
