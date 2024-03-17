@@ -42,13 +42,13 @@ def compare_experiments(csv_output: str='compare',
         model_name = 'adv'
 
     logs = filter(lambda x: '.' not in x, os.listdir(logs_path))    # Get all the directories
-    logs = filter(lambda log: model_name in log, logs)              # Filter the directories based on the model name
     logs = map(lambda x: os.path.join(logs_path, x), logs)          # Get the full path of the directories
 
     if compare_on == 'test':
         logs = filter(lambda x: test_file_name in os.listdir(x), logs)
 
     elif compare_on == 'val':
+        logs = filter(lambda log: model_name in log, logs)              # Filter the directories based on the model name
         logs = filter(lambda x: train_log_name in os.listdir(x), logs)
         metrics_name = list(map(lambda x: f'val {x}', metrics_name))
     
