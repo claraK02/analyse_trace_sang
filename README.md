@@ -1,17 +1,15 @@
-# Data Directory Structure
-
-This directory contains the following subdirectories:
 
 
-- `data/`: This directory contains the data
-    - `1-Modèle Traces Passives/`: This directory contains the data for the first model
-    - `2-Modèle Transfert Glissé/`: This directory contains the data for the second model
-    - `3-Modèle d'impact/`: This directory contains the data for the third model
-       
 
-Please refer to the individual directories for more detailed information.
+# Installation
+To run the code you need python (We use python 3.10.11) and packages that is indicate in [requirements.txt](requirements.txt). You can run the following code to install all packages in the correct versions:
+```bash
+pip install -r requirements.txt
+```
 
-# Create data transform
+# Data
+
+## Create data transform
 ```bash
 python .\data_transform\get_data_transform.py
 ```
