@@ -1,7 +1,4 @@
 EXPERIMENTS
-- train models sur les données réeles de train
-- test les models (appris sur le labo) sur les données réeles
-- test les models (finetune sur réeles) sur les données réeles
 - relancer un random search sur les models adversarials
 
 INFERENCES & RENDU
