@@ -46,6 +46,8 @@ class Search:
         search = self.__loadyaml(search_yaml_file)
         self.logspath = logspath
         self.name = name
+        self.model_name: str = self.config.model.name
+        print(f'{self.model_name = }')
 
         # Get all items
         self.items: list[Item] = []
@@ -68,7 +70,7 @@ class Search:
         self.all_possibilities = self.__get_all_possibilities()
 
         # Create folder to logs the experiments
-        folder_name = number_folder(path=self.logspath, name=f'{self.name}_')
+        folder_name = number_folder(path=self.logspath, name=f'{self.name}_{self.model_name}_')
         self.folder_name = os.path.join(self.logspath, folder_name)
         os.mkdir(self.folder_name)
         print(f'create folder: {self.folder_name}')
@@ -112,10 +114,13 @@ class Search:
         for item in self.items:
             hyperparameters[item.keys[-1]] = item.keys
 
+        print(hyperparameters)
+
         compare_experiments(csv_output='compare',
                             logs_path=self.folder_name,
                             hyperparameters=hyperparameters,
-                            compare_on='val')
+                            compare_on='val',
+                            model_name=self.model_name)
     
     def __update_index(self) -> None:
         """
@@ -129,7 +134,8 @@ class Search:
             raise ValueError('fin du parcours')
     
     def __loadyaml(self, yaml_file: str) -> EasyDict:
-        """Load a YAML file.
+        """
+        Load a YAML file.
 
         Args:
             yaml_file (str): The path to the YAML file.
@@ -144,7 +150,8 @@ class Search:
         return EasyDict(yaml.safe_load(open(yaml_file, 'r')))
     
     def __get_all_item(self, search: EasyDict, keys: list[str] = []) -> None:
-        """Get all Item class to search in.
+        """
+        Get all Item class to search in.
 
         Args:
             search (EasyDict): The dictionary to search in.
@@ -160,6 +167,7 @@ class Search:
     def __get_all_possibilities(self) -> list[tuple[int]]:
         """
         Get all possible combinations of values for each possibility.
+
         Returns:
             A list of tuples representing all possible combinations of values for each possibility.
             If there are no possibilities, an empty list is returned.
@@ -171,33 +179,65 @@ class Search:
         Returns the length of the object.
         """
         return self.len
-    
 
 
 @dataclass
 class Item:
-    keys: list[str]                 # keys path: config[key[0]][key[1]]... to get the item
-    possibles_values: list[Any]     # possibles values for the item
-    
-    def get_value(self, index_value: int) -> Any:
-        """ get a index_value of possibles_value"""
+    """
+    Represents an item in the configuration.
 
+    An item is defined by a list of keys that specify the path to access the item in the configuration dictionary,
+    and a list of possible values for the item.
+
+    Attributes:
+        keys (list[str]): The keys path to access the item in the configuration dictionary.
+        possibles_values (list[Any]): The possible values for the item.
+    """
+
+    keys: list[str]
+    possibles_values: list[Any]
+
+    def get_value(self, index_value: int) -> Any:
+        """
+        Get the value at the specified index.
+
+        Args:
+            index_value (int): The index of the value to retrieve.
+
+        Raises:
+            ValueError: If the index_value is out of range.
+
+        Returns:
+            Any: The value at the specified index.
+        """
         if not (0 <= index_value < len(self)):
-            raise ValueError('index_value out of range. '
-                             f'{index_value = } but {len(self) = }')
+            raise ValueError(f'index_value out of range. {index_value = } but {len(self) = }')
         
         return self.possibles_values[index_value]
     
     def change_config(self, config: dict, index_value: int) -> None:
+        """
+        Change the value in the config dictionary at the specified index.
+
+        Args:
+            config (dict): The configuration dictionary.
+            index_value (int): The index of the value to set in the config dictionary.
+        """
         aux: dict = config
         for key in self.keys[:-1]:
             aux = aux[key]
         aux[self.keys[-1]] = self.get_value(index_value)
     
     def __len__(self) -> int:
+        """
+        Get the number of possible values.
+        """
         return len(self.possibles_values)
     
     def __repr__(self) -> str:
+        """
+        Return a string representation of the Item.
+        """
         return f'{str(self.keys):<50} : {self.possibles_values}'
 
 
@@ -211,7 +251,7 @@ if __name__ == '__main__':
         config = search.get_new_config()
         print(i, config.learning.learning_rate, config.learning.adv.learning_rate_adversary, config.learning.adv.alpha)
     
-  
+    # Test Item
     # item = Item(keys=['learning', 'learning_rate'],
     #             possibles_values=[0.1, 0.2, 0.3])
     # config_path = os.path.join('config', 'config.yaml')

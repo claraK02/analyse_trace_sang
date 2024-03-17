@@ -15,14 +15,11 @@ HYPERPARAMETERS: dict[str, list[str]] = {
         'freeze': ['model', 'resnet', 'freeze_resnet']
     }
 
-METRICS_NAME: list[str] = ['acc micro', 'acc macro', 'f1-score macro', 'top k macro']
-
-
 def compare_experiments(csv_output: str='compare',
                         logs_path: str='logs',
                         config_name: str= 'config.yaml',
                         hyperparameters: dict[str, list[str]] = HYPERPARAMETERS,
-                        metrics_name: list[str] = METRICS_NAME,
+                        model_name: str = 'resnet',
                         compare_on: Literal['val', 'test'] = 'test',
                         test_file_name: str='test_log.txt',
                         train_log_name: str='train_log.csv'
@@ -40,8 +37,13 @@ def compare_experiments(csv_output: str='compare',
         test_file_name (str, optional): The name of the test log file. Defaults to 'test_log.txt'.
         train_log_name (str, optional): The name of the train log file. Defaults to 'train_log.csv'.
     """
-    logs = filter(lambda x: '.' not in x, os.listdir(logs_path))
-    logs = map(lambda x: os.path.join(logs_path, x), logs)
+    metrics_name = get_metrics_name(model_name)
+    if model_name == 'adversarial':
+        model_name = 'adv'
+
+    logs = filter(lambda x: '.' not in x, os.listdir(logs_path))    # Get all the directories
+    logs = filter(lambda log: model_name in log, logs)              # Filter the directories based on the model name
+    logs = map(lambda x: os.path.join(logs_path, x), logs)          # Get the full path of the directories
 
     if compare_on == 'test':
         logs = filter(lambda x: test_file_name in os.listdir(x), logs)
@@ -69,7 +71,7 @@ def compare_experiments(csv_output: str='compare',
                           + f'{list_into_str(results_metrics, round_up=True)}' \
                           + f',{list_into_str(config)}\n'
     
-    csv_output: str = f'{csv_output}_{compare_on}.csv'
+    csv_output: str = f'{csv_output}_{compare_on}_{model_name[:3]}.csv'
     csv_path = os.path.join(logs_path, csv_output)
     with open(file=csv_path, mode='w', encoding='utf8') as f:
         f.write(all_test_results)
@@ -194,6 +196,31 @@ def list_into_str(l: list, sep: str=',', round_up: bool=False) -> str:
         else:
             output += f'{x}{sep}'
     return output[:-len(sep)]
+
+
+def get_metrics_name(model_name: Literal['resnet', 'adversarial']) -> list[str]:
+    """
+    Get the list of metrics names based on the given model name.
+
+    Args:
+        model_name (Literal['resnet', 'adversarial']): The name of the model.
+
+    Raises:
+        ValueError: If the model name is not 'resnet' or 'adversarial'.
+
+    Returns:
+        list[str]: The list of metrics names.
+    """
+
+    if model_name == 'resnet':
+        metrics_name: list[str] = ['acc micro', 'acc macro', 'f1-score macro', 'top k macro']
+    elif model_name == 'adversarial':
+        metrics_name: list[str] = ['crossentropy', 'res loss', 'adv loss', 'resnet_top k micro', 'resnet_acc micro', 'resnet_acc macro', 'adv_acc micro']
+    else:
+        raise ValueError(f'Expected model name in {["resnet", "adversarial"]} '
+                         f'but found {model_name}')
+    
+    return metrics_name
 
 
 if __name__ == '__main__':
