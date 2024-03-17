@@ -6,11 +6,11 @@ precission macro: 0.22348156571388245
 recall macro: 0.23432089388370514
 f1-score macro: 0.2119271457195282
 acc class n°1: 0.6000000238418579
-acc class n°2: 0.0
+acc class n°2: nan
 acc class n°3: 0.699999988079071
 acc class n°4: 0.2857142984867096
-acc class n°5: 0.0
-acc class n°6: 0.0
+acc class n°5: nan
+acc class n°6: nan
 acc class n°7: 0.0
 acc class n°8: 0.0
 acc class n°9: 0.0

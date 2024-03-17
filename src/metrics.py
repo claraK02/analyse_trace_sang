@@ -29,7 +29,7 @@ class Accuracy_per_class:
             # Compute the accuracy for each class
             correct = (y_pred[y_true == label] == label).sum()
             total = (y_true == label).sum()
-            per_label_accuracies.append((correct / total).item() if total > 0 else 0)
+            per_label_accuracies.append((correct / total).item() if total > 0 else np.nan)
 
         return per_label_accuracies
     
