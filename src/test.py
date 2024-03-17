@@ -39,6 +39,7 @@ def test(config: EasyDict,
 
     # Get model
     model = finetune_resnet.get_finetuneresnet(config)
+    utils.resume_training(config=config, model=model)
     weight = utils.load_weights(logging_path, device=device, model_name='res')
     model.load_dict_learnable_parameters(state_dict=weight, strict=True)
     model = model.to(device)
