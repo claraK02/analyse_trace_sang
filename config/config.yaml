@@ -19,10 +19,10 @@ model:                                # model parameters
   resnet:                             # resnet parameters
     hidden_size: 64                   # hidden size of the resnet
     p_dropout: 0.1                    # dropout probability
-    freeze_resnet: false              # freeze the convolution layer of the resnet
+    freeze_resnet: true               # freeze the convolution layer of the resnet
     resume_training:                  # resume training from an experiment
       do_resume: false                # do resume training
-      path: logs/resnet_7             # path to the experiment
+      path: logs/resnet_img256_0      # path to the experiment
       freeze_param: false             # freeze the parameters for this experiment
   adversarial:                        # adversarial parameters
     hidden_size: 256                  # hidden size of the adversarial model
@@ -30,12 +30,12 @@ model:                                # model parameters
 
 learning:                             # learning parameters (training and validation)
   epochs: 20                          # number of epochs
-  batch_size: 8                       # batch size
-  learning_rate: 0.0001               # learning rate
+  batch_size: 42                      # batch size
+  learning_rate: 0.0005               # learning rate
   loss: crossentropy                  # loss function
   optimizer: adam                     # optimizer
   device: cuda                        # device
-  num_workers: 4                      # number of workers 
+  num_workers: 1                      # number of workers 
   shuffle: true                       # shuffle the data
   drop_last: true                     # drop the last batch
   save_experiment: true               # save the experiment
