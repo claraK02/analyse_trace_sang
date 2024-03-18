@@ -64,9 +64,9 @@ def plot_distrib(labels_distribution: list[int],
     plt.xlabel('Classe')
     plt.ylabel('Proportion')
 
-    plt.xticks(classes_index, LABELS, rotation=45, ha='right')
+    # plt.xticks(classes_index, LABELS, rotation=45, ha='right')
 
-    plt.savefig(os.path.join('data', title))
+    plt.savefig(os.path.join('asset', title))
 
 
 def plot_3distribution(distribution1: np.ndarray[float],
@@ -91,9 +91,9 @@ def plot_3distribution(distribution1: np.ndarray[float],
 
     _, ax = plt.subplots(figsize=(12, 6))
 
-    ax.bar(classes_index - bar_width, distribution1, bar_width, label='Distribution 1')
-    ax.bar(classes_index, distribution2, bar_width, label='Distribution 2')
-    ax.bar(classes_index + bar_width, distribution3, bar_width, label='Distribution 3')
+    ax.bar(classes_index - bar_width, distribution1, bar_width, label='train distribution')
+    ax.bar(classes_index, distribution2, bar_width, label='val distribution')
+    ax.bar(classes_index + bar_width, distribution3, bar_width, label='test distribution')
 
     ax.set_title('Comparaison de trois distributions')
     ax.set_xlabel('Classe')
@@ -103,8 +103,8 @@ def plot_3distribution(distribution1: np.ndarray[float],
     ax.legend()
 
     plt.tight_layout()
-    plt.xticks(classes_index, LABELS, rotation=45, ha='right')
-    plt.savefig(os.path.join('data', title))
+    # plt.xticks(classes_index, LABELS, rotation=45, ha='right')
+    plt.savefig(os.path.join('asset', title))
 
 
 if __name__ == '__main__':
