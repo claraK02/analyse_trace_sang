@@ -8,6 +8,7 @@ data/data_ancien
 data/*.zip
 data/real_data
 data/data_real
+data/images_to_predict
 
 # random_search experiments
 logs/random_search_adv*/adv*
