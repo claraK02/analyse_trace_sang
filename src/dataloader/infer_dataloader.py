@@ -18,12 +18,10 @@ class InferDataGenerator(Dataset):
         """
         self.data: list[str] = []
 
-        if not datapath.endswith(("jpeg", "png", "jpg")):
+        if not is_image(datapath):
             for dirpath, _, filenames in os.walk(datapath):
                 if filenames != []:
-                    good_files = filter(
-                        lambda x: x.endswith(("jpeg", "png", "jpg")), filenames
-                    )
+                    good_files = filter(is_image, filenames)
                     self.data += list(
                         map(lambda file: os.path.join(dirpath, file), good_files)
                     )
@@ -49,15 +47,29 @@ class InferDataGenerator(Dataset):
         Returns the image and its corresponding path at the given index.
 
         Args:
-        index: int, the index of the image to load.
+            index: int, the index of the image to load.
 
         Returns:
-        tuple[Tensor, str], a tuple containing the image tensor and its corresponding path.
+            (x, image_path): tuple[Tensor, str], a tuple containing the image tensor 
+                and its corresponding path.
         """
         image_path = self.data[index]
         image = Image.open(image_path)
         x = self.transform(image)
         return x, image_path
+
+
+def is_image(file: str) -> bool:
+    """
+    Check if a file is an image.
+
+    Args:
+        file (str): The file to check.
+
+    Returns:
+        bool: True if the file is an image, False otherwise.
+    """
+    return file.endswith(("jpeg", "png", "jpg", "JPEG", "PNG", "JPG"))
 
 
 def create_infer_dataloader(config: EasyDict, datapath: str) -> DataLoader:
@@ -74,7 +86,7 @@ def create_infer_dataloader(config: EasyDict, datapath: str) -> DataLoader:
     generator = InferDataGenerator(datapath, image_size=config.data.image_size)
     dataloader = DataLoader(
         dataset=generator,
-        batch_size=config.test.batch_size,
+        batch_size=min(config.test.batch_size, len(generator)),
         shuffle=False,
         drop_last=False,
         num_workers=config.test.num_workers,
