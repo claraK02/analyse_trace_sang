@@ -65,10 +65,11 @@ def infer(infer_dataloader: DataLoader,
         for x, image_path in infer_dataloader:
             x: Tensor = x.to(device)
             y_pred = model.forward(x)
-            y_pred = torch.nn.functional.softmax(y_pred, dim=-1)
 
             if run_temperature_optimization:
-                y_pred = torch.nn.functional.log_softmax(y_pred / temperature, dim=-1)
+                y_pred = torch.nn.functional.softmax(y_pred / temperature, dim=-1)
+            else:
+                y_pred = torch.nn.functional.softmax(y_pred, dim=-1)
 
             output += get_topk_prediction(y_pred, k=3)
             images_paths += list(image_path)
