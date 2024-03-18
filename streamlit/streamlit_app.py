@@ -25,14 +25,20 @@ import torch.nn.functional as F
 # set page config
 st.set_page_config(page_title="Image-Comparison Example", layout="centered")
 
-st.title("Image Classification App")
+st.title("Blood Stain Classification App")
 
-st.sidebar.title("Image Transformations")
+st.sidebar.title("Parameters")
+
+# Add a checkbox to the sidebar to allow the user to choose whether to save the results or not
+save_results = st.sidebar.checkbox('Save Results', value=False)
+
+# Add a text input field to the sidebar to allow the user to specify a global path where the results should be saved
+global_path = st.sidebar.text_input('Global Path')
 
 
-plot_mask = st.sidebar.checkbox('Plot Mask', value=False)
+#plot_mask = st.sidebar.checkbox('Plot Mask', value=False)
 # Ajoutez cette ligne après les autres contrôles de la barre latérale
-hue_range = st.sidebar.slider('Hue Range', min_value=0, max_value=180, value=(0, 180))
+#hue_range = st.sidebar.slider('Hue Range', min_value=0, max_value=180, value=(0, 180))
 
 #make a list of all the paths of the folders in data/data_labo the path should have the shape data/data_labo/train_512, data/data_labo/val_512, data/data_labo/test_512
 list_paths = [os.path.join('data/data_labo', folder) for folder in os.listdir('data/data_labo')]
@@ -63,11 +69,11 @@ config_file = st.selectbox("Select Config", config_options)
 image_files = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'], accept_multiple_files=True)
 print("IMAGE FILE: ", image_files)
 # Add sliders for image transformations
-rotation = st.sidebar.slider('Rotation', min_value=0, max_value=180, value=0)
-hflip = st.sidebar.checkbox('Horizontal Flip', value=False)
-vflip = st.sidebar.checkbox('Vertical Flip', value=False)
-contrast = st.sidebar.slider('Contrast', min_value=-3.0, max_value=3.0, value=1.0)
-brightness = st.sidebar.slider('Brightness', min_value=-3.0, max_value=3.0, value=1.0)
+# rotation = st.sidebar.slider('Rotation', min_value=0, max_value=180, value=0)
+# hflip = st.sidebar.checkbox('Horizontal Flip', value=False)
+# vflip = st.sidebar.checkbox('Vertical Flip', value=False)
+# contrast = st.sidebar.slider('Contrast', min_value=-3.0, max_value=3.0, value=1.0)
+# brightness = st.sidebar.slider('Brightness', min_value=-3.0, max_value=3.0, value=1.0)
 
 #choice to print interpretability criteria or not:
 interpretability = st.checkbox('Print Interpretability Criteria', value=False)
@@ -90,46 +96,14 @@ barchart_placeholder = st.session_state["barchart_placeholder"]
 # Utilisation de st.session_state pour récupérer les images
 if st.session_state["image_files"] is not None:
     for i, image_file in enumerate(image_files):
-            
         image = Image.open(image_file)
-        # Convertissez l'image PIL en tableau numpy pour l'utiliser avec OpenCV
-        image_np = np.array(image)
-       
-
-        #apply the transformations
-        #Apply transformations to the image
-        image = image.rotate(rotation)
-        if hflip:
-            image = image.transpose(Image.FLIP_LEFT_RIGHT)
-        if vflip:
-            image = image.transpose(Image.FLIP_TOP_BOTTOM)
-
-        enhancer_contrast = ImageEnhance.Contrast(image)
-        image = enhancer_contrast.enhance(contrast)
-        enhancer_brightness = ImageEnhance.Brightness(image)
-        image = enhancer_brightness.enhance(brightness)
-
-        # Appliquez le masque si le bouton "plot mask" est coché
-        if plot_mask:
-            #mask = mask_red_pixel_hsv(image_np, hue_min, hue_max)
-            mask = mask_red_pixel_hsv(image_np, hue_range[0], hue_range[1])
-        
-            # Créez une image de superposition verte avec le masque
-            overlay = np.zeros_like(image_np)
-            overlay[mask > 0] = (0, 255, 0)  # Vert en RGB
-            
-            # Superposez le masque à l'image originale
-            alpha = 0.5  # Définissez l'alpha pour la transparence
-            image_np = cv2.addWeighted(overlay, alpha, image_np, 1 - alpha, 0)
-            
-            # Convertissez l'image numpy en image PIL pour l'afficher avec Streamlit
-            image = Image.fromarray(image_np)
-
-
         st.image(image, caption=f'Uploaded Image {i+1}.',width=500)
 
 # Add a slider in Streamlit to control the temperature parameter
-temperature = st.slider('Temperature', min_value=0.01, max_value=3.0, value=1.5)
+temperature = 1.5
+
+
+#st.slider('Temperature', min_value=0.01, max_value=3.0, value=1.5)
         
 if st.button("Inference"):
     if st.session_state["image_files"] is not None:
@@ -149,10 +123,6 @@ if st.button("Inference"):
         # Prepare image
         transform =  transforms.Compose([transforms.ToTensor(),transforms.Resize((256, 256))])
         print("image resized and transformed")
-
-        #we also resize the numpy image in the same way
-        image_resized_np = np.array(cv2.resize(image_np, (256, 256)))
-        
         
 
         # Create an empty DataFrame to store image names and predicted labels
@@ -163,12 +133,14 @@ if st.button("Inference"):
             #we print in the app that we are inferring on the image
             st.write(f"Inferring on image {i+1}...")
             st.write("##############################################")
+            st.write("Plotting the probability distribution of the classes...")
             #affiche une icone de chargement
             model = model.to(device) #ATTENTION: il faut remettre le modèle sur le device !! a chaque fois qu'on le charge
             with st.spinner('Inferring...'):
                 #open the image
                 image = Image.open(image)
                 image_np = np.array(image)
+                image_resized_np = cv2.resize(image_np, (256, 256))
                 
                 #apply the transform to the image
                 image = transform(image_np).unsqueeze(0).to(device)
@@ -201,7 +173,8 @@ if st.button("Inference"):
 
                 # Plot the probability distribution
                 # Mettez à jour le graphique barchart en utilisant le placeholder
-                barchart_placeholder.bar_chart(y_pred_df)
+                #put title outside the placeholder
+                st.bar_chart(y_pred_df)
 
                 # Display result
                 res=class_names[y_pred.argmax(dim=-1).item()]
@@ -212,6 +185,21 @@ if st.button("Inference"):
 
                 # Générer et afficher la carte de saillance si la case est cochée
                 # Generate and display the saliency map if the checkbox is checked
+
+                # Check if the "Save Results" checkbox is checked
+                if save_results:
+                    # Get the path from the text input field. If the field is empty, use the current directory as the path
+                    path = global_path if global_path else os.getcwd()
+
+                    # Create a directory at the specified path (if it doesn't exist)
+                    os.makedirs(path, exist_ok=True)
+
+                    # Save the results DataFrame as a CSV file in the created directory
+                    results_df.to_csv(os.path.join(path, 'results.csv'), index=False)
+
+                    # Create a subdirectory in the created directory (if it doesn't exist)
+                    saliency_maps_path = os.path.join(path, 'saliency_maps')
+                    os.makedirs(saliency_maps_path, exist_ok=True)
 
                 if plot_saliency:
                     # Put the image and model on cpu before using them
@@ -232,6 +220,10 @@ if st.button("Inference"):
                     # Display the saliency map and the original image with the bounding box side by side
                     col1.image(saliency_map, caption='Saliency Map', use_column_width=True)
                     col2.image(image_resized_np, caption='Original Image', use_column_width=True)
+
+                    # Save the saliency map with the name "saliency_map_{image_name}.png" in the created directory (image_name without the extension)
+                    if save_results:
+                        cv2.imwrite(os.path.join(saliency_maps_path, f'saliency_map_{image_files[i].name.split(".")[0]}.png'), saliency_map)
 
                    
                     # render image-comparison
