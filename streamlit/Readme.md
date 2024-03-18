@@ -37,7 +37,7 @@ Une fois que vous avez lancé la prédiction, l'application affichera les inform
 
 ## Où les données sont-elles enregistrées?
 
-Si vous avez choisi d'enregistrer les résultats, ils seront enregistrés dans le chemin que vous avez spécifié dans le champ "Chemin global". Si aucun chemin n'est spécifié, les résultats seront enregistrés dans le répertoire courant. Les résultats sont enregistrés sous forme de fichier CSV nommé 'results.csv'. De plus, si vous avez choisi de générer des cartes de saillance, elles seront enregistrées dans un sous-répertoire nommé `saliency_maps`.
+Si vous avez choisi d'enregistrer les résultats, ils seront enregistrés dans le chemin que vous avez spécifié dans le champ "Chemin global". Si aucun chemin n'est spécifié, les résultats seront enregistrés dans le répertoire courant. Les résultats sont enregistrés sous forme de fichier CSV nommé 'results.csv'. Ce fichier contient un tableau avec dans chaque ligne le nom du fichier image traité et la classe prédite. De plus, si vous avez choisi de générer des cartes de saillance, elles seront enregistrées dans un sous-répertoire nommé `saliency_maps`.
 
 ## Problèmes potentiels
 
