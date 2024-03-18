@@ -20,6 +20,10 @@ streamlit run app.py
 ```
 3. **Ouvrir le navigateur**: si tout s'est bien passé, vous devriez voir un message indiquant que l'application est en cours d'exécution et un lien vers lequel vous pouvez cliquer pour ouvrir l'application dans votre navigateur voir le navigateur qui s'ouvre automatiquement.
 
+## Lancement rapide
+
+Il est possible de lancer l'application en lançant le script `run_app.bat` en double cliquant sur ce fichier depuis votre explorateur de fichier (valide uniquement pour Windows). Ce script installe les dépendances nécessaires et lance l'application.
+
 ## Comment utiliser l'application
 
 
