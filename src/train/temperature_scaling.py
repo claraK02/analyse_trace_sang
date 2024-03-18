@@ -7,15 +7,8 @@ from os.path import dirname as up
 import os
 import sys
 sys.path.append(up(up(up(os.path.abspath(__file__)))))
-
-from config.utils import train_step_logger, train_logger
 from src.dataloader.dataloader import create_dataloader
-
-from config.utils import train_step_logger, train_logger
-from src.dataloader.dataloader import create_dataloader
-from src.metrics import Metrics
 from src.model import finetune_resnet
-from utils import utils, plot_learning_curves
 from utils import utils
 from config.utils import load_config
 import os
@@ -44,6 +37,9 @@ def optimize_temperature(val_generator, model, device,config):
             logits = model.forward(x)
             y_pred = torch.nn.functional.log_softmax(logits / temperature, dim=-1)
 
+            print("y_pred",y_pred,y_pred.shape)
+            print("y_true",y_true,y_true.shape)
+
             loss = nll_criterion(y_pred, y_true)
             total_nll += loss.item() * x.size(0)
             total_num += x.size(0)
@@ -70,7 +66,7 @@ def optimize_temperature(val_generator, model, device,config):
 if __name__ == "__main__":
     # Load the model
     import yaml
-    config_file = r"logs\retrain_resnet_img256_2\config.yaml"
+    config_file = r"logs\adv_img256_0\config.yaml"
 
     config = EasyDict(yaml.safe_load(open('config/config.yaml'))) 
     val_generator = create_dataloader(config=config, mode='val')
