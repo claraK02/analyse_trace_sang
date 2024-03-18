@@ -8,8 +8,19 @@
 - PIL
 - Pandas
 
-## Comment utiliser l'application
+## Comment lancer l'application
 
+1. **Se placer dans le répertoire 'streamlit'**:
+```bash
+cd streamlit
+```
+2. **Run la commande suivante**:
+```bash
+streamlit run app.py
+```
+3. **Ouvrir le navigateur**: si tout s'est bien passé, vous devriez voir un message indiquant que l'application est en cours d'exécution et un lien vers lequel vous pouvez cliquer pour ouvrir l'application dans votre navigateur voir le navigateur qui s'ouvre automatiquement.
+
+## Comment utiliser l'application
 
 
 1. **Barre latérale des paramètres**: La barre latérale contient plusieurs options que vous pouvez ajuster selon vos besoins.
