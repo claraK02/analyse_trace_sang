@@ -82,7 +82,6 @@ if __name__ == "__main__":
     model.load_dict_learnable_parameters(state_dict=weight, strict=True)
     model = model.to(device)
 
-    #print("model: ", model)
 
     #launch the optimization
     temperature = optimize_temperature(val_generator, model, device,config)
