@@ -11,24 +11,28 @@ from src.dataloader.labels import LABELS, BACKGROUND
 
 
 def get_distribution(mode: str,
-                     datapath: str=os.path.join('data', 'data_labo')
+                     datapath: str=os.path.join('data', 'data_labo'),
+                     use_background: bool=True
                      ) -> np.ndarray[float]:
-    datapath = os.path.join(datapath, f'{mode}_128')
+    datapath = os.path.join(datapath, f'{mode}_256')
     labels_distribution = []
     for label in LABELS:
         num_data = 0
-        for bg in BACKGROUND:
-            num_data += len(os.listdir(os.path.join(datapath, label, bg)))
-        labels_distribution.append(num_data)
 
-    N = sum(labels_distribution)
-    for i in range(len(labels_distribution)):
-        labels_distribution[i] /= N
+        if use_background:
+            for bg in BACKGROUND:
+                num_data += len(os.listdir(os.path.join(datapath, label, bg)))
+        else:
+            num_data = len(os.listdir(os.path.join(datapath, label)))
+
+        labels_distribution.append(num_data)
     
     return np.array(labels_distribution)
 
 
-def plot_distrib(labels_distribution: list[int]):
+def plot_distrib(labels_distribution: list[int],
+                 title: str='distribution.png'
+                 ) -> None:
     total_classes = len(labels_distribution)
     classes_index = range(1, total_classes + 1)
 
@@ -41,10 +45,14 @@ def plot_distrib(labels_distribution: list[int]):
 
     plt.xticks(classes_index, LABELS, rotation=45, ha='right')
 
-    plt.savefig('distribution.png')
+    plt.savefig(os.path.join('data', title))
 
 
-def plot_3distribution(distribution1, distribution2, distribution3) -> None:
+def plot_3distribution(distribution1: np.ndarray[float],
+                       distribution2: np.ndarray[float],
+                       distribution3: np.ndarray[float],
+                       title='distribution_train_val_test.png'
+                       ) -> None:
     classes_index = np.arange(1, 19)
     bar_width = 0.25
 
@@ -62,7 +70,8 @@ def plot_3distribution(distribution1, distribution2, distribution3) -> None:
     ax.legend()
 
     plt.tight_layout()
-    plt.savefig('distribution_train_val_test.png')
+    plt.xticks(classes_index, LABELS, rotation=45, ha='right')
+    plt.savefig(os.path.join('data', title))
 
 
 if __name__ == '__main__':
@@ -71,8 +80,18 @@ if __name__ == '__main__':
     test = get_distribution(mode='test')
 
     plot_distrib((train + val + test) / 3)
-    # plot_3distribution(train, val, test)
+    plot_3distribution(train, val, test)
 
-    # print('label, train, val, test')
-    # for i in range(len(info.LABELS)):
-    #     print(f'{i + 1:2}: {train[i]:.2f} {val[i]:.2f} {test[i]:.2f}')
+    train_real = get_distribution(mode='train',
+                                  datapath=os.path.join('data', 'data_real'),
+                                  use_background=False)
+    val_real = get_distribution(mode='val',
+                                datapath=os.path.join('data', 'data_real'),
+                                use_background=False)
+    test_real = get_distribution(mode='test',
+                                 datapath=os.path.join('data', 'data_real'),
+                                 use_background=False)
+    plot_distrib((train_real + val_real + test_real) / 3,
+                 title='distribution_real.png')
+    plot_3distribution(train_real, val_real, test_real,
+                       title='distribution_train_val_test_real.png')
