@@ -48,13 +48,9 @@ image_files = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'], acce
 # Initialize session state
 if "image_files" not in st.session_state:
     st.session_state["image_files"] = None
-if "barchart_placeholder" not in st.session_state:
-    st.session_state["barchart_placeholder"] = st.empty()
 
-if image_files is not None:
+if "image_files" is not None:
     st.session_state["image_files"] = image_files
-
-barchart_placeholder = st.session_state["barchart_placeholder"]
 
 # Display uploaded images
 if st.session_state["image_files"] is not None:
@@ -121,3 +117,6 @@ if st.button("Inference"):
                         cv2.imwrite(os.path.join(saliency_maps_path, f'saliency_map_{image_files[i].name.split(".")[0]}.png'), saliency_map)
 
         st.dataframe(results_df)
+
+if __name__ == '__main__':
+    pass
