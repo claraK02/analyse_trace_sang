@@ -1,0 +1,28 @@
+
+
+\section{Pistes infructueuses}
+
+Au cours de ce projet nous avons exploré plusieurs pistes qui se sont avérées infructueuses. Nous les présentons ici pour que le lecteur puisse comprendre les raisons pour lesquelles nous avons choisi de ne pas les poursuivre.
+
+\subsection{Interprétabilité des modèles par feature ingenering}
+
+Un des objectifs de ce projet était de parvenir à interpréter les choix des modèles de machine learning que nous avons entrainé.
+Pour cela, nous avons tenté de nous inspirer du travail réalisé précedement par l'équipe d'experts criminalistiques. En effet,
+leur approche s'inspire de la classification des espèces animales et végétales par les biologistes. Ils ont cherché à identifier des caractéristiques
+déterminantes pour chaques traces de sang et ainsi à classifier les traces de sang grâce à un arbre de décision
+portant sur ces caractéristiques (par exemple: la forme, la taille, présence de tâches milimétriques près des tâches centimétriques, etc..).
+Nous avons donc tenté de reproduire cette approche en utilisant des techniques de feature ingenering pour extraire des caractéristiques
+fondamentales des traces de sang souis formes de critères mathématico-géométriques. Pour cela nous avons d'abord tenté de réaliser
+un algorithme de segmentation non-supervisé par détection de contours pour extraire les formes des tâches de sang, avec des résultats peu concluants. Nous avons ensuite
+tenté de réaliser un algorithme melant des techniques de traitement d'images (seuils, ect..), d'apprentissage auto-supervisé (Unet) et de géométrie pour extraire des caractéristiques géométriques telle la taille
+des tâche satellitaires par rapport à la tâche centrale, la forme des tâches (critère d'ovoidité, de circularité, etc..). Ces tentatives ont néanmoins
+été infructueuses, car les masques de segmentation était trop imprécis du fait de la grande variabilité des images de tâches de sang. Nous avons également tenté des méthodes de segmentation
+adversariale en tirant partie du fait que nous connaissions pour toute les images la nature du support (bois,lino,carrelage,etc..) pour tenter de segmenter les tâches de sang par une approche faiblement supervisée. Ces tentatives ont également été infructueuses, car nous 
+avions peu de donnée d'entrainement ce qui rendait tout apprentissage trop instable de manière faiblement supervisée.
+
+Nous avons également tenté d'extraire ces caractéristiques (masques de segmentation, critères géométriques) à l'aide de modèle de deep learning
+utilisant des techniques dites de "zero-shot classification" (modèles de type CLIP-ViT, etc..) ou zero-shot segmentation (SegmentAnything). Ces tentatives ont également été infructueuses, car le manque de contraste
+sur certaines images de tâches de sang ou leur trop grand éclatement rendait les masques de segmentation trop imprécis.
+
+
+
