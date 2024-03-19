@@ -27,7 +27,6 @@ st.sidebar.title("Parameters")
 # Sidebar options
 save_results = st.sidebar.checkbox('Save Results', value=False)
 global_path = st.sidebar.text_input('Global Path')
-list_paths = [os.path.join('data/data_labo', folder) for folder in os.listdir('data/data_labo')]
 class_names = LABELS
 plot_saliency = st.sidebar.checkbox('Plot Saliency Map', value=True)
 
