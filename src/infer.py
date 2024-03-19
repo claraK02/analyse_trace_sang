@@ -1,17 +1,19 @@
 import os
 import sys
+from tqdm import tqdm
+from typing import Callable
 from easydict import EasyDict
 from os.path import dirname as up
 
 import torch
 from torch import Tensor
-from torch.utils.data import DataLoader
 
 sys.path.append(up(up(os.path.abspath(__file__))))
 
 from src.dataloader.labels import get_topk_prediction
 from src.dataloader.infer_dataloader import create_infer_dataloader
 from src.model import finetune_resnet
+from src.gradcam import GradCam
 from utils import utils
 
 
@@ -19,6 +21,7 @@ def infer(infer_images_path: list[str],
           infer_datapath: str,
           logging_path: str,
           config: EasyDict,
+          plot_saliency: bool,
           dstpath: str,
           filename: str,
           run_temperature_optimization: bool = True,
@@ -53,28 +56,42 @@ def infer(infer_images_path: list[str],
     model = model.to(device)
     del weight
 
+    get_image_name: Callable[[str], str] = lambda img_name: img_name.split(os.sep)[-1]
     temperature: float = 1.5
     output: list[list[tuple[int, str, float]]] = []
-    images_paths: list[str] = []
+    image_names: list[str] = []
+
+    # GradCAM
+    if plot_saliency:
+        gradcam = GradCam(model=model)
+        saliency_path = os.path.join(dstpath, 'saliency_maps')
+        saliency_fun_name = lambda img_name: get_image_name(img_name).split('.')[0] + '_saliency.png'
 
     model.eval()
-    with torch.no_grad():
-        for x, image_path in infer_dataloader:
-            x: Tensor = x.to(device)
-            y_pred = model.forward(x)
+    # with torch.no_grad():
+    for x, image_path in tqdm(infer_dataloader, desc='Infering'):
+        image_name = list(map(get_image_name, image_path))
+        x: Tensor = x.to(device)
+        y_pred = model.forward(x)
 
-            if run_temperature_optimization:
-                y_pred = torch.nn.functional.softmax(y_pred / temperature, dim=-1)
-            else:
-                y_pred = torch.nn.functional.softmax(y_pred, dim=-1)
+        if plot_saliency:
+            visualizations = gradcam.forward(x)
+            gradcam.save_saliency_maps(visualizations=visualizations,
+                                       dstpath=saliency_path,
+                                       filenames=list(map(saliency_fun_name, image_name)))
 
-            output += get_topk_prediction(y_pred, k=3)
-            images_paths += list(image_path)
+        if run_temperature_optimization:
+            y_pred = torch.nn.functional.softmax(y_pred / temperature, dim=-1)
+        else:
+            y_pred = torch.nn.functional.softmax(y_pred, dim=-1)
+
+        output += get_topk_prediction(y_pred, k=3)
+        image_names += image_name
         
     save_infer(dstpath=dstpath,
                filename=filename,
                output=output,
-               images_paths=images_paths,
+               images_paths=image_names,
                sep=sep)
     
 
@@ -125,8 +142,9 @@ if __name__ == '__main__':
     infer(infer_images_path=None,
           infer_datapath=datapath,
           logging_path=logging_path,
+          plot_saliency=True,
           config=config,
           run_temperature_optimization=False,
-          dstpath='.',
+          dstpath='',
           filename='inference_results.csv')
         

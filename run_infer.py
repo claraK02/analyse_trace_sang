@@ -16,6 +16,7 @@ def main(options: dict) -> None:
     infer(infer_images_path=None,
           infer_datapath=options['datapath'],
           logging_path=options['modelpath'],
+          plot_saliency=options['plot_saliency'],
           config=config,
           dstpath=options['dstpath'],
           filename='inference_results.csv',
