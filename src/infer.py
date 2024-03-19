@@ -15,7 +15,7 @@ from src.model import finetune_resnet
 from utils import utils
 
 
-def infer(infer_dataloader: DataLoader,
+def infer(infer_images_path: list[str],
           infer_datapath: str,
           logging_path: str,
           config: EasyDict,
@@ -42,12 +42,9 @@ def infer(infer_dataloader: DataLoader,
     """
     device = utils.get_device(device_config=config.learning.device)
 
-    if infer_dataloader is None:
-        if infer_datapath is not None:
-            infer_dataloader = create_infer_dataloader(config=config,
-                                                       datapath=infer_datapath)
-        else:
-            raise ValueError('infer_generator and infer_datapath cannot be both None')
+    infer_dataloader = create_infer_dataloader(config=config,
+                                               data=infer_images_path,
+                                               datapath=infer_datapath)
 
     # Get model
     model = finetune_resnet.get_finetuneresnet(config)
@@ -103,7 +100,6 @@ def save_infer(dstpath: str,
     header = f'Image{sep}'
     for j in range(k):
         header += f'Prediction {j + 1}{sep}Confidence {j + 1} (en %){sep}'
-    print(header)
 
     with open(file, 'w', encoding='utf8') as f:
         f.write(header[:-len(sep)] + '\n')
@@ -126,9 +122,11 @@ if __name__ == '__main__':
     datapath = os.path.join('data', 'images_to_predict')
     config = EasyDict(yaml.safe_load(open(os.path.join(logging_path, 'config.yaml'))))
     
-    infer(infer_dataloader=None,
+    infer(infer_images_path=None,
           infer_datapath=datapath,
           logging_path=logging_path,
           config=config,
-          run_temperature_optimization=False)
+          run_temperature_optimization=False,
+          dstpath='.',
+          filename='inference_results.csv')
         

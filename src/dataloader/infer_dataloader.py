@@ -8,25 +8,28 @@ from torch.utils.data import Dataset, DataLoader
 
 
 class InferDataGenerator(Dataset):
-    def __init__(self, datapath: str, image_size: int) -> None:
+    def __init__(self,
+                 data: list[str],
+                 datapath: str,
+                 image_size: int) -> None:
         """
-        Initializes the InferDataGenerator class.
+        Initialize the InferDataLoader class.
 
         Args:
-        datapath: str, the path to the directory containing the images or the path to a single image file.
-        image_size: int, the desired size of the images (both width and height).
-        """
-        self.data: list[str] = []
+            data (list[str]): A list of image paths (can be None if datapath is specified).
+            datapath (str): The path to a directory containing images (can be None if data is specified).
+            image_size (int): The desired size of the images.
 
-        if not is_image(datapath):
-            for dirpath, _, filenames in os.walk(datapath):
-                if filenames != []:
-                    good_files = filter(is_image, filenames)
-                    self.data += list(
-                        map(lambda file: os.path.join(dirpath, file), good_files)
-                    )
+        Raises:
+            ValueError: If both `data` and `datapath` are None.
+        """
+
+        if data is not None:
+            self.data = data
+        elif datapath is not None:
+            self.data = get_image_from_path(datapath)
         else:
-            self.data = [datapath]
+            raise ValueError("data and datapath cannot be both None")
 
         self.image_size = (image_size, image_size)
         self.transform = transforms.Compose(
@@ -72,18 +75,48 @@ def is_image(file: str) -> bool:
     return file.endswith(("jpeg", "png", "jpg", "JPEG", "PNG", "JPG"))
 
 
-def create_infer_dataloader(config: EasyDict, datapath: str) -> DataLoader:
+def get_image_from_path(datapath: str) -> list[str]:
+    """
+    Get a list of image file paths from a given datapath.
+
+    Args:
+        datapath (str): The path to the directory containing the images or the path to a single image file.
+
+    Returns:
+        list[str]: A list of image file paths.
+    """
+    data: list[str] = []
+    if not is_image(datapath):
+        for dirpath, _, filenames in os.walk(datapath):
+            if filenames != []:
+                good_files = filter(is_image, filenames)
+                data += list(
+                    map(lambda file: os.path.join(dirpath, file), good_files)
+                )
+    else:
+        data = [datapath]
+    
+    return data
+
+
+def create_infer_dataloader(config: EasyDict,
+                            data: list[str],
+                            datapath: str
+                            ) -> DataLoader:
     """
     Create an inference dataloader.
 
     Args:
-        config (EasyDict): Configuration object.
-        datapath (str): Path to the data.
+        config (EasyDict): The configuration object.
+        data (list[str]): The list of data (can be None if datapath is specified).
+        datapath (str): The path to the data (can be None if data is specified).
 
     Returns:
-        DataLoader: Inference dataloader.
+        DataLoader: The inference dataloader.
     """
-    generator = InferDataGenerator(datapath, image_size=config.data.image_size)
+    generator = InferDataGenerator(data=data,
+                                   datapath=datapath,
+                                   image_size=config.data.image_size)
     dataloader = DataLoader(
         dataset=generator,
         batch_size=min(config.test.batch_size, len(generator)),
@@ -97,7 +130,7 @@ def create_infer_dataloader(config: EasyDict, datapath: str) -> DataLoader:
 
 if __name__ == "__main__":
     datapath = r"data\data_labo\test_512"
-    infer_generator = InferDataGenerator(datapath=datapath, image_size=512)
+    infer_generator = InferDataGenerator(data=None, datapath=datapath, image_size=512)
     print(f"{len(infer_generator)=}")
     x, y = infer_generator.__getitem__(index=0)
     print(f"{x.shape=}")
