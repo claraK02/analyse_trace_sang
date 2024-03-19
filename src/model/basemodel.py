@@ -132,7 +132,7 @@ class Model(nn.Module):
             error_message = f"the following parameter wasn't loaded: {missing_keys}"
             print_error_message(error_message, strict, verbose)
         
-        print('dict was successfully loaded')
+        print('model weigths were successfully loaded')
     
 
 
