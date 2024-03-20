@@ -126,7 +126,7 @@ def save_infer(dstpath: str,
         for i in range(len(output)):
             line = f'{images_paths[i]}{sep}'
             for j in range(k):
-                line += f'{output[i][j][1]}{sep}{output[i][j][2] * 100:.1f}{sep}'
+                line += f'{output[i][j][1]}{sep}{output[i][j][2] * 100:.0f}{sep}'
             f.write(line[:-len(sep)] + '\n')
         f.close()
 
