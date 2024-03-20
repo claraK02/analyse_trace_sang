@@ -44,6 +44,8 @@ def infer(infer_images_path: list[str],
         ValueError: If both infer_dataloader and infer_datapath are None.
     """
     device = utils.get_device(device_config=config.learning.device)
+    if device.type == 'cpu':
+        config.test.batch_size = 32
 
     infer_dataloader = create_infer_dataloader(config=config,
                                                data=infer_images_path,
