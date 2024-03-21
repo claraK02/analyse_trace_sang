@@ -1,5 +1,4 @@
 INFERENCES & RENDU
-- faire une fonction inference qui prend un chemin des données, une config et qui renvoie les prédictions + les cartes de sciences et qui les stocks dans autre dossier (prédictions enregistré dans un exel ou word)
 - Faire un README complet (cf issue github: https://github.com/Highdrien/analyse_trace_sang/issues/4)
-- Faire un mini README d'utilisation juste pour philipe
-- faire une app streamlit qui fait ce que fait l'inference
+- Grad CAM -> preciser les classes
+- autre inference avec * carte de siance avg drop, avg gain, ...
