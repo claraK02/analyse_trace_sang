@@ -30,6 +30,8 @@ class InferDataGenerator(Dataset):
             self.data = get_image_from_path(datapath)
         else:
             raise ValueError("data and datapath cannot be both None")
+        
+        print('number of images:', len(self.data))
 
         self.image_size = (image_size, image_size)
         self.transform = transforms.Compose(

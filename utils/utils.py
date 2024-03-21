@@ -187,3 +187,19 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
             param.requires_grad = True
 
     return None
+
+
+def get_relatif_image_path(image_path: str,
+                           dst_path: str
+                           ) -> str:
+    """
+    Get the relative image path by replacing the destination path with an empty string.
+
+    Args:
+        image_path (str): The absolute path of the image.
+        dst_path (str): The destination path to be replaced.
+
+    Returns:
+        str: The relative image path.
+    """
+    return image_path.replace(dst_path, '')

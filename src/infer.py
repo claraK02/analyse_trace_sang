@@ -58,7 +58,8 @@ def infer(infer_images_path: list[str],
     model = model.to(device)
     del weight
 
-    get_image_name: Callable[[str], str] = lambda img_name: img_name.split(os.sep)[-1]
+    get_image_name: Callable[[str], str] = \
+        lambda img_name: utils.get_relatif_image_path(img_name, infer_datapath)
     temperature: float = 1.5
     output: list[list[tuple[int, str, float]]] = []
     image_names: list[str] = []
@@ -67,7 +68,8 @@ def infer(infer_images_path: list[str],
     if plot_saliency:
         gradcam = GradCam(model=model)
         saliency_path = os.path.join(dstpath, 'saliency_maps')
-        saliency_fun_name = lambda img_name: get_image_name(img_name).split('.')[0] + '_saliency.png'
+        saliency_fun_name: Callable[[str], str] = \
+            lambda img_name: get_image_name(img_name).split('.')[0].replace(os.sep, '_') + '_saliency.png'
 
     model.eval()
     # with torch.no_grad():
@@ -131,7 +133,6 @@ def save_infer(dstpath: str,
         f.close()
 
     print(f'Inference results saved at {file}')
-
 
 
 if __name__ == '__main__':
