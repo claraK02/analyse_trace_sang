@@ -4,19 +4,22 @@ import cv2
 import sys
 import numpy as np
 import pandas as pd
-import streamlit as st
 from PIL import Image
-from scipy.special import softmax
-import torch
-from torchvision import transforms
+import streamlit as st
 from os.path import dirname as up
 
-#custom imports
+import torch
+from torch import Tensor
+from torchvision import transforms
+from torch.nn.functional import softmax
+
 sys.path.append(up(up(os.path.abspath(__file__))))
-from src.dataloader.labels import LABELS
+
 from utils import utils
+from src.dataloader.labels import LABELS
 from config.utils import load_config
 from src.model import finetune_resnet
+from src.gradcam import GradCam
 
 # Set page config
 st.set_page_config(page_title="Blood Stain Classification App", layout="centered")
@@ -27,22 +30,12 @@ st.sidebar.title("Parameters")
 # Sidebar options
 save_results = st.sidebar.checkbox('Save Results', value=False)
 global_path = st.sidebar.text_input('Global Path')
-class_names = LABELS
 plot_saliency = st.sidebar.checkbox('Plot Saliency Map', value=True)
 
-# Function to find .yaml files in a directory
-def find_yaml_files(directory):
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith('.yaml'):
-                yield os.path.join(root, file)
-
-# Config selection
-config_options = list(find_yaml_files('logs'))
-config_file = st.selectbox("Select Config", config_options)
-
 # Image upload
-image_files = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'], accept_multiple_files=True)
+image_files = st.file_uploader("Upload Image",
+                               type=['png', 'jpg', 'jpeg', 'PNG', 'JPG', 'JPEG'],
+                               accept_multiple_files=True)
 
 # Initialize session state
 if "image_files" not in st.session_state:
@@ -59,6 +52,7 @@ if st.session_state["image_files"] is not None:
 
 # Temperature parameter
 temperature = 1.5
+config_file = os.path.join('logs', 'retrain_resnet_allw_img256_2', 'config.yaml')
 
 # Inference
 if st.button("Inference"):
@@ -70,31 +64,32 @@ if st.button("Inference"):
         weight = utils.load_weights(config_in_log_dir, device=device)
         model.load_dict_learnable_parameters(state_dict=weight, strict=True)
         model = model.to(device)
-        transform =  transforms.Compose([transforms.ToTensor(),transforms.Resize((256, 256))])
+        model.eval()
+        transform =  transforms.Compose([transforms.ToTensor(), transforms.Resize((256, 256))])
         results_df = pd.DataFrame(columns=['Image Name', 'Predicted Label'])
+
+        if plot_saliency:
+            gradcam = GradCam(model=model)
 
         for i,image in enumerate(image_files):
             st.write(f"Inferring on image {i+1}...")
             st.write("##############################################")
             st.write("Plotting the probability distribution of the classes...")
             model = model.to(device)
+
             with st.spinner('Inferring...'):
                 image = Image.open(image)
-                image_np = np.array(image)
-                image_resized_np = cv2.resize(image_np, (256, 256))
-                image = transform(image_np).unsqueeze(0).to(device)
-                model.eval()
+                image: Tensor = transform(image).unsqueeze(0).to(device)
                 with torch.no_grad():
                     y_pred = model.forward(image)
-                numpy_y_pred_prob = y_pred.cpu().numpy()[0]
-                numpy_y_pred_prob = softmax(numpy_y_pred_prob/temperature)
-                numpy_y_pred_prob = numpy_y_pred_prob.reshape(1, -1)
-                y_pred_df = pd.DataFrame(numpy_y_pred_prob, columns=class_names)
+                y_pred = softmax(y_pred / temperature, dim=-1)
+                numpy_y_pred_prob = y_pred.cpu().numpy()[0].reshape(1, -1)
+                y_pred_df = pd.DataFrame(numpy_y_pred_prob, columns=LABELS)
                 y_pred_df = y_pred_df.T
                 st.bar_chart(y_pred_df)
-                res=class_names[y_pred.argmax(dim=-1).item()]
+                res = LABELS[y_pred.argmax(dim=-1).item()]
                 st.success(f"**This image is classified as:** {res}")
-                results_df = results_df.append({'Image Name': image_files[i].name, 'Predicted Label': res}, ignore_index=True)
+                results_df.loc[len(results_df)] = {'Image Name': image_files[i].name, 'Predicted Label': res}
 
                 if save_results:
                     path = global_path if global_path else os.getcwd()
@@ -104,14 +99,13 @@ if st.button("Inference"):
                     os.makedirs(saliency_maps_path, exist_ok=True)
 
                 if plot_saliency:
-                    image = image.cpu()
-                    model = model.cpu()
-                    from src.grad_cam import get_saliency_map, threshold_and_find_contour
-                    saliency_map, _ = get_saliency_map(model, image, return_label=True)
-                    segmented_image = threshold_and_find_contour(saliency_map, threshold_value=125)
+                    visualizations = gradcam.forward(image)
+                    saliency_map: np.ndarray = visualizations[0]
+                    saliency_map = saliency_map / 255
+                    np_image: np.ndarray = image.cpu().numpy().squeeze().transpose(1, 2, 0)
                     col1, col2 = st.columns(2)
                     col1.image(saliency_map, caption='Saliency Map', use_column_width=True)
-                    col2.image(image_resized_np, caption='Original Image', use_column_width=True)
+                    col2.image(np_image, caption='Original Image', use_column_width=True)
                     if save_results:
                         cv2.imwrite(os.path.join(saliency_maps_path, f'saliency_map_{image_files[i].name.split(".")[0]}.png'), saliency_map)
 
