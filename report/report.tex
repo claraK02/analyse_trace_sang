@@ -293,7 +293,7 @@ La Table~\ref{tab:random search results} montre les résultats de ce Random Sear
 \end{table}
 
 \subsection{Entraînement du modèle Adversarial}
-Nous avons donc entraîné le modèle Adversarial sur les données de laboratoire sur 20 epochs avec les hyperparamètres trouvés dans la section~\ref{sec: random search} La Figure~\ref{fig: train LP ResNet} montre les courbes d'apprentissages de ce modèle.
+Nous avons donc entraîné le modèle Adversarial sur les données de laboratoire sur 20 epochs avec les hyperparamètres trouvés dans la section~\ref{sec: random search} La Figure~\ref{fig: train adv} montre les courbes d'apprentissages de ce modèle.
 
 \begin{figure}[ht]
     \centering
@@ -313,7 +313,7 @@ Nous avons donc entraîné le modèle Adversarial sur les données de laboratoir
         \caption{adv acc micro}
     \end{subfigure}
     \caption{Valeurs de la loss et des accuracy d'entraînement (en bleue) et de validation (en orange) en fonction des epochs durant l'entraînement du modèle LP ResNet.}
-    \label{fig: train LP ResNet}
+    \label{fig: train adv}
 \end{figure}
 
 \subsection{Fine-tune des modèles LB ResNet et AWL ResNet}
@@ -351,7 +351,7 @@ Les résultats de test sur les données de laboratoire~\ref{tab:results_lab} ind
   \centering
     \begin{tabular}{cccccc}
     \toprule
-    ../logs & Acc Micro & Acc Macro & F1-score & Top 3 \\
+    Modèles & Acc Micro & Acc Macro & F1-score & Top 3 \\
     \midrule
     LP ResNet & 95.2 & 94.3 & 94.7 & \textbf{99.8} \\
     AWL ResNet & \textbf{97.3} & \textbf{97.1} & \textbf{96.2} & \textbf{99.8} \\
@@ -368,7 +368,7 @@ Les résultats de test sur les données de laboratoire~\ref{tab: results_real} i
   \centering
     \begin{tabular}{ccccccc}
     \toprule
-    ../logs & Acc Micro & Acc Macro & F1-score & Top 3 \\
+    Modèles & Acc Micro & Acc Macro & F1-score & Top 3 \\
     \midrule
     LP ResNet & 12.9 & 6.0 & 4.0 & 19.0 \\
     FT LP ResNet & 11.8 & 6.1 & 6.4 & 26.0 \\
