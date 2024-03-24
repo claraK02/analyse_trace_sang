@@ -87,7 +87,8 @@ class GradCam:
         """
         mask = utils.normalize_image(self.forward(image=image))
         mask = torch.tensor(mask, dtype=torch.float32).permute(0, 3, 1, 2)
-        masked_images = (image * mask).to(model.device)
+        mask = mask.to(model.device)
+        masked_images = (image * mask)
         with torch.no_grad():
             logits = model.forward(masked_images)
         y_pred = torch.nn.functional.softmax(logits, dim=1)
