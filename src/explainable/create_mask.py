@@ -208,6 +208,96 @@ def advanced_mask_red_pixel(image: np.ndarray) -> np.ndarray:
     # Return the mask
     return mask
 
+import cv2
+import numpy as np
+from skimage.measure import label
+import matplotlib.pyplot as plt
+
+def advanced_mask_red_pixel_v2(image: np.ndarray) -> np.ndarray:
+
+    # Convert the image to HSV
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # Improve the contrast
+    contrast_image = cv2.convertScaleAbs(hsv_image, alpha=1.5, beta=0)
+
+    # Convert the image to grayscale
+    gray_image = cv2.cvtColor(contrast_image, cv2.COLOR_BGR2GRAY)
+
+    # Apply Otsu's thresholding
+    _, otsu_binary = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # Apply Triangle thresholding
+    _, triangle_binary = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_TRIANGLE)
+
+    # Combine Otsu's and Triangle thresholding
+    binary_image = cv2.bitwise_or(otsu_binary, triangle_binary)
+
+    # Find contours using Suzuki's algorithm
+    contours, _ = cv2.findContours(binary_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Create an empty image to draw the contours
+    mask = np.zeros_like(image)
+
+    # Draw contours on the mask
+    cv2.drawContours(mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
+
+    # Draw the contours in green in another color on the original image
+    cv2.drawContours(image, contours, -1, (0, 255, 0), thickness=1)
+
+    # Label the image
+    label_image = label(mask)
+
+    # Plot the image and the mask
+    plt.figure()
+    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    plt.imshow(mask, alpha=0.5)  # Overlay the mask with transparency
+    plt.show()
+
+    # Return the mask
+    return mask
+
+def advanced_mask_red_pixel_v3(image: np.ndarray) -> np.ndarray:
+
+    # Convert the image to HSV
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # Split the HSV image
+    h, s, v = cv2.split(hsv_image)
+
+    # Improve the contrast
+    contrast_image = cv2.convertScaleAbs(v, alpha=1.5, beta=0)
+
+    # Apply Otsu's thresholding
+    _, otsu_binary = cv2.threshold(contrast_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # Find contours using Suzuki's algorithm
+    contours, _ = cv2.findContours(otsu_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Find the contour with the largest area
+    largest_contour = max(contours, key=cv2.contourArea)
+
+    # Create an empty image to draw the contours
+    mask = np.zeros_like(image)
+
+    # Draw contours on the mask
+    for contour in contours:
+        if np.array_equal(contour, largest_contour):  # Skip the largest contour
+            continue
+        cv2.drawContours(mask, [contour], -1, (255, 255, 255), thickness=cv2.FILLED)
+
+    # Fit ellipses to the contours
+    # for contour in contours:
+    #     if len(contour) >= 5 and not np.array_equal(contour, largest_contour):  # Skip the largest contour
+    #         ellipse = cv2.fitEllipse(contour)
+    #         if ellipse[1][0] >= 0 and ellipse[1][1] >= 0:  # Only draw the ellipse if width and height are valid
+    #             cv2.ellipse(mask, ellipse, (255, 255, 255), thickness=cv2.FILLED)
+
+    # Draw the contours in green in another color on the original image
+    cv2.drawContours(image, contours, -1, (0, 255, 0), thickness=1)
+
+    # Return the mask
+    return mask
 
 def plot_img_and_mask(img: ndarray, mask: ndarray) -> None:
     mul = 255 if mask.max() < 1.01 else 1
@@ -250,10 +340,10 @@ def majority_vote_segmentation(image: np.ndarray, segmentation_functions: list) 
     return majority_vote_mask
 
 if __name__ == '__main__':
-    test_path = os.path.join('data', 'data_labo', 'test_256')
-    for k in range(10):
+    test_path = os.path.join('data', 'data_labo', 'train_256')
+    for k in range(20):
         image, _ = get_random_img(test_path)
-        mask=advanced_mask_red_pixel(image)
+        mask=advanced_mask_red_pixel_v3(image)
         plot_img_and_mask(image, mask)
 
     # print("shape of image used",np.shape(image) )

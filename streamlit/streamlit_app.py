@@ -94,7 +94,7 @@ if st.button("Inference"):
                 st.bar_chart(y_pred_df)
                 res=class_names[y_pred.argmax(dim=-1).item()]
                 st.success(f"**This image is classified as:** {res}")
-                results_df = results_df.append({'Image Name': image_files[i].name, 'Predicted Label': res}, ignore_index=True)
+                results_df.loc[len(results_df)] = {'Image Name': image_files[i].name, 'Predicted Label': res}
 
                 if save_results:
                     path = global_path if global_path else os.getcwd()
