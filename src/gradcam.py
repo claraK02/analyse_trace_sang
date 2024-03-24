@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from os.path import dirname as up
 
+import torch
 from torch import Tensor
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
@@ -69,6 +70,28 @@ class GradCam:
         
         for i, visualization in enumerate(visualizations):
             cv2.imwrite(os.path.join(dstpath, filenames[i]), visualization)
+    
+    def get_probability_with_mask(self,
+                                  model: FineTuneResNet,
+                                  image: Tensor,
+                                  ) -> Tensor:
+        """
+        Calculates the probability of each class in the given image using a the saliency mask.
+
+        Args:
+            model (FineTuneResNet): The model used for prediction.
+            image (Tensor): The input image.
+        
+        Returns:
+            Tensor: The predicted probabilities for each class.
+        """
+        mask = utils.normalize_image(self.forward(image=image))
+        mask = torch.tensor(mask, dtype=torch.float32).permute(0, 3, 1, 2)
+        masked_images = (image * mask).to(model.device)
+        with torch.no_grad():
+            logits = model.forward(masked_images)
+        y_pred = torch.nn.functional.softmax(logits, dim=1)
+        return y_pred
 
 
 if __name__ == '__main__':
@@ -97,3 +120,6 @@ if __name__ == '__main__':
     gradcam.save_saliency_maps(visualizations,
                                'gradcam_images',
                                [f'gradcam_{i}.png' for i in range(batch_size)])
+    
+    y_pred = gradcam.get_probability_with_mask(model=model, image=x)
+    print("y_pred shape:", y_pred.shape)
