@@ -11,14 +11,16 @@ sys.path.append(up(os.path.abspath(__file__)))
 
 from config.utils import test_logger
 from src.dataloader.dataloader import create_dataloader
-from metrics import Metrics
 from src.model import finetune_resnet
+from src.gradcam import GradCam
+from src.metrics.metrics import Metrics
 from utils import utils
 
 
 def test(config: EasyDict,
          logging_path: str,
-         run_real_data: bool = False
+         run_real_data: bool = False,
+         run_silancy_metrics: bool = False
          ) -> None:
     """
     Run the test on the model using the given configuration.
@@ -51,34 +53,42 @@ def test(config: EasyDict,
     # Get metrics
     metrics = Metrics(num_classes=config.data.num_classes,
                       run_argmax_on_y_true=False,
-                      run_acc_per_class=True)
+                      run_acc_per_class=True,
+                      run_silancy_metrics=run_silancy_metrics)
     metrics.to(device)
+
+    # Get GradCam
+    if run_silancy_metrics:
+        gradcam = GradCam(model=model)
 
     test_loss = 0
     test_range = tqdm(test_generator)
 
     all_y_true: list[Tensor] = []
     all_y_pred: list[Tensor] = []
+    all_o_pred: list[Tensor] = [] if run_silancy_metrics else None
 
     model.eval()
+    for i, item in enumerate(test_range):
+        x: Tensor = item['image'].to(device)
+        y_true: Tensor = item['label'].to(device)
 
-    with torch.no_grad():
-        for i, item in enumerate(test_range):
-            x: Tensor = item['image'].to(device)
-            y_true: Tensor = item['label'].to(device)
-
+        with torch.no_grad():
             y_pred = model.forward(x)
-
             loss: Tensor = criterion(y_pred, y_true)
 
-            test_loss += loss.item()
+        test_loss += loss.item()
 
-            all_y_true.append(y_true.to(torch.device('cpu')))
-            all_y_pred.append(y_pred.to(torch.device('cpu')))
+        all_y_true.append(y_true.to(torch.device('cpu')))
+        all_y_pred.append(y_pred.to(torch.device('cpu')))
 
-            current_loss = test_loss / (i + 1)
-            test_range.set_description(f"TEST -> loss: {current_loss:.4f}")
-            test_range.refresh()
+        if run_silancy_metrics:
+            o_pred = gradcam.get_probability_with_mask(model=model, image=x)
+            all_o_pred.append(o_pred.to(torch.device('cpu')))
+
+        current_loss = test_loss / (i + 1)
+        test_range.set_description(f"TEST -> loss: {current_loss:.4f}")
+        test_range.refresh()
 
 
     ###################################################################
@@ -91,7 +101,11 @@ def test(config: EasyDict,
     test_loss = test_loss / n_test
     y_true: Tensor = torch.concat(all_y_true, dim=0).to(device)
     y_pred: Tensor = torch.concat(all_y_pred, dim=0).to(device)
-    test_metrics = metrics.compute(y_pred=y_pred, y_true=y_true)
+    if run_silancy_metrics:
+        o_pred: Tensor = torch.concat(all_o_pred, dim=0).to(device)
+    test_metrics = metrics.compute(y_pred=y_pred,
+                                   y_true=y_true,
+                                   o_pred=o_pred)
     print(metrics.get_info(metrics_value=test_metrics))
 
     if 'real' in config.data.path:

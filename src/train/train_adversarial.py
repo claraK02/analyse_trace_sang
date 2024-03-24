@@ -15,7 +15,7 @@ sys.path.append(up(up(up(os.path.abspath(__file__)))))
 
 from config.utils import train_step_logger, train_logger
 from src.dataloader.dataloader import create_dataloader
-from src.metrics import Metrics
+from src.metrics.metrics import Metrics
 from src.model import finetune_resnet, adversarial
 from utils import utils, plot_learning_curves
 

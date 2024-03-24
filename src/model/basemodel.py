@@ -1,4 +1,5 @@
 from typing import Iterator
+from typing_extensions import Self
 
 import torch
 from torch import nn
@@ -16,6 +17,7 @@ class Model(nn.Module):
             **kwargs: Arbitrary keyword arguments.
         """
         super().__init__(*args, **kwargs)
+        self.device = torch.device("cpu")
     
     def get_parameters(self) -> Iterator[Parameter]:
         """
@@ -134,6 +136,15 @@ class Model(nn.Module):
         
         print('model weigths were successfully loaded')
     
+    def to(self, device: torch.device) -> Self:
+        """
+        Move the model to the given device.
+
+        Args:
+            device (torch.device): The device to move the model to.
+        """
+        self.device = device
+        return super().to(device)
 
 
 def print_error_message(error_message: str, strict: bool, verbose: bool) -> None:

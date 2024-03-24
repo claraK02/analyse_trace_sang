@@ -44,6 +44,8 @@ def infer(infer_images_path: list[str],
         ValueError: If both infer_dataloader and infer_datapath are None.
     """
     device = utils.get_device(device_config=config.learning.device)
+    if device.type == 'cpu':
+        config.test.batch_size = 32
 
     infer_dataloader = create_infer_dataloader(config=config,
                                                data=infer_images_path,
@@ -56,7 +58,8 @@ def infer(infer_images_path: list[str],
     model = model.to(device)
     del weight
 
-    get_image_name: Callable[[str], str] = lambda img_name: img_name.split(os.sep)[-1]
+    get_image_name: Callable[[str], str] = \
+        lambda img_name: utils.get_relatif_image_path(img_name, infer_datapath)
     temperature: float = 1.5
     output: list[list[tuple[int, str, float]]] = []
     image_names: list[str] = []
@@ -65,7 +68,8 @@ def infer(infer_images_path: list[str],
     if plot_saliency:
         gradcam = GradCam(model=model)
         saliency_path = os.path.join(dstpath, 'saliency_maps')
-        saliency_fun_name = lambda img_name: get_image_name(img_name).split('.')[0] + '_saliency.png'
+        saliency_fun_name: Callable[[str], str] = \
+            lambda img_name: get_image_name(img_name).split('.')[0].replace(os.sep, '_') + '_saliency.png'
 
     model.eval()
     # with torch.no_grad():
@@ -124,12 +128,11 @@ def save_infer(dstpath: str,
         for i in range(len(output)):
             line = f'{images_paths[i]}{sep}'
             for j in range(k):
-                line += f'{output[i][j][1]}{sep}{output[i][j][2] * 100:.1f}{sep}'
+                line += f'{output[i][j][1]}{sep}{output[i][j][2] * 100:.0f}{sep}'
             f.write(line[:-len(sep)] + '\n')
         f.close()
 
     print(f'Inference results saved at {file}')
-
 
 
 if __name__ == '__main__':

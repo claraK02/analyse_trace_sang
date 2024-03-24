@@ -78,7 +78,8 @@ def main(options: dict) -> None:
         
         test.test(config=config,
                   logging_path=options['path'],
-                  run_real_data=options['run_on_real_data'])
+                  run_real_data=options['run_on_real_data'],
+                  run_silancy_metrics=options['run_saliency_metics'])
     
     # INEFRENCE
     if options['mode'] == 'infer':
@@ -134,6 +135,8 @@ def get_options() -> dict:
                         help="experiment path (for test and infer)")
     parser.add_argument('--run_on_real_data', '-r', type=str, default='false',
                         help='run on the real data or not')
+    parser.add_argument('--run_saliency_metics', '-s', type=str, default='false',
+                        help='run the saliency metrics or not')
     
     # For inference
     parser.add_argument('--inferpath', '-i', type=str,
@@ -142,6 +145,7 @@ def get_options() -> dict:
     options = vars(args)
 
     options['run_on_real_data'] = (options['run_on_real_data'].lower() == 'true')
+    options['run_saliency_metics'] = (options['run_saliency_metics'].lower() == 'true')
 
     return options
 

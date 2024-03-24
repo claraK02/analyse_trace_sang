@@ -14,7 +14,7 @@ from torchvision import transforms
 
 sys.path.append(up(os.path.abspath(__file__)))
 
-from src.metrics import Metrics
+from src.metrics.metrics import Metrics
 
 
 def get_device(device_config: str) -> torch.device:
@@ -155,8 +155,21 @@ def convert_tensor_to_rgb(image: Tensor, normelize: bool = False) -> np.ndarray[
     rgb_img: np.ndarray = image.permute(1, 2, 0).numpy()
     rgb_img = rgb_img.astype(np.float32)
     if normelize:
-        rgb_img = (rgb_img - rgb_img.min()) / (rgb_img.max() - rgb_img.min())
+        rgb_img = normalize_image(rgb_img)
     return rgb_img
+
+
+def normalize_image(image: np.ndarray) -> np.ndarray:
+    """
+    Normalize the input image by scaling it to the range [0, 1].
+
+    Args:
+        image (np.ndarray): The input image to be normalized.
+
+    Returns:
+        np.ndarray: The normalized image.
+    """
+    return (image - image.min()) / (image.max() - image.min())
 
 
 def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
@@ -187,3 +200,19 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
             param.requires_grad = True
 
     return None
+
+
+def get_relatif_image_path(image_path: str,
+                           dst_path: str
+                           ) -> str:
+    """
+    Get the relative image path by replacing the destination path with an empty string.
+
+    Args:
+        image_path (str): The absolute path of the image.
+        dst_path (str): The destination path to be replaced.
+
+    Returns:
+        str: The relative image path.
+    """
+    return image_path.replace(dst_path, '')

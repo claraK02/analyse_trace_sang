@@ -30,6 +30,8 @@ class InferDataGenerator(Dataset):
             self.data = get_image_from_path(datapath)
         else:
             raise ValueError("data and datapath cannot be both None")
+        
+        print('number of images:', len(self.data))
 
         self.image_size = (image_size, image_size)
         self.transform = transforms.Compose(
@@ -64,7 +66,7 @@ class InferDataGenerator(Dataset):
 
 def is_image(file: str) -> bool:
     """
-    Check if a file is an image.
+    Check if a file is an image and not an silency image.
 
     Args:
         file (str): The file to check.
@@ -72,7 +74,9 @@ def is_image(file: str) -> bool:
     Returns:
         bool: True if the file is an image, False otherwise.
     """
-    return file.endswith(("jpeg", "png", "jpg", "JPEG", "PNG", "JPG"))
+    is_an_image = file.endswith(("jpeg", "png", "jpg", "JPEG", "PNG", "JPG"))
+    is_silency_image = 'saliency' in file
+    return is_an_image and not is_silency_image
 
 
 def get_image_from_path(datapath: str) -> list[str]:
