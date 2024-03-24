@@ -11,14 +11,16 @@ sys.path.append(up(os.path.abspath(__file__)))
 
 from config.utils import test_logger
 from src.dataloader.dataloader import create_dataloader
-from metrics import Metrics
 from src.model import finetune_resnet
+from src.gradcam import GradCam
+from src.metrics.metrics import Metrics
 from utils import utils
 
 
 def test(config: EasyDict,
          logging_path: str,
-         run_real_data: bool = False
+         run_real_data: bool = False,
+         run_saliency_metics: bool = False
          ) -> None:
     """
     Run the test on the model using the given configuration.
