@@ -31,6 +31,29 @@ Cette approche permet de mieux comprendre les décisions prises par le CNN et d'
 Par exemple, nous avons remarqué que parfois certaines des réglettes permettant de donner l'échelle de la photo étaient détectées comme des traces de sang ou induisaient un biais dans la classification.
 En utilisant Grad-CAM, nous avons pu identifier que le modèle se focalisait sur ces réglettes pour prendre sa décision, ce qui nous a permis de mieux comprendre
 les erreurs de classification et d'améliorer la qualité des prédictions.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.40\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../asset/exemple/attention_reglette.jpg}
+    \end{subfigure}
+    \begin{subfigure}{0.40\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{../asset/exemple/attention_reglette_image.jpg}
+    \end{subfigure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{../asset/exemple/14.jpg}
+        \caption{Exemple d'une image  de trace de sang (à droite) avec sa carte de chaleur Grad CAM superposée (à gauche), dans le cadre d'une attention portée à la réglette.}
+        \label{fig:grad_cam_example}
+    \end{figure}
+    \label{fig:grad_cam_example}
+\end{figure}
+
+
+
+
 % [figure montrant une tache avec une réglette.]
 Un autre avantage de Grad-CAM est qu'il permet de vérifier si le modèle se focalise sur la bonne tâche de sang
 dans le cas où plusieurs tâches sont présentes sur une même image.
