@@ -53,5 +53,5 @@ if __name__ == '__main__':
 
     metrics = Accuracy_per_class(num_classes=num_classes)
     
-    print(metrics(y_pred, y_true))
+    print(metrics.compute(y_pred, y_true))
     print(metrics.get_metrics_name())

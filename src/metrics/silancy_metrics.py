@@ -76,8 +76,8 @@ class Silancy_Metrics:
         Returns:
             float: The average drop.
         """
-        clamp = (o - p).clamp(min=0)
-        return clamp.mean().item()
+        is_o_higher = ((o - p) > 0).float()
+        return is_o_higher.mean().item()
     
     def __get_average_gain(self, p: Tensor, o: Tensor) -> float:
         """
@@ -106,5 +106,5 @@ if __name__ == '__main__':
 
     metrics = Silancy_Metrics()
     
-    print(metrics(y_pred=y_pred, o_pred=o_pred))
+    print(metrics.compute(y_pred=y_pred, o_pred=o_pred))
     print(metrics.get_metrics_name())
