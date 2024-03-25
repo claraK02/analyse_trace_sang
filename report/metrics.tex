@@ -1,0 +1,35 @@
+\subsection{Accuracy micro}
+L'accuracy est le pourcentage de réussite d'un modèle. Elle est calculée par la formule suivante :
+\begin{equation}
+    \text{Accuracy micro} = \frac{\text{Nombre de prédictions correctes}}{\text{Nombre total de prédictions}}
+\end{equation}
+
+\subsection{Accuracy macro}
+L'accuracy macro est la moyenne des accuracy de chaque classe. Elle est calculée par la formule suivante :
+\begin{equation}
+    \text{Accuracy macro} = \frac{1}{N} \sum_{i=1}^{n} \frac{\text{Nombre de prédiction correctes de la classe } i}{\text{Nombre total de prédictions de la classe } i}{}
+\end{equation}
+
+\subsection{Précision}
+La précision est le pourcentage de prédictions correctes parmi les prédictions positives. Elle est calculée par la formule suivante :
+\begin{equation}
+    \text{Précision} = \frac{\text{Nombre de vrais positifs}}{\text{Nombre de vrais positifs + Nombre de faux positifs}}
+\end{equation}
+
+\subsection{Rappel}
+Le rappel est le pourcentage de prédictions correctes parmi les vrais labels positifs. Il est calculé par la formule suivante :
+\begin{equation}
+    \text{Rappel} = \frac{\text{Nombre de vrais positifs}}{\text{Nombre de vrais positifs + Nombre de faux négatifs}} 
+\end{equation}
+
+\subsection{F1-score}
+Le F1-score est la moyenne harmonique de la précision et du rappel. Il est calculé par la formule suivante :
+\begin{equation}
+    \text{F1-score} = 2 \times \frac{\text{Précision} \times \text{Rappel}}{\text{Précision} + \text{Rappel}}
+\end{equation}
+
+\subsection{Top 3}
+Le Top 3 est le pourcentage de trouver la réponse parmi les 3 classes les plus prédites par le modèle. Il est calculé par la formule suivante :
+\begin{equation}
+    \text{Top 3} = \frac{\text{Nombre de prédictions correctes parmi les 3 premières prédictions}}{\text{Nombre total d'exemples}}
+\end{equation}
