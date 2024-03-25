@@ -68,6 +68,38 @@ donc d'améliorer la qualité des prédictions du modèle, de renforcer la confi
 %     \end{minipage}
 % \end{figure}
 
+
+
+Cela permet en théorie d'éliminer les parties de l'image qui ne sont pas importantes pour la prédiction et de se focaliser sur les zones importantes, et
+donc d'améliorer la qualité des prédictions du modèle, de renforcer la confiance dans les prédictions et de mieux comprendre les décisions prises par le modèle.
+%graphe montrant les 3 équations des 3 méthdoes (3 images cotes a cotes des équations)
+% \begin{figure}
+% \centering
+% \begin{minipage}{0.3\textwidth}
+% \centering
+% \includegraphics[width=\textwidth]{../asset/exemple/average_drop.png}
+% \caption{Méthode "average drop".}
+% \label{fig:grad_cam_example1}
+% \end{minipage}\hfill
+% \begin{minipage}{0.3\textwidth}
+% \centering
+% \includegraphics[width=\textwidth]{average_gain.png}
+% \caption{Méthode "average gain".}
+% \label{fig:grad_cam_example2}
+% \end{minipage}\hfill
+% \begin{minipage}{0.3\textwidth}
+% \centering
+% \includegraphics[width=\textwidth]{average_increase.png}
+% \caption{Méthode "average increase".}
+% \label{fig:grad_cam_example2}
+% \end{minipage}
+% \end{figure}
+
+
+Plus précisement, ces métriques sont utilisées pour mesurer l'impact du masquage sur les probabilités de classe prédites d'une image d'entrée. Plus précisément, l'image d'entrée est masquée avec une carte de saliency, et les probabilités de classe prédites pour les images originales et masquées sont comparées.
+La baisse moyenne (average drop) est utilisée pour quantifier la perte de puissance prédictive lorsque l'image est masquée. Elle est définie comme la différence moyenne entre les probabilités prédites pour les images originales et masquées. Une valeur plus faible est préférable pour l'average drop.
+Enfin, l'augmentation moyenne (average increase) est utilisée pour quantifier le changement global de la puissance prédictive lorsque l'image est masquée, elle est calculée comme le pourcentage des cas où le masquage a augmenté la probabilité prédite. 
+Ces métriques sont utilisées pour évaluer les performances de différentes méthodes de masquage de l'image d'entrée, telles que Opticam, Fakecam, Gradcam et autres. En comparant les valeurs de ad, ag et ai pour différentes méthodes, on peut déterminer quelle méthode est la meilleure pour une tâche donnée.
 Voici les résultats obtenus avec ces méthodes sur une image de trâce de sang:
 
 \begin{table}[h]
