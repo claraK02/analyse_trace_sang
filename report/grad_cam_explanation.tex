@@ -39,7 +39,7 @@ Dans l'exemple suivant, nous voyons que c'est la tâche de gauche qui est détec
 % [figure montrant 2 images côte à côte avec les cartes de chaleur Grad-CAM correspondantes].
 
 
-De plus, nous avons également implémenté la méthode "average drop / average gain /average increase" qui consiste à multiplier l'image de départ par la carte de saillence obtenue avec Grad-CAM puis de redonner cette image au modèle
+De plus, nous avons également implémenté les métriques average drop, average gain et average increase, définie dans la partie~\ref{sec: grad metrics} (voir l'article~\cite{opticam}), qui consiste à multiplier l'image de départ par la carte de saillence obtenue avec Grad-CAM puis de redonner cette image au modèle
 pour obtenir une nouvelle prédiction.
 Cela permet en théorie d'éliminer les parties de l'image qui ne sont pas importantes pour la prédiction et de se focaliser sur les zones importantes, et 
 donc d'améliorer la qualité des prédictions du modèle, de renforcer la confiance dans les prédictions et de mieux comprendre les décisions prises par le modèle.

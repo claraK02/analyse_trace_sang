@@ -187,7 +187,7 @@ Les procédures de calcul de ces métriques sont explicitées en détail dans l'
 
 \section{Résultats}
 
-Les résultats de test sur les données de laboratoire~\ref{tab:results_lab} indiquent de meilleures performances pour le modèle Resnet qui a été réentraîné sur tous ses poids, selon l'accuracy et le F1-score. 
+Les résultats de test sur les données de laboratoire présent dans la Table~\ref{tab:results_lab} indiquent de meilleures performances pour le modèle Resnet qui a été réentraîné sur tous ses poids, selon l'accuracy et le F1-score. 
 
 \begin{table}[ht]
   \centering
@@ -204,7 +204,8 @@ Les résultats de test sur les données de laboratoire~\ref{tab:results_lab} ind
     \label{tab:results_lab}
 \end{table}
 
-Les résultats de test sur les données de laboratoire~\ref{tab: results_real} indiquent de meilleures performances pour le modèle Resnet qui était entraîné entièrement sur les données de laboratoire, puis fine-tuné sur les données réelles, selon l'accuracy et le F1-score. 
+Les résultats de test sur les données de laboratoire présent dans la Table~\ref{tab: results_real} indiquent de meilleures performances pour le modèle Resnet qui était entraîné entièrement sur les données de laboratoire, puis fine-tuné sur les données réelles, selon l'accuracy et le F1-score. 
+Nous avons également une valeur de Top 3 à 51.7\%, ce qui signifie qu'il y a une chance sur deux que la bonne réponse soit présente dans la prédiction. 
 
 \begin{table}[ht]
   \centering
@@ -223,14 +224,21 @@ Les résultats de test sur les données de laboratoire~\ref{tab: results_real} i
     \label{tab: results_real}
 \end{table}
 
+Le modèle Adversarial a des performances assez décevantes par rapport à un modèle Resnet, donc le modèle Adversarial n'est pas le plus adapté pour notre problématique.
+
+Le AWL Resnet a étonnament de meilleures performances que le modèle Resnet appliquant le Linear Probing. 
+
 \section{Conclusion}
 
-Notre projet s'inscrit dans une volonté d'optimiser le travail d'analyse de traces de sang en criminologie, notamment pour l'expert international Philippe Esperança. 
-Nous avons aussi testé d'autres méthode que nous avons détaillées dans la section~\ref{sec: pistes infructruces}.
+Nous avons pu tester d'autres méthodes plus longuement détaillées dans la section~\ref{sec: pistes infructruces}. L'une d'elles était l'utilisation de la clé de détermination définie par Philippe Esperança. Selon certaines caractéristiques repérées sur l'image de trace de sang, comme la présence ou non d'une trace ovoïde, nous pouvons déduire différentes classes de trace de sang en suivant la clé de détermination. Les méthodes présentées dans la section~\ref{sec: pistes infructruces} n'ont principalement pas abouties, d'où leur mention en annexe.
 
-En effet, notre encadrant a pu recevoir notre projet sous la forme d'une interface qui fonctionne localement sur son appareil de travail. En effet, ce modèle d'analyse de traces de sang ne doit pas avoir accès à internet afin d'éviter tout risque d'attaque ou de fuite de données. Pouvoir faire tourner le projet en local pour l'expert criminalistique lui permet de nous faire confiance vis-à-vis de l'outil implémenté. Il a pu apprécier et être satisfait de notre rendu.
+Notre encadrant a pu recevoir notre projet sous la forme d'une interface qui fonctionne localement sur son appareil de travail. Ce modèle d'analyse de traces de sang ne doit pas avoir accès à internet afin d'éviter tout risque d'attaque ou de fuite de données. Pouvoir faire tourner le projet en local pour l'expert criminalistique lui permet de nous faire confiance vis-à-vis de l'outil implémenté. Malgré des prédictions et des interprétations instables dans le contexte de notre projet, il a pu néanmoins apprécier et être satisfait de notre rendu dans son ensemble pour les objectifs qu'il remplit.
 
-Notre projet fait également l'objet d'une documentation afin qu'il puisse être repris aisément à l'avenir. 
+Le modèle sur lequel nous avons abouti représente un potentiel significatif. Il présente de bonnes performances sur les données de laboratoires, ~97\% d'accuracy micro contre ~41\% avec les données réelles, sachant qu'il y a eu 10 000 images de laboratoire contre environ 300 images réelles. D'autre part, notre expert criminalistique possède encore environ 100 000 images, non labellisées. Pour palier à cet écart et pouvoir éventuellement exploiter ces 100 000 images d'entraînement, il faudrait envisager d'implémenter de l'apprentissage auto-supervisé.  
+
+D'autre pistes d'améliorations possibles concernent le modèle Resnet utilisé. Celui qui a été manipulé est le Resnet50, qui est relativement petit par rapport à d'autres Resnet plus grands existants. Il y a également peu de résultats concluants et significatifs à travers les cartes de saillance avec le Grad cam utilisé. Il serait éventuellement plus judicieux d'utiliser Grad cam ++ ou bien Score cam. 
+
+Notre projet va faire l'objet d'une reprise dans le cadre d'un sujet de stage au laboratoire LIS. Ainsi, notre projet possède un Github public ainsi qu'un documentation détaillée afin que la prochaine personne en charge puisse reprendre aisément le sujet à l'avenir. 
 
 \printbibliography
 
