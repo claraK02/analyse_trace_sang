@@ -1,3 +1,8 @@
+\documentclass[a4paper]{article}
+
+
+\begin{document}
+
 Afin de répondre à l'aspect "boîte noire" du modèle utilisé, nous avons im-
 plémenté de l'interprétabilité dans notre modèle à l'aide de Grad-CAM~\cite{GRADCAM}.
 Cette méthode permet de fournir une explication visuelle vis-à-vis des déci-
@@ -14,6 +19,23 @@ Cette approche permet de mieux comprendre les décisions prises par le CNN et d'
 
 [exmeple d'une image avec la carte de chaleur Grad-CAM superposée (toute simple pour montrer à quoi ca ressemble)]
 
+%%create a figure with an image and the corresponding Grad-CAM heatmap
+\begin{figure}
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{14.jpg}
+        \caption{Exemple d'une image de trâce de sang.}
+        \label{fig:grad_cam_example1}
+    \end{minipage}\hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{14_saliency.png}
+        \caption{Exemple d'une image avec la carte de chaleur Grad CAM superposée.}
+        \label{fig:grad_cam_example2}
+    \end{minipage}
+\end{figure}
+
 Par exemple, nous avons remarqué que parfois certaines des réglettes permettant de donner l'échelle de la photo étaient détectées comme des traces de sang ou induisaient un biais dans la classification.
 En utilisant Grad-CAM, nous avons pu identifier que le modèle se focalisait sur ces réglettes pour prendre sa décision, ce qui nous a permis de mieux comprendre
 les erreurs de classification et d'améliorer la qualité des prédictions.
@@ -23,3 +45,54 @@ dans le cas où plusieurs tâches sont présentes sur une même image.
 
 Dans l'exemple suivant, nous voyons que c'est la tâche de gauche qui est détectée par le modèle, ce qui est confirmé par la carte de chaleur Grad-CAM qui met en évidence les zones importantes de l'image pour cette tâche.
 [figure montrant 2 images côte à côte avec les cartes de chaleur Grad-CAM correspondantes].
+
+\end{document}
+
+De plus, nous avons également implémenté la méthode "average drop / average gain /average increase" qui consiste à multiplier l'image de départ par la carte de saillence obtenue avec Grad-CAM puis de redonner cette image au modèle
+pour obtenir une nouvelle prédiction.
+Cela permet en théorie d'éliminer les parties de l'image qui ne sont pas importantes pour la prédiction et de se focaliser sur les zones importantes, et 
+donc d'améliorer la qualité des prédictions du modèle, de renforcer la confiance dans les prédictions et de mieux comprendre les décisions prises par le modèle.
+
+%graphe montrant les 3 équations des 3 méthdoes (3 images cotes a cotes des équations)
+
+\begin{figure}
+    \centering
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{average_drop.png}
+        \caption{Méthode "average drop".}
+        \label{fig:grad_cam_example1}
+    \end{minipage}\hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{average_gain.png}
+        \caption{Méthode "average gain".}
+        \label{fig:grad_cam_example2}
+    \end{minipage}\hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{average_increase.png}
+        \caption{Méthode "average increase".}
+        \label{fig:grad_cam_example2}
+    \end{minipage}
+\end{figure}
+
+Voici les résultats obtenus avec ces méthodes sur une image de trâce de sang:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{lcc}
+    \toprule
+    & AWL ResNet & FT AWL ResNet \
+    \midrule
+    avg_drop & 91.6 & 87.6 \
+    avg_increase & 0.0 & 0.0 \
+    avg_gain & 0.0 & 0.0 \
+    \bottomrule
+    \end{tabular}
+    \caption{Résultats des saliency maps sur les données réelles. (Lower is better)}
+    \label{tab:saliency_results}
+\end{table}
+    
+
+\end{document}
