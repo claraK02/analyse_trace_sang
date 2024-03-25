@@ -13,7 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 
 from src.dataloader.dataloader import create_dataloader
-from src.explainable.create_mask import segment_image_file
+from src.explainable.create_mask import segment_image_file,advanced_mask_red_pixel_v3
 from src.explainable.find_criteres import calculate_ovality, count_satellites, \
                                           calculate_irregularity, calculate_satellite_ratio, \
                                             calculate_homogeneity, count_internal_striations, classify_distribution
@@ -24,6 +24,9 @@ def extract_features_and_labels(generator):
     for i, (batch_x, batch_y, _) in enumerate(generator):
         print("Treating batch:", i, "out of", len(generator))
         for image, label in zip(batch_x, batch_y):
+
+            print("Image",image)
+            print("Label",label)
 
             #get the image in numpy array
             image=image.permute(1, 2, 0).numpy()
@@ -36,7 +39,8 @@ def extract_features_and_labels(generator):
 
 
             # Segment the image
-            mask = segment_image_file(image)
+            #mask = segment_image_file(image)
+            mask = advanced_mask_red_pixel_v3(image)
 
             #inverser les valeurs de la mask
             mask = 1-mask
@@ -227,6 +231,9 @@ if __name__ == "__main__":
 
     #create a dataloader
     train_generator = create_dataloader(config=config, mode='train')
+
+    #print the length of the train generator
+    print("Length of the train generator:",len(train_generator))
 
     #create a xgboost model
     model = train_xgboost(train_generator)

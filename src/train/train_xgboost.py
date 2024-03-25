@@ -11,9 +11,8 @@ from os.path import dirname as up
 
 sys.path.append(up(up(up(os.path.abspath(__file__)))))
 
-
 from src.dataloader.dataloader import create_dataloader
-from src.explainable.create_mask import segment_image_file
+from src.explainable.create_mask import segment_image_file,advanced_mask_red_pixel_v3
 from src.explainable.find_criteres import Critieres
 
 def extract_features_and_labels(generator):
@@ -21,16 +20,30 @@ def extract_features_and_labels(generator):
     labels = []
     criteres = Critieres()
 
+    num_batches = len(generator)
+
+    k=10
+
+    #we will treat only the first 10 batches
+
     for i, item in enumerate(generator):
+        if i>=k:
+            break
         print("Treating batch:", i, "out of", len(generator))
-        for image, label in zip(item['image'], item['background']):
+        for image, label in zip(item['image'], item['label']):
             image=image.permute(1, 2, 0).numpy()
             image = image * 255
+            #print("max value of image:", image.max())
+            #print("min value of image:", image.min())
             # Segment the image
-            mask = segment_image_file(image)
+            #mask = segment_image_file(image)
+            mask = advanced_mask_red_pixel_v3(image)
+
+            #print("max value of mask:", mask.max())
+            #print("min value of mask:", mask.min())
 
             #inverser les valeurs de la mask
-            mask = 1 - mask
+            mask = 255 - mask #car on a des valeurs entre 0 et 255
 
             mask = mask[:,:,0]
             feature = criteres.get_critieres(mask)
@@ -40,7 +53,7 @@ def extract_features_and_labels(generator):
     return np.array(features), np.array(labels)
 
 def train_xgboost(dataloader):
-    model = xgb.XGBClassifier(tree_method='gpu_hist')
+    model = xgb.XGBClassifier(device='cuda')
     features, labels = extract_features_and_labels(dataloader)
     model.fit(features, labels)
     return model
@@ -84,8 +97,7 @@ def plot_shap_values(model, dataloader):
         prediction = model.predict(np.reshape(features, (1, -1)))
         print("Max value of prediction:",prediction.max())
         print("XGBoost prediction:", prediction)
-        #print("The image belong to model:", ["Passive", "Glissée", "impact"][prediction[0]])
-        #predicted_class = ["Passive", "Glissée", "impact"][prediction[0]]
+
         # Get the SHAP values for the first prediction
         shap_values = explainer.shap_values(np.reshape(features, (1, -1)))
         print("SHAP values:", shap_values)

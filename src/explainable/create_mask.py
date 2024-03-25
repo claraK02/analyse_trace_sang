@@ -279,6 +279,11 @@ def advanced_mask_red_pixel_v3(image: np.ndarray) -> np.ndarray:
 
     # Create an empty image to draw the contours
     mask = np.zeros_like(image)
+    mask = cv2.UMat(mask)
+
+    # Convert the image to uint8
+    image = image.astype(np.uint8)
+
 
     # Draw contours on the mask
     for contour in contours:
@@ -286,15 +291,11 @@ def advanced_mask_red_pixel_v3(image: np.ndarray) -> np.ndarray:
             continue
         cv2.drawContours(mask, [contour], -1, (255, 255, 255), thickness=cv2.FILLED)
 
-    # Fit ellipses to the contours
-    # for contour in contours:
-    #     if len(contour) >= 5 and not np.array_equal(contour, largest_contour):  # Skip the largest contour
-    #         ellipse = cv2.fitEllipse(contour)
-    #         if ellipse[1][0] >= 0 and ellipse[1][1] >= 0:  # Only draw the ellipse if width and height are valid
-    #             cv2.ellipse(mask, ellipse, (255, 255, 255), thickness=cv2.FILLED)
-
     # Draw the contours in green in another color on the original image
-    cv2.drawContours(image, contours, -1, (0, 255, 0), thickness=1)
+    #cv2.drawContours(image, contours, -1, (0, 255, 0), thickness=1)
+
+    #convert the mask to numpy array
+    mask = mask.get()
 
     # Return the mask
     return mask
@@ -346,35 +347,3 @@ if __name__ == '__main__':
         mask=advanced_mask_red_pixel_v3(image)
         plot_img_and_mask(image, mask)
 
-    # print("shape of image used",np.shape(image) )
-
-    # #use the kmeans algorithm to segment the image
-    # masks = segment_image_kmeans(image)
-
-    # print("shape of first mask final",np.shape(masks[0][0]))
-    # print("longueur de la liste de mask",len(masks))
-
-    # #find the mask with the most red pixels
-    # #mask = find_top_masks(image,masks[0])
-
-    # #plot the image and the mask
-    # #plot_img_and_mask(image, mask)
-
-    # # Plot the image and the masks
-    # #plot_img_and_mask(image, masks[0])
-    # #plot_img_and_mask(image, masks[1])
-    # #plot_img_and_mask(image, masks[2])
-
-
-
-    # # Convert the image to a tensor, add an extra dimension to simulate a batch, and transpose to PyTorch format
-    # image_tensor = torch.from_numpy(image.transpose((2, 0, 1))).unsqueeze(0)
-
-    # # Apply batched segmentation
-    # mask_tensor = batched_segmentation(image_tensor)
-
-    # # Convert the mask tensor back to a numpy array, remove the extra dimension, and transpose back to image format
-    # mask = mask_tensor.numpy().squeeze(0).transpose((1, 2, 0))
-
-    # # Plot the image and the mask
-    # plot_img_and_mask(image, mask)

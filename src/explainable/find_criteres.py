@@ -26,7 +26,8 @@ class Critieres:
     def get_critieres(self, mask: np.ndarray) -> list[float]:
         output = np.zeros(len(self))
         for i, function in enumerate(self.crits.values()):
-            output[i] = function[mask]
+            #print("function:", function)
+            output[i] = function(mask) #function[mask] avant
         return output
 
 
