@@ -11,12 +11,9 @@ un algorithme de segmentation non supervisé par détection de contours pour ext
 tenté de réaliser un algorithme mêlant des techniques de traitement d'images (seuils, etc..), d'apprentissage auto-supervisé (Unet~\cite{UNet}) et de géométrie pour extraire des caractéristiques géométriques telle la taille
 des tâches satellitaires par rapport à la tâche centrale, la forme des tâches (critère d'ovoïdité, de circularité, etc..). Ces tentatives ont néanmoins
 été infructueuses, car les masques de segmentation étaient trop imprécis du fait de la grande variabilité des images de taches de sang. Nous avons également tenté des méthodes de segmentation
-adversarial en tirant parti du fait que nous connaissions pour toutes les images la nature du support (bois, lino, carrelage, etc..) pour tenter de segmenter les taches de sang par une approche faiblement supervisée. Ces tentatives ont également été infructueuses, car nous 
+adversarial en tirant parti du fait que nous connaissions pour toutes les images la nature du support (bois, lino, carrelage, etc..) pour tenter de segmenter les taches de sang par une approche faiblement supervisée. Ces tentatives ont par ailleurs été infructueuses, car nous 
 avions peu de donnée d'entrainement, ce qui rendait tout apprentissage trop instable de manière faiblement supervisée.
 
-Nous avons également tenté d'extraire ces caractéristiques (masques de segmentation, critères géométriques) à l'aide de modèle de deep learning
+Nous avons aussi tenté d'extraire ces caractéristiques (masques de segmentation, critères géométriques) à l'aide de modèle de deep learning
 utilisant des techniques dites de "zero-shot classification" (modèles de type CLIP-ViT~\cite{CLip}, etc..) ou zero-shot segmentation (SegmentAnything~\cite{SegmentAnything}). Ces tentatives ont également été infructueuses, car le manque de contraste
 sur certaines images de taches de sang ou leur trop grand éclatement rendait les masques de segmentation trop imprécis.
-
-
-

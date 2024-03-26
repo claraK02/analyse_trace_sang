@@ -40,16 +40,15 @@ En utilisant Grad-CAM, nous avons pu identifier que le modèle se focalisait par
 \end{figure}
 
 \subsection{Métriques de saliency maps}
-De plus, nous avons également implémenté les métriques Average Drop, Average Increase et Average Gain~\cite{opticam}, qui consiste à multiplier l'image de départ par la carte de saillence obtenue avec Grad-CAM puis de redonner cette image au modèle
-pour obtenir une nouvelle prédiction. On va alors compérer le changement de probabilité de la classe prédite avant et après le masquage de l'image. Ces métriques prémettent de quantifier l'excactitude des cartes de saillance obtenues. La section~\ref{sec: grad metrics} présente les formules prémétant de les calculer.
+De plus, nous avons également implémenté les métriques Average Drop, Average Increase et Average Gain~\cite{opticam}, qui consiste à multiplier l'image de départ par la carte de saillence obtenue avec Grad-CAM puis de redonner cette image au modèle pour obtenir une nouvelle prédiction. On va alors comparer le changement de probabilité de la classe prédite avant et après le masquage de l'image. Ces métriques permettent de quantifier l'exactitude des cartes de saillance obtenues. La section~\ref{sec: grad metrics} présente les formules permettant de les calculer.
 
-L'Average Drop (AD) quantifie la perte de pouvoir prédictif, mesurée en termes de probabilité de classe, lorsque nous masquons uniquement l'image image. Elle est comprise entre 0 et 100, et une valeur plus faible est meilleure.
+L'Average Drop (AD) quantifie la perte de pouvoir prédictif, mesurée en termes de probabilité de classe, lorsque nous masquons uniquement l'image. Elle est comprise entre 0 et 100, et une valeur plus faible est meilleure.
 
-L'Average increase (AI) également connu sous le nom d'increase in confidence, mesure le pourcentage d'images pour lesquelles l'image masquée donne une probabilité de classe plus élevée que l'image originale. Elle est compris en 0 et 100, et une valeur plus haute est la meilleur.
+L'Average increase (AI) également connu sous le nom d'increase in confidence, mesure le pourcentage d'images pour lesquelles l'image masquée donne une probabilité de classe plus élevée que l'image originale. Elle est comprise en 0 et 100, et une valeur plus haute est la meilleure.
 
 L'Average Gain (AG) quantifie le pouvoir prédictif, mesuré en tant que probabilité de classe, lorsque nous masquons l'image. Elle est comprise entre 0 et 100, et une valeur plus élevée est meilleure.
 
-La Table~\ref{tab:saliency_results} montre les scores de ses métriques sur la base de données de test des données réelles.
+La Table~\ref{tab:saliency_results} montre les scores de ses métriques sur la base de données de test des données réelles
 
 \begin{table}[ht]
     \centering
@@ -65,4 +64,4 @@ La Table~\ref{tab:saliency_results} montre les scores de ses métriques sur la b
     \label{tab:saliency_results}
 \end{table}
 
-On peut voir dans la Table~\ref{tab:saliency_results} des résultats très peu satisefant. En effet, les deux modèles ont une Average Increase et une Average Gain de 0, ce qui signifie que avec les notations de la section~\ref{sec: grad metrics}, on a toujours $\forall i \in [1, N], p_i < o_i$. Cela signifie qu'en multipliant l'image d'origine par la carte de saillance, on obtient toujours une probabilité de classe plus faible que l'image d'origine. Cela montre que ces cartes de saillance ne sont pas fiables. Une améliorations possible serait d'utiliser des méthodes de saliency maps plus performantes comme Grad-CAM++~\cite{gradcam++} ou Score-CAM~\cite{scorecam}.
+On peut voir dans la Table~\ref{tab:saliency_results} des résultats très peu satisfaisant. En effet, les deux modèles ont une Average Increase et une Average Gain de 0, ce qui signifie qu'avec les notations de la section~\ref{sec: grad metrics}, on a toujours $\forall i \in [1, N], p_i < o_i$. Cela signifie qu'en multipliant l'image d'origine par la carte de saillance, on obtient toujours une probabilité de classe plus faible que l'image d'origine. Cela montre que ces cartes de saillance ne sont pas fiables. Une amélioration possible serait d'utiliser des méthodes de saliency maps plus performantes comme Grad-CAM++~\cite{gradcam++} ou Score-CAM~\cite{scorecam}.
