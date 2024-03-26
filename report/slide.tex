@@ -73,7 +73,6 @@
     \end{figure}
 \end{frame}
 
-
 \begin{frame}{Images réelles}
     \begin{figure}[ht]
         \centering
@@ -89,6 +88,23 @@
         \end{subfigure}
         \caption{Deux images de scènes de crime}
         \label{fig: reals images}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Distribution des données}
+    \begin{figure}[ht]
+        \centering
+        \begin{subfigure}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{../asset/distribution.png}
+            \caption{données de laboratoire}
+        \end{subfigure}
+        \begin{subfigure}{0.48\linewidth}
+            \centering
+            \includegraphics[width=\textwidth]{../asset/distribution_real.png}
+            \caption{données réelles}
+        \end{subfigure}
+        \caption{Distribution des données sur les 18 classes selon le dataset de laboratoire et de scène de crime.}
     \end{figure}
 \end{frame}
 
@@ -142,7 +158,7 @@
         \item \textbf{Accuracy micro}: accuracy "classique"
         \item \textbf{Accuracy macro}: moyenne des accuracy sur chacune des classes
         \item Rappel, précision et le f1 score
-        \item top k, avec $k=3$
+        \item top 3
     \end{itemize}
 \end{frame}
 
@@ -170,6 +186,9 @@
 \end{frame}
 
 \begin{frame}{Trouver les meilleurs hyperparamètres pour Adversarial}
+    \begin{itemize}
+        \item loss utilisé: $L_{adv} = \frac{CE_{tache}}{\alpha CE_{background}}$
+    \end{itemize}
     \begin{table}
         \centering
         \begin{tabular}{cc}
@@ -305,7 +324,7 @@
         \centering
         \begin{tabular}{cccc}
             \toprule
-            Métriques & Average Drop & Average Increase & Average Gain \\
+            Métriques & Avg Drop & Avg Increase & Avg Gain \\
             \midrule
             AWL ResNet & 91.6 & 0.0& 0.0\\
             FT AWL ResNet & 87.6 & 0.0 & 0.0\\
@@ -320,6 +339,16 @@
         \item utiliser des méthodes de saliency maps plus performantes comme Grad-CAM++ ou Score-CAM.
     \end{itemize}
 \end{frame}
+
+
+\begin{frame}{Tentative d'utilisation de la clé de détermination}
+    \begin{figure}[ht]
+        \centering
+        \includegraphics[width=0.8\textwidth]{../ressources/morceau_cle_determination.png}
+        \caption{Morceau de la clé de détermination fait par l'expert.}
+    \end{figure}
+\end{frame}
+
 
 \begin{frame}{Conclusion}
     \begin{itemize}
