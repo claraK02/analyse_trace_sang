@@ -71,7 +71,7 @@ Nous avons entraîné le modèle LP ResNet sur les données de laboratoire sur 2
 \label{sec: random search}
 On cherche ici à trouver le meilleur learning rate pour optimiser le ResNet $lr_{res}$ et pour celui adversarial $lr_{adv}$. On cherche aussi le meilleur paramètre $\alpha$, utilisé dans la formule~\ref{eq: advloss}. On a alors implémenté un Random Search~\cite{randomsearch} et fait 10 expériences de 5 epochs, en prenant à chaque fois des paramètres dans la Table~\ref{tab:random search possibilities}\footnote{On a fait un Random Search et pas un Grid-Search, car il n'est pas possible de tester toutes les combinaisons possibles, qui sont au nombre de 200.}
 
-\begin{table}
+\begin{table}[ht]
     \centering
     \begin{tabular}{cc}
         \toprule
@@ -137,14 +137,14 @@ Nous avons donc entraîné le modèle Adversarial sur les données de laboratoir
 \subsection{Fine-tune des modèles LB ResNet et AWL ResNet}
 Nous avons ensuite appris les modèles FT LB ResNet et FT AWL ResNet sur 10 epochs qui sont des modèles fine-tune sur les données réelles à partir des modèles respectivement LB ResNet et AWL ResNet sur 10 epochs. La Figure~\ref{fig: finetune} montre les courbes d'apprentissages de ce modèle.
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
-    \begin{subfigure}{0.45\textwidth}
+    \begin{subfigure}{0.35\textwidth}
         \centering
         \includegraphics[width=\linewidth]{../logs/retrain_resnet_img256_0/crossentropy.png}
         \caption{crossentropy de FT LP ResNet}
     \end{subfigure}
-    \begin{subfigure}{0.45\textwidth}
+    \begin{subfigure}{0.35\textwidth}
         \centering
         \includegraphics[width=\linewidth]{../logs/retrain_resnet_allw_img256_2/crossentropy.png}
         \caption{crossentropy de FT AWL ResNet}

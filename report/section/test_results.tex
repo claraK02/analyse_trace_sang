@@ -1,5 +1,4 @@
-
-Les résultats de test sur les données de laboratoire présent dans la Table~\ref{tab:results_lab} indiquent de meilleures performances pour le modèle Resnet qui a été réentraîné sur tous ses poids, selon l'accuracy et le F1-score. 
+Les résultats de test sur les données de laboratoire présent dans la Table~\ref{tab:results_lab} indiquent de meilleures performances pour le modèle Resnet qui a été réentraîné sur tous ses poids, selon l'accuracy et le F1-score. On peut également constater que les modèles fine-tunés sur les données rélles ont des performances moins bonnes que les modèles réentraînés.
 
 \begin{table}[ht]
   \centering
@@ -7,9 +6,11 @@ Les résultats de test sur les données de laboratoire présent dans la Table~\r
     \toprule
     Modèles & Acc Micro & Acc Macro & F1-score & Top 3 \\
     \midrule
-    LP ResNet & 95.2 & 94.3 & 94.7 & \textbf{99.8} \\
-    AWL ResNet & \textbf{97.3} & \textbf{97.1} & \textbf{96.2} & \textbf{99.8} \\
-    Adversarial & 93.4 & 91.8 & 91.8 & \textbf{99.8} \\
+    LP ResNet & 95.2 & 94.3 & 94.7 & \textbf{99.9} \\
+    FT LP ResNet & 83.9 & 86.2 & 80.4 & 98.3 \\
+    AWL ResNet & \textbf{97.3} & \textbf{97.1} & \textbf{96.2} & \textbf{99.9} \\
+    FT AWL ResNet & 76.4 & 76.1 & 70.7 & 93.8 \\
+    Adversarial & 93.4 & 91.8 & 91.8 & \textbf{99.9} \\
     \bottomrule
     \end{tabular}
     \caption{Résultats de test sur les données de laboratoire}
@@ -25,11 +26,11 @@ Nous avons également une valeur de Top 3 à 51.7\%, ce qui signifie qu'il y a u
     \toprule
     Modèles & Acc Micro & Acc Macro & F1-score & Top 3 \\
     \midrule
-    LP ResNet & 12.9 & 6.0 & 4.0 & 19.0 \\
-    FT LP ResNet & 11.8 & 6.1 & 6.4 & 26.0 \\
-    AWL Resnet & 17.2 & 13.8 & 8.1 & 28.7 \\
-    FT AWL ResNet & \textbf{41.9} & \textbf{33.4} & \textbf{26.9} & \textbf{51.7} \\
-    Adversarial & 11.8 & 5.7 & 3.7 & 16.7 \\
+    LP ResNet & 12.9 & 6.0 & 4.0 & 30.1 \\
+    FT LP ResNet & 11.8 & 6.1 & 6.4 & 36.6 \\
+    AWL Resnet & 17.2 & 13.8 & 8.1 & 30.1 \\
+    FT AWL ResNet & \textbf{41.9} & \textbf{33.4} & \textbf{26.9} & \textbf{67.7} \\
+    Adversarial & 11.8 & 5.7 & 3.7 & 23.7 \\
     \bottomrule
     \end{tabular}
     \caption{Résultats de test sur les données réelles}

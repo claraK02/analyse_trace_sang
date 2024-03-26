@@ -217,9 +217,11 @@
         \toprule
         Modèles & Acc Micro & Acc Macro & F1-score & Top 3 \\
         \midrule
-        LP ResNet & 95.2 & 94.3 & 94.7 & \textbf{99.8} \\
-        AWL ResNet & \textbf{97.3} & \textbf{97.1} & \textbf{96.2} & \textbf{99.8} \\
-        Adversarial & 93.4 & 91.8 & 91.8 & \textbf{99.8} \\
+        LP ResNet & 95.2 & 94.3 & 94.7 & \textbf{99.9} \\
+        FT LP ResNet & 83.9 & 86.2 & 80.4 & 98.3 \\
+        AWL ResNet & \textbf{97.3} & \textbf{97.1} & \textbf{96.2} & \textbf{99.9} \\
+        FT AWL ResNet & 76.4 & 76.1 & 70.7 & 93.8 \\
+        Adversarial & 93.4 & 91.8 & 91.8 & \textbf{99.9} \\
         \bottomrule
         \end{tabular}
         \caption{Résultats de test sur les données de laboratoire}
@@ -234,11 +236,11 @@
         \toprule
         Modèles & Acc Micro & Acc Macro & F1-score & Top 3 \\
         \midrule
-        LP ResNet & 12.9 & 6.0 & 4.0 & 19.0 \\
-        FT LP ResNet & 11.8 & 6.1 & 6.4 & 26.0 \\
-        AWL Resnet & 17.2 & 13.8 & 8.1 & 28.7 \\
-        FT AWL ResNet & \textbf{41.9} & \textbf{33.4} & \textbf{26.9} & \textbf{51.7} \\
-        Adversarial & 11.8 & 5.7 & 3.7 & 16.7 \\
+        LP ResNet & 12.9 & 6.0 & 4.0 & 30.1 \\
+        FT LP ResNet & 11.8 & 6.1 & 6.4 & 36.6 \\
+        AWL Resnet & 17.2 & 13.8 & 8.1 & 30.1 \\
+        FT AWL ResNet & \textbf{41.9} & \textbf{33.4} & \textbf{26.9} & \textbf{67.7} \\
+        Adversarial & 11.8 & 5.7 & 3.7 & 23.7 \\
         \bottomrule
         \end{tabular}
         \caption{Résultats de test sur les données réelles}
