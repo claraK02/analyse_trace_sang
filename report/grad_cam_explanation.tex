@@ -1,9 +1,4 @@
-Afin de répondre à l'aspect "boîte noire" du modèle utilisé, nous avons im-
-plémenté de l'interprétabilité dans notre modèle à l'aide de Grad-CAM~\cite{GRADCAM}.
-Cette méthode permet de fournir une explication visuelle vis-à-vis des déci-
-sions de classification issue de notre modèle, permettant ainsi de rajouter une
-certaine légitimité relative face à nos analyses de traces de sang faisant partie
-d'un processus judiciaire. 
+Afin de répondre à l'aspect "boîte noire" du modèle utilisé, nous avons implémenté de l'interprétabilité dans notre modèle à l'aide de Grad-CAM~\cite{GRADCAM}. Cette méthode permet de fournir une explication visuelle vis-à-vis des décisions de classification issue de notre modèle, permettant ainsi de rajouter une certaine légitimité relative face à nos analyses de traces de sang faisant partie d'un processus judiciaire. 
 
 L'algorithme Grad-CAM (Gradient-weighted Class Activation Mapping) est une technique utilisée pour rendre les réseaux de neurones convolutifs (CNN) plus interprétables dans le domaine de la classification.
 Il fonctionne en générant des cartes de chaleur (heatmaps) qui mettent en évidence les zones importantes d'une image qui contribuent le plus à la prédiction d'une classe spécifique.
@@ -11,10 +6,9 @@ Pour ce faire, Grad-CAM calcule les dérivées des scores de sortie de la classe
 Ces dérivées sont ensuite globalement moyennées pour obtenir les poids d'importance de chaque carte de caractéristiques.
 Enfin, les cartes de caractéristiques sont pondérées par les poids d'importance et combinées pour obtenir la carte de chaleur Grad-CAM, qui peut être superposée à l'image d'origine pour une visualisation plus intuitive.
 Cette approche permet de mieux comprendre les décisions prises par le CNN et d'améliorer la confiance dans les prédictions du modèle.
+La Figure~\ref{fig:grad_cam_example} montre un exemple d'une image de trace de sang avec sa carte de chaleur Grad-CAM superposée.
 
-% [exmeple d'une image avec la carte de chaleur Grad-CAM superposée (toute simple pour montrer à quoi ca ressemble)]
-
-\begin{figure}
+\begin{figure}[ht]
     \centering
     \begin{subfigure}{0.40\linewidth}
         \centering
@@ -28,11 +22,10 @@ Cette approche permet de mieux comprendre les décisions prises par le CNN et d'
     \label{fig:grad_cam_example}
 \end{figure}
 
-Par exemple, nous avons remarqué que parfois certaines des réglettes permettant de donner l'échelle de la photo étaient détectées comme des traces de sang ou induisaient un biais dans la classification.
-En utilisant Grad-CAM, nous avons pu identifier que le modèle se focalisait sur ces réglettes pour prendre sa décision, ce qui nous a permis de mieux comprendre
-les erreurs de classification et d'améliorer la qualité des prédictions.
+Nous avons remarqué que parfois certaines des réglettes permettant de donner l'échelle de la photo étaient détectées comme des traces de sang ou induisaient un biais dans la classification.
+En utilisant Grad-CAM, nous avons pu identifier que le modèle se focalisait parfois sur ces réglettes pour prendre sa décision, ce qui nous a permis de mieux comprendre les erreurs de classification, comme le montre la Figure~\ref{fig:grad_cam reglette}.
 
-\begin{figure}
+\begin{figure}[ht]
     \centering
     \begin{subfigure}{0.40\linewidth}
         \centering
@@ -42,24 +35,15 @@ les erreurs de classification et d'améliorer la qualité des prédictions.
         \centering
         \includegraphics[width=\linewidth]{../asset/exemple/attention_reglette_image.jpg}
     \end{subfigure}
-    \begin{figure}
-        \centering
-        \includegraphics[width=\textwidth]{../asset/exemple/14.jpg}
-        \caption{Exemple d'une image  de trace de sang (à droite) avec sa carte de chaleur Grad CAM superposée (à gauche), dans le cadre d'une attention portée à la réglette.}
-        \label{fig:grad_cam_example}
-    \end{figure}
-    \label{fig:grad_cam_example}
+    \caption{Exemple d'une image  de trace de sang (à droite) avec sa carte de chaleur Grad CAM superposée (à gauche), dans le cadre d'une attention portée à la réglette.}
+    \label{fig:grad_cam reglette}
 \end{figure}
 
 
+% Un autre avantage de Grad-CAM est qu'il permet de vérifier si le modèle se focalise sur la bonne tâche de sang
+% dans le cas où plusieurs tâches sont présentes sur une même image.
 
-
-% [figure montrant une tache avec une réglette.]
-Un autre avantage de Grad-CAM est qu'il permet de vérifier si le modèle se focalise sur la bonne tâche de sang
-dans le cas où plusieurs tâches sont présentes sur une même image.
-
-Dans l'exemple suivant, nous voyons que c'est la tâche de gauche qui est détectée par le modèle, ce qui est confirmé par la carte de chaleur Grad-CAM qui met en évidence les zones importantes de l'image pour cette tâche.
-% [figure montrant 2 images côte à côte avec les cartes de chaleur Grad-CAM correspondantes].
+% Dans l'exemple suivant, nous voyons que c'est la tâche de gauche qui est détectée par le modèle, ce qui est confirmé par la carte de chaleur Grad-CAM qui met en évidence les zones importantes de l'image pour cette tâche.
 
 
 De plus, nous avons également implémenté les métriques average drop, average gain et average increase, définie dans la partie~\ref{sec: grad metrics} (voir l'article~\cite{opticam}), qui consiste à multiplier l'image de départ par la carte de saillence obtenue avec Grad-CAM puis de redonner cette image au modèle
@@ -67,73 +51,23 @@ pour obtenir une nouvelle prédiction.
 Cela permet en théorie d'éliminer les parties de l'image qui ne sont pas importantes pour la prédiction et de se focaliser sur les zones importantes, et 
 donc d'améliorer la qualité des prédictions du modèle, de renforcer la confiance dans les prédictions et de mieux comprendre les décisions prises par le modèle.
 
-%graphe montrant les 3 équations des 3 méthdoes (3 images cotes a cotes des équations)
-
-% \begin{figure}
-%     \centering
-%     \begin{minipage}{0.3\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{../asset/exemple/average_drop.png}
-%         \caption{Méthode "average drop".}
-%         \label{fig:grad_cam_example1}
-%     \end{minipage}\hfill
-%     \begin{minipage}{0.3\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{average_gain.png}
-%         \caption{Méthode "average gain".}
-%         \label{fig:grad_cam_example2}
-%     \end{minipage}\hfill
-%     \begin{minipage}{0.3\textwidth}
-%         \centering
-%         \includegraphics[width=\textwidth]{average_increase.png}
-%         \caption{Méthode "average increase".}
-%         \label{fig:grad_cam_example2}
-%     \end{minipage}
-% \end{figure}
-
-
-
 Cela permet en théorie d'éliminer les parties de l'image qui ne sont pas importantes pour la prédiction et de se focaliser sur les zones importantes, et
 donc d'améliorer la qualité des prédictions du modèle, de renforcer la confiance dans les prédictions et de mieux comprendre les décisions prises par le modèle.
-%graphe montrant les 3 équations des 3 méthdoes (3 images cotes a cotes des équations)
-% \begin{figure}
-% \centering
-% \begin{minipage}{0.3\textwidth}
-% \centering
-% \includegraphics[width=\textwidth]{../asset/exemple/average_drop.png}
-% \caption{Méthode "average drop".}
-% \label{fig:grad_cam_example1}
-% \end{minipage}\hfill
-% \begin{minipage}{0.3\textwidth}
-% \centering
-% \includegraphics[width=\textwidth]{average_gain.png}
-% \caption{Méthode "average gain".}
-% \label{fig:grad_cam_example2}
-% \end{minipage}\hfill
-% \begin{minipage}{0.3\textwidth}
-% \centering
-% \includegraphics[width=\textwidth]{average_increase.png}
-% \caption{Méthode "average increase".}
-% \label{fig:grad_cam_example2}
-% \end{minipage}
-% \end{figure}
-
 
 Plus précisement, ces métriques sont utilisées pour mesurer l'impact du masquage sur les probabilités de classe prédites d'une image d'entrée. Plus précisément, l'image d'entrée est masquée avec une carte de saliency, et les probabilités de classe prédites pour les images originales et masquées sont comparées.
-La baisse moyenne (average drop) est utilisée pour quantifier la perte de puissance prédictive lorsque l'image est masquée. Elle est définie comme la différence moyenne entre les probabilités prédites pour les images originales et masquées. Une valeur plus faible est préférable pour l'average drop.
-Enfin, l'augmentation moyenne (average increase) est utilisée pour quantifier le changement global de la puissance prédictive lorsque l'image est masquée, elle est calculée comme le pourcentage des cas où le masquage a augmenté la probabilité prédite. 
+L'average drop (AD) est utilisée pour quantifier la perte de puissance prédictive lorsque l'image est masquée. Elle est définie comme la différence moyenne entre les probabilités prédites pour les images originales et masquées. Une valeur plus faible est préférable pour l'average drop.
+Enfin, l'average increase (AI) est utilisée pour quantifier le changement global de la puissance prédictive lorsque l'image est masquée, elle est calculée comme le pourcentage des cas où le masquage a augmenté la probabilité prédite. 
 Ces métriques sont utilisées pour évaluer les performances de différentes méthodes de masquage de l'image d'entrée, telles que Opticam, Fakecam, Gradcam et autres. En comparant les valeurs de ad, ag et ai pour différentes méthodes, on peut déterminer quelle méthode est la meilleure pour une tâche donnée.
 Voici les résultats obtenus avec ces méthodes sur une image de trâce de sang:
 
-\begin{table}[h]
+\begin{table}[ht]
     \centering
-    \begin{tabular}{lcc}
+    \begin{tabular}{cccc}
         \toprule
-        Métriques & AWL ResNet & FT AWL ResNet \\
+        Métriques & Average Drop & Average Increase & Average Gain \\
         \midrule
-        avg\_drop & 91.6 & 87.6 \\
-        avg\_increase & 0.0 & 0.0 \\
-        avg\_gain & 0.0 & 0.0 \\
+        AWL ResNet & 91.6 & 0.0& 0.0\\
+        FT AWL ResNet & 87.6 & 0.0 & 0.0\\
         \bottomrule
         \end{tabular}
     \caption{Résultats des saliency maps sur les données réelles. (Lower is better)}
