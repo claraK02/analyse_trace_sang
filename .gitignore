@@ -18,6 +18,7 @@ test_paths.txt
 
 # latex aux files
 /report/*
+!/report/section
 !/report/*.tex
 !/report/*.pdf
 !/report/ref.bib
