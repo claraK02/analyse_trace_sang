@@ -1,4 +1,5 @@
 \subsection{Evaluation des modèles}
+\label{sec: metrics}
 \subsubsection{Accuracy micro}
 L'accuracy est le pourcentage de réussite d'un modèle. Elle est calculée par la formule suivante :
 \begin{equation}
@@ -41,16 +42,22 @@ Le Top 3 est le pourcentage de trouver la réponse parmi les 3 classes les plus 
 Soit $p_i = \text{arg}\max_c p_i^c$ la probabilité de la classe prédicte par le modèle pour l'image $x_i$. Soit $o_i$ la probabilité de cette même classe prédite par le modèle pour l'image maské de ca carte de saillance $x_i * s_i$ (où $s_i$ est la carte de saillance de l'image $x_i$). On définie $N$ le nombre totale d'image dans le test set. On note $[x]_+$ le maximun entre $0$ et la valeur $x$ ($[x]_+=\max(0, x)$). On définie les métriques suivantes :
 
 \subsubsection{Averare Drop (AD)}
+L'Average Drop (AD) quantifie la perte de pouvoir prédictif, mesurée en termes de probabilité de classe, lorsque nous masquons uniquement l'image image. Elle est comprise entre 0 et 100, et une valeur plus faible est meilleure.
+
 \begin{equation}
     \text{AD} = \frac{1}{N} \sum_{i=1}^{N} \frac{[p_i - o_i]_+}{p_i} \cdot 100
 \end{equation}
 
 \subsubsection{Average Increase (AI)}
+L'Average increase (AI) également connu sous le nom d'increase in confidence, mesure le pourcentage d'images pour lesquelles l'image masquée donne une probabilité de classe plus élevée que l'image originale. Elle est compris en 0 et 100, et une valeur plus haute est la meilleur.
+
 \begin{equation}
     \text{AI} = \frac{1}{N} \sum_{i=1}^{N} 1_{p_i<o_i} \cdot 100
 \end{equation}
 
 \subsubsection{Average Gain (AG)}
+L'Average Gain (AG) quantifie le pouvoir prédictif, mesuré en tant que probabilité de classe, lorsque nous masquons l'image. Elle est comprise entre 0 et 100, et une valeur plus élevée est meilleure.
 \begin{equation}
     \text{AG} = \frac{1}{N} \sum_{i=1}^{N} \frac{[o_i - p_i]_+}{1 - p_i} \cdot 100
 \end{equation}
+
