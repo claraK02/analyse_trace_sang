@@ -213,7 +213,7 @@ def get_metrics_name(model_name: Literal['resnet', 'adversarial']) -> list[str]:
     """
 
     if model_name == 'resnet':
-        metrics_name: list[str] = ['acc micro', 'acc macro', 'f1-score macro', 'top k macro']
+        metrics_name: list[str] = ['acc micro', 'acc macro', 'f1-score macro', 'top k micro']
     elif model_name == 'adversarial':
         metrics_name: list[str] = ['crossentropy', 'res loss', 'adv loss', 'resnet_top k micro', 'resnet_acc micro', 'resnet_acc macro', 'adv_acc micro']
     else:
