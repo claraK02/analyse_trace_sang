@@ -102,10 +102,10 @@ def test(config: EasyDict,
     y_true: Tensor = torch.concat(all_y_true, dim=0).to(device)
     y_pred: Tensor = torch.concat(all_y_pred, dim=0).to(device)
     if run_silancy_metrics:
-        o_pred: Tensor = torch.concat(all_o_pred, dim=0).to(device)
+        all_o_pred: Tensor = torch.concat(all_o_pred, dim=0).to(device)
     test_metrics = metrics.compute(y_pred=y_pred,
                                    y_true=y_true,
-                                   o_pred=o_pred)
+                                   o_pred=all_o_pred)
     print(metrics.get_info(metrics_value=test_metrics))
 
     if 'real' in config.data.path:
