@@ -50,8 +50,8 @@
 \begin{frame}{Données}
     \begin{itemize}
         \item 2 datasets: données de laboratoire et données réelles issus de scène de crime
-        \item données labo: 10978 images coupés en 80\%, 10\%, 10\%.
-        \item données réelles: 245 images coupés en 60\%, 10\%, 30\% de sorte à avoir 70 images dans le test.
+        \item données labo: 10978 images coupés en 80\%, 10\%, 10\%, contient 4 backgrounds différents (lino, bois, carrelage, papier)
+        \item données réelles: 245 images coupés en 60\%, 10\%, 30\% de sorte à avoir 70 images dans le test. Pas de background
     \end{itemize}
 \end{frame}
 
@@ -88,6 +88,28 @@
         \end{subfigure}
         \caption{Deux images de scènes de crime}
         \label{fig: reals images}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Données}
+    \begin{figure}[ht]
+        \centering
+        \begin{subfigure}{0.32\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{../asset/67.jpg}
+            \caption{Un modèle de Trace passives}
+        \end{subfigure}
+        \begin{subfigure}{0.32\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{../asset/35.jpg}
+            \caption{Plusieurs trace de passives}
+        \end{subfigure}
+        \begin{subfigure}{0.32\textwidth}
+            \centering
+            \includegraphics[width=\linewidth]{../asset/1275.jpg}
+            \caption{Un modèle de trace d'ejection}
+        \end{subfigure}
     \end{figure}
 \end{frame}
 
@@ -291,11 +313,11 @@
         \centering
         \begin{subfigure}{0.40\textwidth}
             \centering
-            \includegraphics[width=\linewidth]{../asset/exemple/attention_reglette.jpg}
+            \includegraphics[width=\linewidth]{../asset/exemple/attention_reglette_image.jpg}
         \end{subfigure}
         \begin{subfigure}{0.40\textwidth}
             \centering
-            \includegraphics[width=\linewidth]{../asset/exemple/attention_reglette_image.jpg}
+            \includegraphics[width=\linewidth]{../asset/exemple/attention_reglette.png}
         \end{subfigure}
         \caption{Exemple d'une image de trace de sang (à droite) avec sa carte de chaleur Grad CAM superposée (à gauche), dans le cadre d'une attention portée à la réglette.}
         \label{fig:grad_cam reglette}
@@ -357,7 +379,7 @@
         \item Utiliser un plus gros ResNet
         \item Faire du self-supervise learning pour traiter toutes les données de l'expert
         \item Installer le code chez l'expert pour qu'il puisse le faire tourner en local sur sa machine
-        \item Mise à disposition d'un GitHub public pour les prochaines équipes
+        \item Mise à disposition d'un GitHub public pour les prochaines équipes. \url{https://github.com/Highdrien/blood_trace_analysis}
     \end{itemize}
 \end{frame}
 
