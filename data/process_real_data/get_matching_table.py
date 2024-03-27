@@ -20,6 +20,5 @@ def get_matching_table(filepath: str = MATCHING_TABLE_PATH
     return matching_table
 
 if __name__ == '__main__':
-    from icecream import ic
     matching_table = get_matching_table()
-    ic(matching_table)
+    print(matching_table)

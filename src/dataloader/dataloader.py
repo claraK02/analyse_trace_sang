@@ -22,7 +22,6 @@ class DataGenerator(Dataset):
     def __init__(self,
                  data_path: str,
                  mode: Literal['train', 'val', 'test'],
-                 image_size: int,
                  use_background: bool,
                  transforms: EasyDict
                  ) -> None:
@@ -32,7 +31,6 @@ class DataGenerator(Dataset):
         Args:
             data_path (str): The path to the data directory.
             mode (Literal['train', 'val', 'test']): The mode of the DataLoader. Must be one of 'train', 'val', or 'test'.
-            image_size (int): The size of the images.
             use_background (bool): Whether to use background images.
             transforms (EasyDict): The transforms configuration.
 
@@ -48,11 +46,7 @@ class DataGenerator(Dataset):
         self.use_background = use_background
 
         if not os.path.exists(data_path):
-            raise FileNotFoundError(
-                f"{data_path} wans't found. ",
-                f"Make sure that you have run get_data_transform correctly",
-                f"with the image_size={image_size}",
-            )
+            raise FileNotFoundError(f"{data_path} wans't found. ")
 
         self.data: list[tuple[str, str, str]] = []
         for label in LABELS:

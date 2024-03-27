@@ -4,10 +4,10 @@ import argparse
 from config.utils import load_config, find_config
 from config.search import Search
 from src.train import train_resnet, train_adversarial
-from src import test, infer
+from src import test
 
 
-MODE_IMPLEMENTED = ['train', 'test', 'infer', 'random_search', 'grid_search']
+MODE_IMPLEMENTED = ['train', 'test', 'random_search', 'grid_search']
 MODEL_IMPLEMENTED = ['resnet', 'adversarial']
 
 
@@ -80,17 +80,6 @@ def main(options: dict) -> None:
                   logging_path=options['path'],
                   run_real_data=options['run_on_real_data'],
                   run_silancy_metrics=options['run_saliency_metics'])
-    
-    # INEFRENCE
-    if options['mode'] == 'infer':
-        if options['path'] is None:
-            raise ValueError('Please specify the path to the experiments')
-        
-        config = load_config(find_config(experiment_path=options['path']))
-        infer.infer(datapath=r'data\data_labo\test_256',
-                    logging_path=options['path'],
-                    config=config,
-                    test_inference=True)
 
 
 def get_options() -> dict:
@@ -113,9 +102,6 @@ def get_options() -> dict:
         --run_on_real_data, -r: str, default='false'
             Run on the real data or not.
 
-        --inferpath, -i: str
-            Data path to run the inference (for infer).
-
     Returns:
         dict: A dictionary of options.
     """
@@ -137,10 +123,6 @@ def get_options() -> dict:
                         help='run on the real data or not')
     parser.add_argument('--run_saliency_metics', '-s', type=str, default='false',
                         help='run the saliency metrics or not')
-    
-    # For inference
-    parser.add_argument('--inferpath', '-i', type=str,
-                        help="data path to run the inference (for infer)")
     args = parser.parse_args()
     options = vars(args)
 
