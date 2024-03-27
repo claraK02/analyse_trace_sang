@@ -48,6 +48,12 @@ You can use `python run_infer.py -h` for this documentation. Example of code exe
 python run_infer.py -d data/images_to_infer -m logs/retrain_resnet_allw_img256_2 -o data/output -s false
 ```
 
+## Use Streamlit
+You can also perform an inference with streamlit by using [run_app.bat](streamlit/run_app.bat) if you use Windows, or run this commende line:
+```bash
+streamlit run streamlit/streamlit_app.py
+```
+
 # Training (validate and testing) new models
 
 ## Config
