@@ -1,5 +1,5 @@
 data:                                 # data parameters
-  path: '/projects/LAC/data/data_real'
+  path: '/projects/LAC/data/new_real_data'
   real_data_path: '/projects/LAC/data/new_real_data'
   image_size: 256                     # size of the images
   num_classes: 18                     # number of classes                  
