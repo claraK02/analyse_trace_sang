@@ -151,7 +151,7 @@ def create_dataloader(config: EasyDict,
     generator = DataGenerator(
         data_path=data_path,
         mode=mode,
-        image_size=config.data.image_size,
+        # image_size=config.data.image_size,
         use_background=(not (run_real_data or 'real' in config.data.path)),
         transforms=config.data.transforms
     )
