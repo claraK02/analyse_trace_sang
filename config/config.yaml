@@ -1,6 +1,6 @@
 data:                                 # data parameters
-  path: data/data_labo                # path to the data
-  real_data_path: data/data_real      # path to the real data
+  path: '/projects/LAC/data/data_real'
+  real_data_path: '/projects/LAC/data/new_real_data'
   image_size: 256                     # size of the images
   num_classes: 18                     # number of classes                  
   background_classes: 4               # number of background classes      
@@ -19,23 +19,23 @@ model:                                # model parameters
   resnet:                             # resnet parameters
     hidden_size: 64                   # hidden size of the resnet
     p_dropout: 0.1                    # dropout probability
-    freeze_resnet: true               # freeze the convolution layer of the resnet
+    freeze_resnet: false               # freeze the convolution layer of the resnet
     resume_training:                  # resume training from an experiment
-      do_resume: false                # do resume training
-      path: logs/resnet_img256_0      # path to the experiment
+      do_resume: true                # do resume training
+      path: logs/resnet_allw_img256_2     # path to the experiment
       freeze_param: false             # freeze the parameters for this experiment
   adversarial:                        # adversarial parameters
     hidden_size: 256                  # hidden size of the adversarial model
     p_dropout: 0.1                    # dropout probability
 
 learning:                             # learning parameters (training and validation)
-  epochs: 20                          # number of epochs
+  epochs: 10                          # number of epochs
   batch_size: 42                      # batch size
-  learning_rate: 0.0005               # learning rate
+  learning_rate: 0.0001              # learning rate
   loss: crossentropy                  # loss function
   optimizer: adam                     # optimizer
   device: cuda                        # device
-  num_workers: 1                      # number of workers 
+  num_workers: 4                     # number of workers
   shuffle: true                       # shuffle the data
   drop_last: true                     # drop the last batch
   save_experiment: true               # save the experiment
