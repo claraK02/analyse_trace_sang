@@ -31,6 +31,7 @@ model:                                # model parameters
     hidden_size: 64                   # hidden size of the resnet
     p_dropout: 0.1                    # dropout probability
     freeze_resnet: true               # freeze the convolution layer of the resnet
+    path: trex.pth
     resume_training:                  # resume training from an experiment
       do_resume: true                # do resume training
       path: trex.pth     # path to the experiment
