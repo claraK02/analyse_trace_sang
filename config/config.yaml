@@ -1,5 +1,5 @@
 data:                                 # data parameters
-  path: '/projects/LAC/data/new_real_data'
+  path: '/projects/LAC/data/data_labo'
   real_data_path: '/projects/LAC/data/new_real_data'
   image_size: 256                     # size of the images
   num_classes: 18                     # number of classes                  
@@ -15,7 +15,7 @@ data:                                 # data parameters
       hue: 0.0                        # hue
 
 model:                                # model parameters
-  name: resnet                        # name of the model. can be resnet, adversarial
+  name: trex                       # name of the model. can be resnet, adversarial
   resnet:                             # resnet parameters
     hidden_size: 64                   # hidden size of the resnet
     p_dropout: 0.1                    # dropout probability
@@ -27,6 +27,15 @@ model:                                # model parameters
   adversarial:                        # adversarial parameters
     hidden_size: 256                  # hidden size of the adversarial model
     p_dropout: 0.1                    # dropout probability
+  trex:                               # trex parameters
+    hidden_size: 64                   # hidden size of the resnet
+    p_dropout: 0.1                    # dropout probability
+    freeze_resnet: true               # freeze the convolution layer of the resnet
+    resume_training:                  # resume training from an experiment
+      do_resume: true                # do resume training
+      path: trex.pth     # path to the experiment
+      freeze_param: false
+
 
 learning:                             # learning parameters (training and validation)
   epochs: 10                          # number of epochs
