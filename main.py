@@ -3,12 +3,12 @@ import argparse
 
 from config.utils import load_config, find_config
 from config.search import Search
-from src.train import train_resnet, train_adversarial
+from src.train import train_resnet, train_adversarial, train_trex
 from src import test
 
 
 MODE_IMPLEMENTED = ['train', 'test', 'random_search', 'grid_search']
-MODEL_IMPLEMENTED = ['resnet', 'adversarial']
+MODEL_IMPLEMENTED = ['resnet', 'adversarial' , 'trex']
 
 
 def main(options: dict) -> None:
@@ -40,6 +40,9 @@ def main(options: dict) -> None:
         
         if config.model.name == 'adversarial':
             train_adversarial.train(config)
+
+        if config.model.name == 'trex':
+            train_trex.train(config)
     
     if options['mode'] in ['random_search', 'grid_search']:
         search = Search(config_yaml_file=options['config_path'],
@@ -63,6 +66,8 @@ def main(options: dict) -> None:
                 train_resnet.train(config, logspath=search.get_directory())
             elif config.model.name == 'adversarial':
                 train_adversarial.train(config, logspath=search.get_directory())
+            elif config.model.name == 'trex':
+                train_trex.train(config, logspath=search.get_directory())
             else:
                 raise NotImplementedError
         

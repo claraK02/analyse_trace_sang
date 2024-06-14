@@ -1,7 +1,7 @@
 from easydict import EasyDict
 
 
-MODEL_IMPLEMENTED = ['resnet', 'adversarial']
+MODEL_IMPLEMENTED = ['resnet', 'adversarial', 'trex']
 
 
 def get_config_name(config: EasyDict) -> str:
@@ -26,6 +26,9 @@ def get_config_name(config: EasyDict) -> str:
 
     if config.model.name == 'adversarial':
         return get_config_name_adv(config)
+
+    if config.model.name == 'trex':
+        return get_config_name_trex(config)
     
     return 'unknown'
 
@@ -68,3 +71,14 @@ def get_config_name_adv(config: EasyDict) -> str:
     """
     return f'adv_img{config.data.image_size}'
     
+def get_config_name_adv(config: EasyDict) -> str:
+    """
+    Get the configuration name for the trex models.
+
+    Args:
+        config (EasyDict): The configuration object.
+
+    Returns:
+        str: The configuration name.
+    """
+    return f'trex_img{config.data.image_size}'
