@@ -41,6 +41,7 @@ class Trex(Model):
             state_dict = checkpoint['state_dict'] if 'state_dict' in checkpoint else checkpoint
             msg = backbone.load_state_dict(state_dict, strict=False)
             assert msg.missing_keys == ["fc.weight", "fc.bias"] and msg.unexpected_keys == []
+            model.load_state_dict(checkpoint,strict= False)
 
         self.backbone_begin = nn.Sequential(*(list(backbone.children())[:-1]))
 
