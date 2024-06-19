@@ -75,7 +75,7 @@ class Trex(Model):
     def load_checkpoint(self, checkpoint_path):
          checkpoint = torch.load(checkpoint_path)
          state_dict = checkpoint['state_dict'] if 'state_dict' in checkpoint else checkpoint
-         self.load_state_dict(state_dict, strict=False)
+         self.load_state_dict(state_dict, strict=True)
     def forward_and_get_intermediate(self, x: Tensor) -> tuple[Tensor, Tensor]:
         """
         Forward pass of the model and returns intermediate and final outputs.
@@ -135,6 +135,7 @@ def get_trex(config: EasyDict) -> Trex:
     return trex
 
 
+
 if __name__ == '__main__':
     import yaml
     import torch
@@ -150,6 +151,7 @@ if __name__ == '__main__':
     print("Total parameters:", sum(p.numel() for p in model.parameters()))
     print("Trainable parameters:", sum(p.numel() for p in model.parameters() if p.requires_grad))
     learnable_param = model.get_dict_learned_parameters()
+
     x = torch.randn((32, 3, 128, 128))
     y = model.forward(x)
     print("y shape:", y.shape)
