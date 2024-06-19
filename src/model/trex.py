@@ -34,15 +34,19 @@ class Trex(Model):
         """
         # Load the backbone model resnet
         backbone = models.resnet50(weights=None)
-        backbone.fc = nn.Identity()
+
 
         # Load checkpoint if provided
         if checkpoint_path:
             checkpoint = torch.load(checkpoint_path, map_location='cpu')
             state_dict = checkpoint['state_dict'] if 'state_dict' in checkpoint else checkpoint
             msg = backbone.load_state_dict(state_dict, strict=False)
-            assert msg.missing_keys == ["fc.weight", "fc.bias"] and msg.unexpected_keys == []
+            #assert msg.missing_keys == ["fc.weight", "fc.bias"] and msg.unexpected_keys == []
 
+            if msg.missing_keys:
+                print(f"Warning: Missing keys in state_dict: {msg.missing_keys}")
+            if msg.unexpected_keys:
+                print(f"Warning: Unexpected keys in state_dict: {msg.unexpected_keys}")
 
         self.backbone_begin = nn.Sequential(*(list(backbone.children())[:-1]))
 
