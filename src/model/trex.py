@@ -32,18 +32,19 @@ class Trex(Model):
             checkpoint_path (None | str, optional): Path to checkpoint. Defaults to None.
         """
         # Load the ResNet-50 model
-        resnet = models.resnet50(weights = None)
+        #resnet = models.resnet50(weights = None)
 
+        trex = "trex.pth"
 
         # Load checkpoint if provided
         if checkpoint_path:
             checkpoint = torch.load(checkpoint_path, map_location='cpu')
             state_dict = checkpoint['state_dict'] if 'state_dict' in checkpoint else checkpoint
-            msg = resnet.load_state_dict(state_dict, strict=False)
+            msg = trex.load_state_dict(state_dict, strict=False)
             assert msg.missing_keys == ["fc.weight", "fc.bias"] and msg.unexpected_keys == []
 
 
-        self.resnet_begin = nn.Sequential(*(list(resnet.children())[:-1]))
+        self.resnet_begin = nn.Sequential(*(list(trex.children())[:-1]))
 
         if freeze_resnet:
             for param in self.resnet_begin.parameters():
