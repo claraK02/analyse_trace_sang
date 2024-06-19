@@ -134,7 +134,7 @@ def create_infer_dataloader(config: EasyDict,
 
 if __name__ == "__main__":
     datapath = r"data\data_labo\test_512"
-    infer_generator = InferDataGenerator(data=None, datapath=datapath, image_size=512)
+    infer_generator = InferDataGenerator(data=None, datapath=datapath, image_size=264)
     print(f"{len(infer_generator)=}")
     x, y = infer_generator.__getitem__(index=0)
     print(f"{x.shape=}")

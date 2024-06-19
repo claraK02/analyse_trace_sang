@@ -4,7 +4,7 @@ from os.path import dirname as up
 
 import torch
 from torchvision import models
-from torchvision.models.resnet import ResNet18_Weights, ResNet
+from torchvision.models.resnet import ResNet50_Weights, ResNet
 
 sys.path.append(up(up(up(os.path.abspath(__file__)))))
 
@@ -24,7 +24,7 @@ def get_original_resnet(finetune_resnet: FineTuneResNet) -> ResNet:
     Returns:
         ResNet: The original ResNet model with matched weights.
     """
-    resnet = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+    resnet = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
     finetune_weigth = finetune_resnet.resnet_begin.state_dict()
 
     loaded_param : list[str] = []

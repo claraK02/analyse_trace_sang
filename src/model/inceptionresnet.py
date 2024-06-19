@@ -1,7 +1,7 @@
 import torch
 import torchvision.models as models
 import torch.nn as nn
-from torchvision.models.resnet import ResNet18_Weights
+from torchvision.models.resnet import ResNet50_Weights
 from torch.nn import functional as F
 from itertools import chain
 
@@ -11,7 +11,7 @@ class InceptionResNet(nn.Module):
         super(InceptionResNet, self).__init__() # Call parent's constructor
 
         # Load the pre-trained ResNet-18 model
-        self.model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+        self.model = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
 
         # Freeze all the pre-trained layers
         for param in self.model.parameters():
@@ -64,7 +64,7 @@ class AdversarialInceptionResNet(nn.Module):
         super(AdversarialInceptionResNet, self).__init__() # Call parent's constructor
 
         # Load the pre-trained ResNet-18 model
-        self.model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+        self.model = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
 
         # Freeze all the pre-trained layers
         for param in self.model.parameters():
