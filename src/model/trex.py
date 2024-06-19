@@ -155,4 +155,9 @@ if __name__ == '__main__':
     x = torch.randn((32, 3, 128, 128))
     y = model.forward(x)
     print("y shape:", y.shape)
-    intermediate, final_output = model.forward_and_get_intermediate(x)
+    intermediate, reel_output = model.forward_and_get_intermediate(x)
+
+    inter_param = model.get_intermediare_parameters()
+    print(inter_param, type(inter_param))
+    for param in inter_param:
+        print(param)
