@@ -7,6 +7,8 @@ from os.path import dirname as up
 import torch
 from torch import Tensor
 
+from src.model.trex import get_trex
+
 sys.path.append(up(os.path.abspath(__file__)))
 
 from config.utils import test_logger
@@ -40,11 +42,18 @@ def test(config: EasyDict,
     n_test = len(test_generator)
 
     # Get model
-    model = finetune_resnet.get_finetuneresnet(config)
-    weight = utils.load_weights(logging_path, device=device, model_name='res')
-    model.load_dict_learnable_parameters(state_dict=weight, strict=True)
-    model = model.to(device)
-    del weight
+    if config.model.type == 'resnet':
+        model = finetune_resnet.get_finetuneresnet(config)
+        weight = utils.load_weights(logging_path, device=device, model_name='res')
+        model.load_dict_learnable_parameters(state_dict=weight, strict=True)
+        model = model.to(device)
+        del weight
+    if config.model.type == 'trex':
+        model = get_trex(config=config)
+        weight = utils.load_weights(logging_path, device=device, model_name='trex')
+        model.load_dict_learnable_parameters(state_dict=weight, strict=False)
+        model = model.to(device)
+        del weight
 
     # Loss
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
