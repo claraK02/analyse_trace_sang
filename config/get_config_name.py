@@ -71,7 +71,7 @@ def get_config_name_adv(config: EasyDict) -> str:
     """
     return f'adv_img{config.data.image_size}'
     
-def get_config_name_adv(config: EasyDict) -> str:
+def get_config_name_trex(config: EasyDict) -> str:
     """
     Get the configuration name for the trex models.
 
