@@ -45,6 +45,8 @@ class Trex(Model):
 
         self.backbone_begin = nn.Sequential(*(list(backbone.children())[:-1]))
 
+        for param in self.backbone_begin.parameters():
+            param.requires_grad = False
         if freeze_backbone:
             for param in self.backbone_begin.parameters():
                 param.requires_grad = False
