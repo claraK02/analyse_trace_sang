@@ -39,7 +39,7 @@ class Trex(Model):
         if checkpoint_path:
             checkpoint = torch.load(checkpoint_path, map_location='cpu')
             state_dict = checkpoint['state_dict'] if 'state_dict' in checkpoint else checkpoint
-            msg = backbone.load_state_dict(state_dict, strict=False)
+            msg = backbone.load_state_dict(torch.load('trex.pth'), strict=False)
             assert msg.missing_keys == ["fc.weight", "fc.bias"] and msg.unexpected_keys == []
 
 
