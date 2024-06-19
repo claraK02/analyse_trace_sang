@@ -211,7 +211,7 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
 
         print(f'Resume training from {checkpoint_path} for trex')
         checkpoint = torch.load(checkpoint_path)
-        model.load_state_dict(checkpoint, strict=True)
+        model.load_state_dict(checkpoint, strict=False)
         del checkpoint
 
 
