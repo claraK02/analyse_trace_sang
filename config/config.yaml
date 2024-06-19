@@ -32,9 +32,6 @@ model:                                # model parameters
     p_dropout: 0.1                    # dropout probability
     freeze_resnet: true               # freeze the convolution layer of the resnet
     checkpoint_path: trex.pth
-    do_resume: true                # do resume training
-    path: trex.pth                 # path to the experiment
-    freeze_param: false
 
 
 learning:                             # learning parameters (training and validation)
