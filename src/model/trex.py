@@ -75,7 +75,7 @@ class Trex(Model):
     def load_checkpoint(self, checkpoint_path):
          checkpoint = torch.load(checkpoint_path)
          state_dict = checkpoint['state_dict'] if 'state_dict' in checkpoint else checkpoint
-         self.load_state_dict(state_dict, strict=True)
+         self.load_state_dict(state_dict, strict=False)
     def forward_and_get_intermediate(self, x: Tensor) -> tuple[Tensor, Tensor]:
         """
         Forward pass of the model and returns intermediate and final outputs.
