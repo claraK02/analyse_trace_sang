@@ -4,7 +4,7 @@ import argparse
 from config.utils import load_config, find_config
 from src.infer import infer
 
-MODEL_IMPLEMENTED = ['resnet', 'adversarial']
+MODEL_IMPLEMENTED = ['resnet', 'adversarial','trex']
 
 
 def main(options: dict) -> None:    
