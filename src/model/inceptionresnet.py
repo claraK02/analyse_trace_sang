@@ -124,7 +124,7 @@ if __name__ == '__main__':
     print(model.model)
     #test of the model
     #creata a random tensor
-    x = torch.randn(1,3,512,512)
+    x = torch.randn(1,3,2048,2048)
     #forward
     
     y = model.forward(x)
