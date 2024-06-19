@@ -32,7 +32,7 @@ class Trex(Model):
             freeze_backbone (bool, optional): Whether to freeze the backbone layers. Defaults to True.
             checkpoint_path (str, optional): Path to checkpoint. Defaults to None.
         """
-        # Load the backbone model
+        # Load the backbone model resnet
         backbone = models.resnet50(weights=None)
         backbone.fc = nn.Identity()
 
