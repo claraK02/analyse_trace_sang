@@ -214,10 +214,7 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
         model.load_state_dict(checkpoint, strict=True)
         del checkpoint
 
-        if not config.model.trex.freeze_backbone:
-            print('Unfreezing the parameters for trex')
-            for param in model.parameters():
-                param.requires_grad = True
+
 
     return None
 
