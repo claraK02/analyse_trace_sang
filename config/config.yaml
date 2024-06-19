@@ -28,10 +28,10 @@ model:                                # model parameters
     hidden_size: 256                  # hidden size of the adversarial model
     p_dropout: 0.1                    # dropout probability
   trex:                               # trex parameters
-    hidden_size: 64                   # hidden size of the resnet
+    hidden_size: 64                   # hidden size of the model
     p_dropout: 0.1                    # dropout probability
-    freeze_resnet: true               # freeze the convolution layer of the resnet
-    checkpoint_path: trex.pth
+    freeze_backbone: true             # freeze the convolution layer of the model
+    checkpoint_path: 'trex.pth'       # path to the checkpoint
 
 
 learning:                             # learning parameters (training and validation)
