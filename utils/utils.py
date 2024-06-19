@@ -199,6 +199,7 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
             print('unfreezing the parameters')
             for param in model.parameters():
                 param.requires_grad = True
+
     elif config.model.name == 'trex':
         if 'checkpoint_path' not in config.model.trex.keys():
             print("Didn't find checkpoint_path key for trex")
@@ -211,8 +212,11 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
 
         print(f'Resume training from {checkpoint_path} for trex')
         checkpoint = torch.load(checkpoint_path)
-        model.load_state_dict(checkpoint, strict=False)
+        model.load_state_dict(checkpoint, strict=True)
         del checkpoint
+
+
+
 
 
 
