@@ -92,8 +92,8 @@ class Trex(Model):
         x = x.squeeze(-1).squeeze(-1)
         intermediate = self.relu(self.fc1(x))
         x = self.dropout(intermediate)
-        final_output = self.fc2(x)
-        return intermediate, final_output
+        reel_output = self.fc2(x)
+        return intermediate, reel_output
 
     def get_intermediate_parameters(self) -> Iterator[nn.Parameter]:
         """
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     print("Total parameters:", sum(p.numel() for p in model.parameters()))
     print("Trainable parameters:", sum(p.numel() for p in model.parameters() if p.requires_grad))
     learnable_param = model.get_dict_learned_parameters()
-
+    model.load_dict_learnable_parameters(state_dict=learnable_param, strict=True)
     x = torch.randn((32, 3, 128, 128))
     y = model.forward(x)
     print("y shape:", y.shape)

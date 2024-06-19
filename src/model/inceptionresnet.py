@@ -15,7 +15,7 @@ class InceptionResNet(nn.Module):
 
         # Freeze all the pre-trained layers
         for param in self.model.parameters():
-            param.requires_grad = True
+            param.requires_grad = False
 
         # Add a dropout layer and modify the last layer of the model
         self.dropout = nn.Dropout(dropout_probability)
