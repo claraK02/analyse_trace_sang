@@ -6,7 +6,7 @@ from torchvision.transforms import (
     RandomHorizontalFlip,
     RandomVerticalFlip,
     ColorJitter,
-    ToTensor,
+    ToTensor, Grayscale,
 )
 
 
