@@ -38,10 +38,10 @@ class Trex(Model):
         # Load checkpoint if provided
         if checkpoint_path:
             checkpoint = torch.load(checkpoint_path, map_location='cpu')
-            state_dict = checkpoint['state_dict'] if 'state_dict' in checkpoint else checkpoint
-            msg = Model.load_state_dict(state_dict, strict=False)
+            #state_dict = checkpoint['state_dict'] if 'state_dict' in checkpoint else checkpoint
+            msg = backbone.load_state_dict(checkpoint, strict=False)
             assert msg.missing_keys == ["fc.weight", "fc.bias"] and msg.unexpected_keys == []
-            #Model.load_state_dict(checkpoint,strict= False)
+
 
         self.backbone_begin = nn.Sequential(*(list(backbone.children())[:-1]))
 
