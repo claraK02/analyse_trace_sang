@@ -34,7 +34,7 @@ class Trex(Model):
         """
         # Load the backbone model
         backbone = models.resnet50(weights=None)
-        model.fc = nn.Identity()
+        backbone.fc = nn.Identity()
 
         # Load checkpoint if provided
         if checkpoint_path:
