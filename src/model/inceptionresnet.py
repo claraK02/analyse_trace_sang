@@ -10,7 +10,7 @@ class InceptionResNet(nn.Module):
     def __init__(self, num_classes=2, pretrained=True, dropout_probability=0.5, hidden_size=100):   
         super(InceptionResNet, self).__init__() # Call parent's constructor
 
-        # Load the pre-trained ResNet-18 model
+        # Load the pre-trained ResNet-50 model
         self.model = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
 
         # Freeze all the pre-trained layers

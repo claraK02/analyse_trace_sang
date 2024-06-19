@@ -180,24 +180,44 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
         config (EasyDict): The configuration object.
         model (torch.nn.Module): The model to resume training on.
     """
-    if 'resume_training' not in config.model.resnet.keys():
-        print("didn't find resume_training key")
-        return None
+    if config.model.name == 'resnet':
+        if 'resume_training' not in config.model.resnet.keys():
+            print("didn't find resume_training key")
+            return None
 
-    resume_training: EasyDict = config.model.resnet.resume_training
-    if not resume_training.do_resume:
-        print("resume training: None")
-        return None
+        resume_training: EasyDict = config.model.resnet.resume_training
+        if not resume_training.do_resume:
+            print("resume training: None")
+            return None
 
-    print(f'resume training from {resume_training.path}')
-    weight = load_weights(resume_training.path)
-    model.load_dict_learnable_parameters(state_dict=weight, strict=True)
-    del weight
+        print(f'resume training from {resume_training.path}')
+        weight = load_weights(resume_training.path)
+        model.load_dict_learnable_parameters(state_dict=weight, strict=True)
+        del weight
 
-    if not resume_training.freeze_param:
-        print('unfreezing the parameters')
-        for param in model.parameters():
-            param.requires_grad = True
+        if not resume_training.freeze_param:
+            print('unfreezing the parameters')
+            for param in model.parameters():
+                param.requires_grad = True
+    elif config.model.name == 'trex':
+        if 'checkpoint_path' not in config.model.trex.keys():
+            print("Didn't find checkpoint_path key for trex")
+            return None
+
+        checkpoint_path = config.model.trex.checkpoint_path
+        if not checkpoint_path:
+            print("Resume training for trex: None")
+            return None
+
+        print(f'Resume training from {checkpoint_path} for trex')
+        checkpoint = torch.load(checkpoint_path)
+        model.load_state_dict(checkpoint, strict=True)
+        del checkpoint
+
+        if not config.model.trex.freeze_backbone:
+            print('Unfreezing the parameters for trex')
+            for param in model.parameters():
+                param.requires_grad = True
 
     return None
 

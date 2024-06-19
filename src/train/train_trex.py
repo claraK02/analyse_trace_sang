@@ -14,6 +14,7 @@ from src.dataloader.dataloader import create_dataloader
 from src.metrics.metrics import Metrics
 from src.model import finetune_resnet, trex
 from utils import utils, plot_learning_curves
+from utils.utils import resume_training
 
 
 def train(config: EasyDict,
@@ -30,7 +31,7 @@ def train(config: EasyDict,
         ValueError: If the model name in the config is not 'trex'.
     """
     if config.model.name != 'trex':
-        raise ValueError(f"Expected model.name=resnet but found {config.model.name}.")
+        raise ValueError(f"Expected model.name=trex but found {config.model.name}.")
 
     device = utils.get_device(device_config=config.learning.device)
 
