@@ -192,7 +192,7 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
 
         print(f'resume training from {resume_training.path}')
         weight = load_weights(resume_training.path)
-        model.load_dict_learnable_parameters(state_dict=weight, strict=True)
+        model.load_dict_learnable_parameters(state_dict=weight, strict=False)
         del weight
 
         if not resume_training.freeze_param:
