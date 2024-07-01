@@ -45,7 +45,7 @@ def test(config: EasyDict,
     if config.model.name == 'resnet':
         model = finetune_resnet.get_finetuneresnet(config)
         weight = utils.load_weights(logging_path, device=device, model_name='res')
-        model.load_dict_learnable_parameters(state_dict=weight, strict=True)
+        model.load_dict_learnable_parameters(state_dict=weight, strict=False)
         model = model.to(device)
         del weight
     if config.model.name == 'trex':
