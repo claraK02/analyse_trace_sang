@@ -112,7 +112,7 @@ if __name__ == '__main__':
 
     model = get_finetuneresnet(config)
     weight = utils.load_weights(config_path, device=torch.device('cpu'))
-    model.load_dict_learnable_parameters(state_dict=weight, strict=True)
+    model.load_dict_learnable_parameters(state_dict=weight, strict=False)
     del weight
 
     gradcam_plus_plus = GradCamPlusPlus(model=model)
