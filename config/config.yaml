@@ -15,7 +15,7 @@ data:                                 # data parameters
       hue: 0.0                        # hue
 
 model:                                # model parameters
-  name: trex                       # name of the model. can be resnet, adversarial
+  name: resnet                      # name of the model. can be resnet, adversarial
   resnet:                             # resnet parameters
     hidden_size: 64                   # hidden size of the resnet
     p_dropout: 0.1                    # dropout probability
