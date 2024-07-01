@@ -8,7 +8,6 @@ import torch
 from torch import Tensor
 from pytorch_grad_cam import GradCAMPlusPlus
 from pytorch_grad_cam.utils.image import show_cam_on_image
-from torchvision.transforms import Grayscale
 
 sys.path.append(up(up(os.path.abspath(__file__))))
 
@@ -103,8 +102,7 @@ if __name__ == '__main__':
     from src.model.finetune_resnet import get_finetuneresnet
 
     batch_size = 2
-    cv2.transform.append(Grayscale(num_output_channels=3))
-    x = torch.rand(batch_size, 1, 256, 256)
+    x = torch.rand(batch_size, 3, 256, 256)
     for i in range(batch_size):
         xi, _ = utils.get_random_img(image_type='torch')
         x[i] = xi
