@@ -214,12 +214,6 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint, strict=False)
         del checkpoint
-
-
-
-
-
-
     return None
 
 
