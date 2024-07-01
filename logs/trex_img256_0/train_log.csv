@@ -1,1 +1,0 @@
-step,crossentropy,val crossentropy,top k micro,val top k micro,top k macro,val top k macro,acc micro,val acc micro,acc macro,val acc macro,precission macro,val precission macro,recall macro,val recall macro,f1-score macro,val f1-score macro
