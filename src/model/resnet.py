@@ -44,12 +44,7 @@ def get_original_resnet(finetune_resnet: FineTuneResNet) -> ResNet:
 
             if finetune_name not in finetune_weigth.keys():
                 raise ValueError(f'param {name} was not found in finetune_weigth')
-
-            if param.shape != param.copy_(finetune_weigth[finetune_name]).shape:
-                print(
-                    f'Shape mismatch for {name}: resnet {param.shape}, finetune {param.copy_(finetune_weigth[finetune_name]).shape}')
-                continue
-
+            
             with torch.no_grad():
                 param.copy_(finetune_weigth[finetune_name])
             loaded_param.append(finetune_name)
