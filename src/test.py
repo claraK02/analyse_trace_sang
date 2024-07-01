@@ -14,7 +14,7 @@ sys.path.append(up(os.path.abspath(__file__)))
 from config.utils import test_logger
 from src.dataloader.dataloader import create_dataloader
 from src.model import finetune_resnet
-from src.gradcam import GradCam
+from src.gradcam import GradCamPlusPlus
 from src.metrics.metrics import Metrics
 from utils import utils
 
@@ -67,7 +67,7 @@ def test(config: EasyDict,
 
     # Get GradCam
     if run_silancy_metrics:
-        gradcam = GradCam(model=model)
+        gradcam =GradCamPlusPlus(model=model)
 
     test_loss = 0
     test_range = tqdm(test_generator)

@@ -13,7 +13,7 @@ sys.path.append(up(up(os.path.abspath(__file__))))
 from src.dataloader.labels import get_topk_prediction
 from src.dataloader.infer_dataloader import create_infer_dataloader
 from src.model import finetune_resnet
-from src.gradcam import GradCam
+from src.gradcam import GradCamPlusPlus
 from utils import utils
 
 
@@ -66,7 +66,7 @@ def infer(infer_images_path: list[str],
 
     # GradCAM
     if plot_saliency:
-        gradcam = GradCam(model=model)
+        gradcam = GradCamPlusPlus(model=model)
         saliency_path = os.path.join(dstpath, 'saliency_maps')
         saliency_fun_name: Callable[[str], str] = \
             lambda img_name: get_image_name(img_name).split('.')[0].replace(os.sep, '_') + '_saliency.png'
