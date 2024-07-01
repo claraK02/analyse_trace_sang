@@ -23,7 +23,7 @@ def get_transforms(transforms_config: EasyDict, mode: str) -> Compose:
     """
     transform = []
 
-
+    transform.append(Grayscale(num_output_channels=3))
 
     if mode == "train":
         if transforms_config.run_rotation:
