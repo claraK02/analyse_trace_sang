@@ -22,7 +22,7 @@ model:                                # model parameters
     freeze_resnet: false               # freeze the convolution layer of the resnet
     resume_training:                  # resume training from an experiment
       do_resume: true                # do resume training
-      path: logs/resnet_allw_img256_2     # path to the experiment
+      path: logs_previous_models/resnet_allw_img256_2     # path to the experiment
       freeze_param: false             # freeze the parameters for this experiment
   adversarial:                        # adversarial parameters
     hidden_size: 256                  # hidden size of the adversarial model
