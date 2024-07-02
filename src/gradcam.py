@@ -25,7 +25,7 @@ class GradCam:
             model (FineTuneResNet): The fine-tuned ResNet model.
         """
         true_resnet = get_original_resnet(model)
-        target_layer = true_resnet.layer4[-1].conv3
+        target_layer = true_resnet.layer4[1].conv2
         self.cam = GradCAM(model=true_resnet, target_layers=[target_layer])
 
     def forward(self, image: Tensor) -> np.ndarray:

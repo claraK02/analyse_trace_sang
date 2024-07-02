@@ -4,7 +4,7 @@ from os.path import dirname as up
 
 import torch
 from torchvision import models
-from torchvision.models.resnet import ResNet50_Weights, ResNet
+from torchvision.models.resnet import ResNet18_Weights, ResNet
 
 sys.path.append(up(up(up(os.path.abspath(__file__)))))
 
@@ -12,7 +12,7 @@ from src.model.finetune_resnet import FineTuneResNet
 
 
 def get_original_resnet(finetune_resnet: FineTuneResNet) -> ResNet:
-    """ 
+    """
     Get the original ResNet with weight matching.
 
     Args:
@@ -24,10 +24,10 @@ def get_original_resnet(finetune_resnet: FineTuneResNet) -> ResNet:
     Returns:
         ResNet: The original ResNet model with matched weights.
     """
-    resnet = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
+    resnet = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
     finetune_weigth = finetune_resnet.resnet_begin.state_dict()
 
-    loaded_param : list[str] = []
+    loaded_param: list[str] = []
     num_fc_layers: int = 0
 
     for name, param in resnet.named_parameters():
@@ -44,14 +44,14 @@ def get_original_resnet(finetune_resnet: FineTuneResNet) -> ResNet:
 
             if finetune_name not in finetune_weigth.keys():
                 raise ValueError(f'param {name} was not found in finetune_weigth')
-            
+
             with torch.no_grad():
                 param.copy_(finetune_weigth[finetune_name])
             loaded_param.append(finetune_name)
-        
+
         else:
             num_fc_layers += 1
-    
+
     return resnet
 
 

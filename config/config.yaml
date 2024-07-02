@@ -1,9 +1,12 @@
 data:                                 # data parameters
-  path: '/projects/LAC/data/data_labo'
-  real_data_path: '/projects/LAC/data/new_real_data'
+  path: /projects/LAC/data/data_labo  # path to the data
+  real_data_path: /projects/LAC/data/new_real_data   # path to the real data
+#  path: data//data//data_labo  # path to the data
+#  real_data_path: data//data//data_real   # path to the real data
   image_size: 256                     # size of the images
   num_classes: 18                     # number of classes                  
-  background_classes: 4               # number of background classes      
+  background_classes: 4               # number of background classes
+  domain_number: 2
   transforms:                         # data augmentation           
     run_rotation: false               # rotation       
     run_hflip: true                   # horizontal flip           
@@ -15,33 +18,38 @@ data:                                 # data parameters
       hue: 0.0                        # hue
 
 model:                                # model parameters
-  name: resnet                      # name of the model. can be resnet, adversarial
+  name: trex                        # name of the model. can be resnet, adversarial, dann or trex
   resnet:                             # resnet parameters
-    hidden_size: 64                   # hidden size of the resnet
+    hidden_size: 42                   # hidden size of the resnet
     p_dropout: 0.1                    # dropout probability
     freeze_resnet: false               # freeze the convolution layer of the resnet
     resume_training:                  # resume training from an experiment
       do_resume: true                # do resume training
-      path: logs/resnet_allw_img256_2     # path to the experiment
+      path: logs/resnet_img256_0      # path to the experiment
       freeze_param: false             # freeze the parameters for this experiment
   adversarial:                        # adversarial parameters
     hidden_size: 256                  # hidden size of the adversarial model
     p_dropout: 0.1                    # dropout probability
-  trex:                               # trex parameters
-    hidden_size: 64                   # hidden size of the model
+  dann:
+    hidden_size: 256
+    p_dropout: 0.1
+  adda:
+    hidden_size: 42
+    p_dropout: 0.1
+  trex:
+    hidden_size: 42                   # hidden size of the model
     p_dropout: 0.1                    # dropout probability
-    freeze_backbone: false            # freeze the convolution layer of the model
-    checkpoint_path: 'logs/trex_img256_7/checkpoint.pt'       # path to the checkpoint
-
+    freeze_backbone: true            # freeze the convolution layer of the model
+    checkpoint_path: 'trex.pth'       # path to the checkpoint
 
 learning:                             # learning parameters (training and validation)
-  epochs: 10                          # number of epochs
-  batch_size: 42                      # batch size
-  learning_rate: 0.0001              # learning rate
+  epochs: 20                          # number of epochs
+  batch_size: 64                       # batch size
+  learning_rate: 0.0001               # learning rate
   loss: crossentropy                  # loss function
   optimizer: adam                     # optimizer
   device: cuda                        # device
-  num_workers: 4                     # number of workers
+  num_workers: 12                      # number of workers
   shuffle: true                       # shuffle the data
   drop_last: true                     # drop the last batch
   save_experiment: true               # save the experiment
@@ -49,7 +57,14 @@ learning:                             # learning parameters (training and valida
   plot_learning_curves: true          # plot the learning curves
   adv:                                # adversarial parameters
     learning_rate_adversary: 0.0001   # learning rate of the adversary
-    alpha: 10                         # coeficient of the adversarial loss: resnet_loss / (alpha * adversary_loss)
+    alpha: 0.1                         # coeficient of the adversarial loss: resnet_loss / (alpha * adversary_loss)
+  dann:
+    learning_rate_adversary: 0.0001
+    Lambda: 10
+  adda:
+    learning_rate_adversary: 0.001
+    Lambda: 0.1
+
 
 test:                                 # test parameters
   batch_size: 244                     # batch size

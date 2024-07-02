@@ -109,16 +109,12 @@ class Trex(Model):
         """
         Sets the model to training mode.
         """
-        # super().train(mode)
-        # self.dropout.train(mode)
         self.dropout = self.dropout.train()
 
     def eval(self) -> None:
         """
         Sets the model to evaluation mode.
         """
-        # super().eval()
-        # self.dropout.eval()
         self.dropout = self.dropout.eval()
 
 
@@ -136,7 +132,6 @@ def get_trex(config: EasyDict) -> Trex:
     return trex
 
 
-
 if __name__ == '__main__':
     import yaml
     import torch
@@ -146,11 +141,11 @@ if __name__ == '__main__':
     checkpoint_path = 'trex.pth'
 
     model = get_trex(config)
-    #model.load_checkpoint(checkpoint_path)
 
     # Print parameter counts
     print("Total parameters:", sum(p.numel() for p in model.parameters()))
     print("Trainable parameters:", sum(p.numel() for p in model.parameters() if p.requires_grad))
+    
     learnable_param = model.get_dict_learned_parameters()
     model.load_dict_learnable_parameters(state_dict=learnable_param, strict=True)
     x = torch.randn((32, 3, 128, 128))

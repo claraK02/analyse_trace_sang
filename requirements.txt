@@ -12,3 +12,8 @@ tqdm==4.65.0
 streamlit==1.31.1
 Pillow==10.0.0
 pandas==2.2.0
+scipy>=1.1.0
+scikit_learn>=0.19.2
+opencv-python-headless
+streamlit-option-menu
+python-docx

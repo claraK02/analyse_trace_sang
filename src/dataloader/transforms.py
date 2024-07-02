@@ -6,7 +6,8 @@ from torchvision.transforms import (
     RandomHorizontalFlip,
     RandomVerticalFlip,
     ColorJitter,
-    ToTensor, Grayscale,
+    ToTensor,
+    Grayscale
 )
 
 
@@ -22,7 +23,6 @@ def get_transforms(transforms_config: EasyDict, mode: str) -> Compose:
         Compose: A composed transform object.
     """
     transform = []
-
     transform.append(Grayscale(num_output_channels=3))
 
     if mode == "train":

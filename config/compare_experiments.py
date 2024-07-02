@@ -51,26 +51,32 @@ def compare_experiments(csv_output: str='compare',
         logs = filter(lambda log: model_name in log, logs)              # Filter the directories based on the model name
         logs = filter(lambda x: train_log_name in os.listdir(x), logs)
         metrics_name = list(map(lambda x: f'val {x}', metrics_name))
-    
+
     logs = list(logs)
 
     all_test_results: str = 'logs,' + list_into_str(metrics_name) + ',' + \
                             list_into_str(hyperparameters.keys()) + '\n'
 
     for log in logs:
+        print("log : ", log)
         log_name = log.split(os.sep)[-1]
         if compare_on == 'test':
             results = get_test_results(log, test_file_name=test_file_name)
         else:
-            results = get_val_results(log, train_log_name=train_log_name)
-        
+            try:
+                results = get_val_results(log, train_log_name=train_log_name)
+            except ValueError as e:
+                print(f"Skipping {log_name} due to error: {e}")
+                continue
+
+
         config = get_config(log, hyperparameters, config_name)
         results_metrics = list(map(lambda metric_name: results[metric_name],
                                 metrics_name))
         all_test_results += f'{log_name},' \
                           + f'{list_into_str(results_metrics, round_up=True)}' \
                           + f',{list_into_str(config)}\n'
-    
+
     csv_output: str = f'{csv_output}_{compare_on}_{model_name[:3]}.csv'
     csv_path = os.path.join(logs_path, csv_output)
     with open(file=csv_path, mode='w', encoding='utf8') as f:
@@ -98,7 +104,7 @@ def get_test_results(log_path: str,
     test_file = os.path.join(log_path, test_file_name)
     if not os.path.exists(path=test_file):
         raise FileNotFoundError(f"{test_file} wasn't found")
-    
+
     test_results: dict[str, float] = {}
     with open(test_file, mode='r', encoding='utf8') as f:
         for line in f.readlines():
@@ -106,9 +112,9 @@ def get_test_results(log_path: str,
                 metrics_name, metric_value = line[:-1].split(': ')
             except:
                 raise ValueError(f'Can split the line{line[-1]} with ": "')
-            
+
             test_results[metrics_name] = float(metric_value)
-    
+
     return test_results
 
 
@@ -131,12 +137,19 @@ def get_val_results(log_path: str,
     train_file = os.path.join(log_path, train_log_name)
     if not os.path.exists(path=train_file):
         raise FileNotFoundError(f"{train_file} wasn't found")
-    
+
     df = pd.read_csv(train_file)
 
     # find best epoch
     val_loss_key: str = list(df.keys())[2]
-    index_line = df[val_loss_key].idxmin()
+    print(df[val_loss_key])
+
+    if df[val_loss_key].isna().all():
+        raise ValueError(f"All values in {val_loss_key} are NaN. Cannot find minimum.")
+
+    # Filter out NaN values before finding the minimum
+    df_no_nan = df.dropna(subset=[val_loss_key])
+    index_line = df_no_nan[val_loss_key].idxmin()
 
     # Convert the line into a dict to return it
     output: dict[str, np.float64 | bool | int | str] = dict(df.iloc[index_line])
@@ -164,7 +177,7 @@ def get_config(log_path: str,
     config_path = os.path.join(log_path, config_name)
     if not os.path.exists(config_path):
         raise FileNotFoundError(f'config path was not found in {config_path}')
-    
+
     config = yaml.safe_load(open(config_path))
 
     output = []
@@ -173,7 +186,7 @@ def get_config(log_path: str,
         for key in keys:
             value = value[key]
         output.append(value)
-    
+
     return output
 
 
@@ -198,15 +211,15 @@ def list_into_str(l: list, sep: str=',', round_up: bool=False) -> str:
     return output[:-len(sep)]
 
 
-def get_metrics_name(model_name: Literal['resnet', 'adversarial']) -> list[str]:
+def get_metrics_name(model_name: Literal['resnet', 'adversarial', 'dann', 'trex']) -> list[str]:
     """
     Get the list of metrics names based on the given model name.
 
     Args:
-        model_name (Literal['resnet', 'adversarial']): The name of the model.
+        model_name (Literal['resnet', 'adversarial', 'dann', 'trex']): The name of the model.
 
     Raises:
-        ValueError: If the model name is not 'resnet' or 'adversarial'.
+        ValueError: If the model name is not 'resnet' or 'adversarial' or 'dann' or 'trex'.
 
     Returns:
         list[str]: The list of metrics names.
@@ -216,16 +229,21 @@ def get_metrics_name(model_name: Literal['resnet', 'adversarial']) -> list[str]:
         metrics_name: list[str] = ['acc micro', 'acc macro', 'f1-score macro', 'top k micro']
     elif model_name == 'adversarial':
         metrics_name: list[str] = ['crossentropy', 'res loss', 'adv loss', 'resnet_top k micro', 'resnet_acc micro', 'resnet_acc macro', 'adv_acc micro']
+    elif model_name == 'dann':
+        metrics_name: list[str] = ['crossentropy', 'res loss', 'adv loss', 'resnet_top k micro', 'resnet_acc micro', 'resnet_acc macro', 'adv_acc micro']
+    elif model_name == 'trex':
+        metrics_name: list[str] = ['acc micro', 'acc macro', 'f1-score macro', 'top k micro']
     else:
-        raise ValueError(f'Expected model name in {["resnet", "adversarial"]} '
+        raise ValueError(f'Expected model name in {["resnet", "adversarial", "dann", "trex"]} '
                          f'but found {model_name}')
-    
+
     return metrics_name
 
 
 if __name__ == '__main__':
-    compare_experiments(compare_on='val')
-    compare_experiments(compare_on='test')
-    compare_experiments(compare_on='test',
-                        test_file_name='test_real_log.txt',
-                        csv_output='compare_real')
+    # compare_experiments(compare_on='val')
+    # compare_experiments(compare_on='test')
+    # compare_experiments(compare_on='test',
+    #                     test_file_name='test_real_log.txt',
+    #                     csv_output='compare_real')
+    compare_experiments(logs_path="../logs/grid_search_dann_0", compare_on="val", model_name="dann")

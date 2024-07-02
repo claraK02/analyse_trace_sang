@@ -1,8 +1,9 @@
 import os
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
 from os.path import dirname as up
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 sys.path.append(up(up(os.path.abspath(__file__))))
@@ -40,19 +41,11 @@ def get_distribution(mode: str,
     
     return np.array(labels_distribution)
 
-
 def plot_distrib(labels_distribution: list[int],
                  title: str='distribution.png'
                  ) -> None:
     """
     Plot the distribution of data for each label.
-
-    Args:
-        labels_distribution (list[int]): The distribution of data for each label.
-        title (str, optional): The title of the plot. Defaults to 'distribution.png'.
-
-    Returns:
-        None
     """
     total_classes = len(labels_distribution)
     classes_index = range(1, total_classes + 1)
@@ -64,10 +57,10 @@ def plot_distrib(labels_distribution: list[int],
     plt.xlabel('Classe')
     plt.ylabel('Proportion')
 
-    # plt.xticks(classes_index, LABELS, rotation=45, ha='right')
+    # Create 'asset' directory if it doesn't exist
+    os.makedirs('asset', exist_ok=True)
 
     plt.savefig(os.path.join('asset', title))
-
 
 def plot_3distribution(distribution1: np.ndarray[float],
                        distribution2: np.ndarray[float],
@@ -76,15 +69,6 @@ def plot_3distribution(distribution1: np.ndarray[float],
                        ) -> None:
     """
     Plot the comparison of three distributions.
-
-    Args:
-        distribution1 (np.ndarray[float]): The first distribution.
-        distribution2 (np.ndarray[float]): The second distribution.
-        distribution3 (np.ndarray[float]): The third distribution.
-        title (str, optional): The title of the plot. Defaults to 'distribution_train_val_test.png'.
-
-    Returns:
-        None
     """
     classes_index = np.arange(1, 19)
     bar_width = 0.25
@@ -103,7 +87,10 @@ def plot_3distribution(distribution1: np.ndarray[float],
     ax.legend()
 
     plt.tight_layout()
-    # plt.xticks(classes_index, LABELS, rotation=45, ha='right')
+
+    # Create 'asset' directory if it doesn't exist
+    os.makedirs('asset', exist_ok=True)
+
     plt.savefig(os.path.join('asset', title))
 
 
@@ -125,6 +112,6 @@ if __name__ == '__main__':
                                  datapath=os.path.join('data', 'data_real'),
                                  use_background=False)
     plot_distrib((train_real + val_real + test_real) / 3,
-                 title='distribution_real.png')
+                 title='distribution_real_new.png')
     plot_3distribution(train_real, val_real, test_real,
-                       title='distribution_train_val_test_real.png')
+                       title='distribution_train_val_test_real_new.png')

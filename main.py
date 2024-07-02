@@ -3,12 +3,12 @@ import argparse
 
 from config.utils import load_config, find_config
 from config.search import Search
-from src.train import train_resnet, train_adversarial, train_trex
+from src.train import train_resnet, train_adversarial, train_adversarial_dann, train_adversarial_adda, train_trex
 from src import test
 
 
 MODE_IMPLEMENTED = ['train', 'test', 'random_search', 'grid_search']
-MODEL_IMPLEMENTED = ['resnet', 'adversarial' , 'trex']
+MODEL_IMPLEMENTED = ['resnet', 'adversarial', 'dann', 'adda', 'trex']
 
 
 def main(options: dict) -> None:
@@ -41,9 +41,16 @@ def main(options: dict) -> None:
         if config.model.name == 'adversarial':
             train_adversarial.train(config)
 
+        if config.model.name == 'dann':
+            train_adversarial_dann.train(config)
+
+        if config.model.name == 'adda':
+            train_adversarial_adda.train(config)
+
         if config.model.name == 'trex':
             train_trex.train(config)
-    
+
+
     if options['mode'] in ['random_search', 'grid_search']:
         search = Search(config_yaml_file=options['config_path'],
                         name=options['mode'])
@@ -64,12 +71,21 @@ def main(options: dict) -> None:
             
             if config.model.name == 'resnet':
                 train_resnet.train(config, logspath=search.get_directory())
+
             elif config.model.name == 'adversarial':
                 train_adversarial.train(config, logspath=search.get_directory())
+
+            elif config.model.name == 'dann':
+                train_adversarial_dann.train(config, logspath=search.get_directory())
+
             elif config.model.name == 'trex':
                 train_trex.train(config, logspath=search.get_directory())
+
+            elif config.model.name == 'adda':
+                train_adversarial_adda.train(config, logspath=search.get_directory())
             else:
                 raise NotImplementedError
+
         
         search.compare_experiments()
     
@@ -124,8 +140,10 @@ def get_options() -> dict:
     # For testing
     parser.add_argument('--path', '-p', type=str,
                         help="experiment path (for test and infer)")
+
     parser.add_argument('--run_on_real_data', '-r', type=str, default='false',
                         help='run on the real data or not')
+
     parser.add_argument('--run_saliency_metics', '-s', type=str, default='false',
                         help='run the saliency metrics or not')
     args = parser.parse_args()

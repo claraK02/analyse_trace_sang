@@ -22,6 +22,8 @@ LABELS = [
 ]
 BACKGROUND = ["carrelage", "papier", "bois", "lino"]
 
+DOMAIN = ['data_labo', "new_real_data"]
+
 
 def get_label_prediction(y_pred: torch.Tensor) -> list[tuple[int, str]]:
     """

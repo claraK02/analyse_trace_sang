@@ -7,7 +7,7 @@ from os.path import dirname as up
 import torch
 from torch import nn, Tensor
 from torchvision import models
-from torchvision.models.resnet import ResNet50_Weights
+from torchvision.models.resnet import ResNet18_Weights
 
 sys.path.append(up(up(up(os.path.abspath(__file__)))))
 
@@ -34,7 +34,7 @@ class FineTuneResNet(Model):
         """
         super(FineTuneResNet, self).__init__()
 
-        resnet = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
+        resnet = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
         self.resnet_begin = nn.Sequential(*(list(resnet.children())[:-1]))
 
         if freeze_resnet:
@@ -42,7 +42,7 @@ class FineTuneResNet(Model):
                 param.requires_grad = False
         self.resnet_begin.eval()
 
-        self.fc1 = nn.Linear(in_features=2048, out_features=hidden_size)
+        self.fc1 = nn.Linear(in_features=512, out_features=hidden_size)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(p=p_dropout)
         self.fc2 = nn.Linear(in_features=hidden_size, out_features=num_classes)
@@ -124,7 +124,7 @@ def get_finetuneresnet(config: EasyDict) -> FineTuneResNet:
 if __name__ == '__main__':
     import yaml
     import torch
-    config_path = 'config/config.yaml'   
+    config_path = 'config/config.yaml'
     config = EasyDict(yaml.safe_load(open(config_path)))
 
     model = get_finetuneresnet(config)

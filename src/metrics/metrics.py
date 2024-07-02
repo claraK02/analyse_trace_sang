@@ -37,8 +37,8 @@ class Metrics:
                         'recall macro': Recall(**macro),
                         'f1-score macro': F1Score(**macro)}
         
-        self.metrics_onehot = {'top k micro': Accuracy(top_k=3, **micro),
-                               'top k macro': Accuracy(top_k=3, **macro)}
+        self.metrics_onehot = {'top k micro': Accuracy(top_k=2, **micro),
+                               'top k macro': Accuracy(top_k=2, **macro)}
         
         self.num_metrics: int = len(self.metrics_onehot) + len(self.metrics)
         self.metrics_name: list[str] = list(self.metrics_onehot.keys())
