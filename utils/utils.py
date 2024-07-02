@@ -214,6 +214,20 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
         model.load_state_dict(checkpoint, strict=False)
         del checkpoint
 
+        if 'resume_training' not in config.model.trex.keys():
+            print("didn't find resume_training key")
+            return None
+
+        resume_training: EasyDict = config.model.trex.resume_training
+        if not resume_training.do_resume:
+            print("resume training: None")
+            return None
+
+        print(f'resume training from {resume_training.path}')
+        weight = load_weights(resume_training.path)
+        model.load_dict_learnable_parameters(state_dict=weight, strict=True)
+        del weight
+
     return None
 
 
