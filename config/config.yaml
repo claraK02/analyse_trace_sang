@@ -39,7 +39,7 @@ model:                                # model parameters
 
 
 learning:                             # learning parameters (training and validation)
-  epochs: 100                         # number of epochs
+  epochs: 200                         # number of epochs
   batch_size: 64                      # batch size
   learning_rate: 0.0001              # learning rate
   loss: crossentropy                  # loss function
