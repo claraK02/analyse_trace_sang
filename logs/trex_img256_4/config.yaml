@@ -2,7 +2,8 @@ config_metadata: 'Saving time : 07/02/2024, 11:00:18'
 
 # data options
 data:
-    path: '/projects/LAC/data/new_real_data'
+    #new_real_data
+    path: '/projects/LAC/data/data_labo'
     real_data_path: '/projects/LAC/data/new_real_data'
     image_size: 256
     num_classes: 18
