@@ -19,7 +19,9 @@ class Trex(Model):
                  hidden_size: int,
                  p_dropout: float,
                  freeze_backbone: bool = True,
-                 checkpoint_path: str = None) -> None:
+                 checkpoint_path: str = None,
+                 **kwargs
+                 ) -> None:
         super(Trex, self).__init__()
 
         """
