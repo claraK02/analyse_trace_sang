@@ -30,12 +30,12 @@ model:                                # model parameters
   trex:                               # trex parameters
     hidden_size: 64                   # hidden size of the model
     p_dropout: 0.1                    # dropout probability
-    freeze_backbone: true            # freeze the convolution layer of the model
-    checkpoint_path: 'trex.pth'       # path to the checkpoint
+    freeze_backbone: false            # freeze the convolution layer of the model
+    checkpoint_path: 'logs/trex_img256_7/checkpoint.pt'       # path to the checkpoint
 
 
 learning:                             # learning parameters (training and validation)
-  epochs: 3                          # number of epochs
+  epochs: 10                          # number of epochs
   batch_size: 42                      # batch size
   learning_rate: 0.0001              # learning rate
   loss: crossentropy                  # loss function
