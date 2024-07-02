@@ -1,5 +1,5 @@
 data:                                 # data parameters
-  path: '/projects/LAC/data/new_real_data'
+  path: '/projects/LAC/data/data_labo'
   real_data_path: '/projects/LAC/data/new_real_data'
   image_size: 256                     # size of the images
   num_classes: 18                     # number of classes
@@ -33,14 +33,14 @@ model:                                # model parameters
     freeze_backbone: true            # freeze the convolution layer of the model
     checkpoint_path: trex.pth     # path to the checkpoint
     resume_training:                  # resume training from an experiment
-      do_resume: true                # do resume training
+      do_resume: false                # do resume training
       path: logs/trex_img256_7_0    # path to the experiment
       freeze_param: false
 
 
 learning:                             # learning parameters (training and validation)
-  epochs: 30                          # number of epochs
-  batch_size: 42                      # batch size
+  epochs: 20                          # number of epochs
+  batch_size: 64                      # batch size
   learning_rate: 0.0001              # learning rate
   loss: crossentropy                  # loss function
   optimizer: adam                     # optimizer
