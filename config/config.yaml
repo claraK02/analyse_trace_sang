@@ -35,7 +35,7 @@ model:                                # model parameters
     resume_training:                   # resume training from an experiment
       do_resume: true                # do resume training
       path: logs/trex_img256_7      # path to the experiment
-      freeze_param: false
+      freeze_param: true
 
 
 learning:                             # learning parameters (training and validation)
