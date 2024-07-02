@@ -34,7 +34,7 @@ model:                                # model parameters
     checkpoint_path: trex.pth     # path to the checkpoint
     resume_training:                  # resume training from an experiment
       do_resume: true                # do resume training
-      path: trex_img256_10    # path to the experiment
+      path: logs/trex_img256_10    # path to the experiment
       freeze_param: false
 
 
