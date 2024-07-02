@@ -24,7 +24,7 @@ def get_original_resnet(finetune_resnet: FineTuneResNet) -> ResNet:
     Returns:
         ResNet: The original ResNet model with matched weights.
     """
-    resnet = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+    resnet = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
     finetune_weigth = finetune_resnet.resnet_begin.state_dict()
 
     loaded_param: list[str] = []
