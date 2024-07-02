@@ -4,7 +4,7 @@ from os.path import dirname as up
 
 import torch
 from torchvision import models
-from torchvision.models.resnet import ResNet18_Weights, ResNet
+from torchvision.models.resnet import ResNet50_Weights, ResNet
 
 sys.path.append(up(up(up(os.path.abspath(__file__)))))
 
