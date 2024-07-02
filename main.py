@@ -6,7 +6,6 @@ from config.search import Search
 from src.train import train_resnet, train_adversarial, train_adversarial_dann, train_adversarial_adda, train_trex
 from src import test
 
-
 MODE_IMPLEMENTED = ['train', 'test', 'random_search', 'grid_search']
 MODEL_IMPLEMENTED = ['resnet', 'adversarial', 'dann', 'adda', 'trex']
 
@@ -37,7 +36,7 @@ def main(options: dict) -> None:
 
         if config.model.name == 'resnet':
             train_resnet.train(config)
-        
+
         if config.model.name == 'adversarial':
             train_adversarial.train(config)
 
@@ -49,7 +48,6 @@ def main(options: dict) -> None:
 
         if config.model.name == 'trex':
             train_trex.train(config)
-
 
     if options['mode'] in ['random_search', 'grid_search']:
         search = Search(config_yaml_file=options['config_path'],
@@ -68,7 +66,7 @@ def main(options: dict) -> None:
             if config.model.name not in MODEL_IMPLEMENTED:
                 raise ValueError(f'Expected model name in {MODEL_IMPLEMENTED} but found {config.model.name}.')
             print(f'train {config.model.name}')
-            
+
             if config.model.name == 'resnet':
                 train_resnet.train(config, logspath=search.get_directory())
 
@@ -86,17 +84,16 @@ def main(options: dict) -> None:
             else:
                 raise NotImplementedError
 
-        
         search.compare_experiments()
-    
+
     # TESTING
     if options['mode'] == 'test':
         if options['path'] is None:
             raise ValueError('Please specify the path to the experiments')
-        
+
         config = load_config(find_config(experiment_path=options['path']))
         print(f'test {config.model.name}')
-        
+
         test.test(config=config,
                   logging_path=options['path'],
                   run_real_data=options['run_on_real_data'],
@@ -136,7 +133,7 @@ def get_options() -> dict:
                         type=str, help="path to config (for training)")
     parser.add_argument('--num_run', '-n', default=10, type=int,
                         help='number of experiment for random search')
-    
+
     # For testing
     parser.add_argument('--path', '-p', type=str,
                         help="experiment path (for test and infer)")
