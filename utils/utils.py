@@ -180,7 +180,7 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
         config (EasyDict): The configuration object.
         model (torch.nn.Module): The model to resume training on.
     """
-    if config.model.name == 'resnet' or config.model.name == 'trex':
+    if config.model.name == 'resnet' :
         if 'resume_training' not in config.model.resnet.keys():
             print("didn't find resume_training key")
             return None
@@ -213,6 +213,7 @@ def resume_training(config: EasyDict, model: torch.nn.Module) -> None:
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint, strict=False)
         del checkpoint
+
     return None
 
 
