@@ -1,0 +1,75 @@
+top k micro: 0.5
+top k macro: 0.224512979388237
+acc micro: 0.35245901346206665
+acc macro: 0.12625661492347717
+precission macro: 0.12189933657646179
+recall macro: 0.12625661492347717
+f1-score macro: 0.11339680850505829
+acc class n°1: 0.20000000298023224
+acc class n°2: 0.0
+acc class n°3: 0.4583333432674408
+acc class n°4: 0.0
+acc class n°5: 0.0
+acc class n°6: 0.0
+acc class n°7: 0.0
+acc class n°8: 0.0
+acc class n°9: 0.1111111119389534
+acc class n°10: 0.0
+acc class n°11: 0.23333333432674408
+acc class n°12: 0.0
+acc class n°13: 0.3333333432674408
+acc class n°14: 0.0
+acc class n°15: 0.9365079402923584
+acc class n°16: 0.0
+acc class n°17: 0.0
+acc class n°18: 0.0
+top k micro: 0.5
+top k macro: 0.21238568425178528
+acc micro: 0.35245901346206665
+acc macro: 0.1198735162615776
+precission macro: 0.11155202984809875
+recall macro: 0.1198735162615776
+f1-score macro: 0.10632122308015823
+acc class n°1: 0.21739129722118378
+acc class n°2: 0.0
+acc class n°3: 0.4166666567325592
+acc class n°4: 0.0
+acc class n°5: 0.0
+acc class n°6: 0.0
+acc class n°7: 0.0
+acc class n°8: 0.0
+acc class n°9: 0.0
+acc class n°10: 0.0
+acc class n°11: 0.3030303120613098
+acc class n°12: 0.0
+acc class n°13: 0.30000001192092896
+acc class n°14: 0.0
+acc class n°15: 0.920634925365448
+acc class n°16: 0.0
+acc class n°17: 0.0
+acc class n°18: 0.0
+top k micro: 0.5081967115402222
+top k macro: 0.21888282895088196
+acc micro: 0.34836065769195557
+acc macro: 0.12404800951480865
+precission macro: 0.12505199015140533
+recall macro: 0.12404800951480865
+f1-score macro: 0.1125570610165596
+acc class n°1: 0.22727273404598236
+acc class n°2: 0.0
+acc class n°3: 0.3214285671710968
+acc class n°4: 0.0
+acc class n°5: 0.0
+acc class n°6: 0.0
+acc class n°7: 0.0
+acc class n°8: 0.0
+acc class n°9: 0.1428571492433548
+acc class n°10: 0.0
+acc class n°11: 0.2432432472705841
+acc class n°12: 0.0
+acc class n°13: 0.3636363744735718
+acc class n°14: 0.0
+acc class n°15: 0.9344262480735779
+acc class n°16: 0.0
+acc class n°17: 0.0
+acc class n°18: 0.0
