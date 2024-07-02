@@ -31,7 +31,7 @@ model:                                # model parameters
     hidden_size: 64                   # hidden size of the model
     p_dropout: 0.1                    # dropout probability
     freeze_backbone: false            # freeze the convolution layer of the model
-    checkpoint_path: 'logs/trex_img256_7/checkpoint.pt'       # path to the checkpoint
+    checkpoint_path: 'trex.pth'       # path to the checkpoint
 
 
 learning:                             # learning parameters (training and validation)
