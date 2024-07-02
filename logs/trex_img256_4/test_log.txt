@@ -1,0 +1,150 @@
+top k micro: 0.4193989038467407
+top k macro: 0.37985455989837646
+acc micro: 0.29371583461761475
+acc macro: 0.2735291123390198
+precission macro: 0.15612204372882843
+recall macro: 0.2735291123390198
+f1-score macro: 0.18495666980743408
+acc class n°1: 0.9583333134651184
+acc class n°2: 0.0
+acc class n°3: 0.6969696879386902
+acc class n°4: 0.0
+acc class n°5: 0.0
+acc class n°6: 0.0
+acc class n°7: 0.0
+acc class n°8: 0.0
+acc class n°9: 0.837837815284729
+acc class n°10: 0.07563025504350662
+acc class n°11: 0.7674418687820435
+acc class n°12: 0.0
+acc class n°13: 0.0
+acc class n°14: 0.0
+acc class n°15: 0.5357142686843872
+acc class n°16: 0.3243243098258972
+acc class n°17: 0.7272727489471436
+acc class n°18: 0.0
+top k micro: 0.4207650125026703
+top k macro: 0.38332676887512207
+acc micro: 0.3060109317302704
+acc macro: 0.2855834364891052
+precission macro: 0.16183575987815857
+recall macro: 0.2855834364891052
+f1-score macro: 0.19146782159805298
+acc class n°1: 0.9718309640884399
+acc class n°2: 0.0
+acc class n°3: 0.78125
+acc class n°4: 0.0
+acc class n°5: 0.0
+acc class n°6: 0.0
+acc class n°7: 0.0
+acc class n°8: 0.0
+acc class n°9: 0.9189189076423645
+acc class n°10: 0.08943089097738266
+acc class n°11: 0.7872340679168701
+acc class n°12: 0.0
+acc class n°13: 0.0
+acc class n°14: 0.0
+acc class n°15: 0.5918367505073547
+acc class n°16: 0.3333333432674408
+acc class n°17: 0.6666666865348816
+acc class n°18: 0.0
+top k micro: 0.4234972596168518
+top k macro: 0.38224196434020996
+acc micro: 0.3046448230743408
+acc macro: 0.2819761633872986
+precission macro: 0.1556856334209442
+recall macro: 0.2819761633872986
+f1-score macro: 0.18614888191223145
+acc class n°1: 0.9577465057373047
+acc class n°2: 0.0
+acc class n°3: 0.7878788113594055
+acc class n°4: 0.0
+acc class n°5: 0.0
+acc class n°6: 0.0
+acc class n°7: 0.0
+acc class n°8: 0.0
+acc class n°9: 0.8888888955116272
+acc class n°10: 0.08870967477560043
+acc class n°11: 0.782608687877655
+acc class n°12: 0.0
+acc class n°13: 0.0
+acc class n°14: 0.0
+acc class n°15: 0.5593220591545105
+acc class n°16: 0.34375
+acc class n°17: 0.6666666865348816
+acc class n°18: 0.0
+top k micro: 0.4303278625011444
+top k macro: 0.3863620162010193
+acc micro: 0.30054643750190735
+acc macro: 0.2785435914993286
+precission macro: 0.15734341740608215
+recall macro: 0.2785435914993286
+f1-score macro: 0.18698841333389282
+acc class n°1: 0.9552238583564758
+acc class n°2: 0.0
+acc class n°3: 0.7575757503509521
+acc class n°4: 0.0
+acc class n°5: 0.0
+acc class n°6: 0.0
+acc class n°7: 0.0
+acc class n°8: 0.0
+acc class n°9: 0.8421052694320679
+acc class n°10: 0.09375
+acc class n°11: 0.7872340679168701
+acc class n°12: 0.0
+acc class n°13: 0.0
+acc class n°14: 0.0
+acc class n°15: 0.5535714030265808
+acc class n°16: 0.3243243098258972
+acc class n°17: 0.699999988079071
+acc class n°18: 0.0
+top k micro: 0.41530054807662964
+top k macro: 0.3786052167415619
+acc micro: 0.3019125759601593
+acc macro: 0.279829204082489
+precission macro: 0.15881749987602234
+recall macro: 0.279829204082489
+f1-score macro: 0.18920384347438812
+acc class n°1: 0.9722222089767456
+acc class n°2: 0.0
+acc class n°3: 0.6875
+acc class n°4: 0.0
+acc class n°5: 0.0
+acc class n°6: 0.0
+acc class n°7: 0.0
+acc class n°8: 0.0
+acc class n°9: 0.837837815284729
+acc class n°10: 0.08196721225976944
+acc class n°11: 0.7708333134651184
+acc class n°12: 0.0
+acc class n°13: 0.0
+acc class n°14: 0.0
+acc class n°15: 0.5862069129943848
+acc class n°16: 0.32258063554763794
+acc class n°17: 0.7777777910232544
+acc class n°18: 0.0
+top k micro: 0.41530054807662964
+top k macro: 0.37149131298065186
+acc micro: 0.3046448230743408
+acc macro: 0.2818506956100464
+precission macro: 0.16107824444770813
+recall macro: 0.2818506956100464
+f1-score macro: 0.19139039516448975
+acc class n°1: 0.9722222089767456
+acc class n°2: 0.0
+acc class n°3: 0.7575757503509521
+acc class n°4: 0.0
+acc class n°5: 0.0
+acc class n°6: 0.0
+acc class n°7: 0.0
+acc class n°8: 0.0
+acc class n°9: 0.875
+acc class n°10: 0.07500000298023224
+acc class n°11: 0.75
+acc class n°12: 0.0
+acc class n°13: 0.0
+acc class n°14: 0.0
+acc class n°15: 0.5614035129547119
+acc class n°16: 0.35483869910240173
+acc class n°17: 0.7272727489471436
+acc class n°18: 0.0
