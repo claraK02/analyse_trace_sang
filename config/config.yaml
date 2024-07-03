@@ -33,19 +33,19 @@ model:                                # model parameters
     freeze_backbone: true            # freeze the convolution layer of the model
     checkpoint_path: trex.pth     # path to the checkpoint
     resume_training:                  # resume training from an experiment
-      do_resume: false                # do resume training
+      do_resume: true               # do resume training
       path: logs/trex_img256_4    # path to the experiment
       freeze_param: false
 
 
 learning:                             # learning parameters (training and validation)
-  epochs: 35                         # number of epochs
+  epochs: 20                         # number of epochs
   batch_size: 64                      # batch size
   learning_rate: 0.0001              # learning rate
   loss: crossentropy                  # loss function
   optimizer: adam                     # optimizer
   device: cuda                        # device
-  num_workers: 4                     # number of workers
+  num_workers: 2                     # number of workers
   shuffle: true                       # shuffle the data
   drop_last: true                     # drop the last batch
   save_experiment: true               # save the experiment
