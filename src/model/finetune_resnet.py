@@ -7,7 +7,7 @@ from os.path import dirname as up
 import torch
 from torch import nn, Tensor
 from torchvision import models
-from torchvision.models.resnet import ResNet18_Weights
+from torchvision.models.resnet import ResNet50_Weights
 
 sys.path.append(up(up(up(os.path.abspath(__file__)))))
 
@@ -34,7 +34,7 @@ class FineTuneResNet(Model):
         """
         super(FineTuneResNet, self).__init__()
 
-        resnet = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+        resnet = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
         self.resnet_begin = nn.Sequential(*(list(resnet.children())[:-1]))
 
         if freeze_resnet:
