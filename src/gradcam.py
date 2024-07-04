@@ -18,9 +18,7 @@ from utils import utils
 
 
 class GradCam:
-    transform = []
-    transform.append(Grayscale(num_output_channels=3))
-    transform.append(ToTensor())
+
     def __init__(self, model: FineTuneResNet) -> None:
         """
         Initialize the GradCAM object.
