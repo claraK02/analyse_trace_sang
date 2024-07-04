@@ -1,1 +1,1 @@
-logs,val acc micro,val acc macro,val f1-score macro,val top k micro,learning_rate,batch_size
+logs,val acc micro,val acc macro,val f1-score macro,val top k micro,image_size,hidden_size,p_dropout,epochs,batch_size,learning_rate,freeze

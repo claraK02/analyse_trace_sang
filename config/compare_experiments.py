@@ -282,4 +282,4 @@ if __name__ == '__main__':
     # compare_experiments(compare_on='test',
     #                     test_file_name='test_real_log.txt',
     #                     csv_output='compare_real')
-    compare_experiments(logs_path="../logs/grid_search_dann_0", compare_on="val", model_name="dann")
+    compare_experiments(logs_path="../logs/grid_search_trex_1", compare_on="val", model_name="trex")
