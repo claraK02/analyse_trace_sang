@@ -2,8 +2,7 @@ import os
 import yaml
 import numpy as np
 import pandas as pd
-from typing import Literal
-
+from typing import Literal, List
 
 HYPERPARAMETERS: dict[str, list[str]] = {
         'image_size': ['data', 'image_size'],
@@ -239,6 +238,43 @@ def get_metrics_name(model_name: Literal['resnet', 'adversarial', 'dann', 'trex'
 
     return metrics_name
 
+def calculate_mean_and_std(logs_path: str, output_file: str = 'mean_std_results.txt', test_file_name: str = 'test_real_log.txt') -> None:
+    """
+    Calculate the mean and standard deviation of metrics from test_real_log.txt files.
+
+    Args:
+        logs_path (str): Path to the directory containing experiment subdirectories.
+        output_file (str, optional): Name of the output file to save the results. Defaults to 'mean_std_results.txt'.
+        test_file_name (str, optional): Name of the test log file. Defaults to 'test_real_log.txt'.
+    """
+    metrics_data: dict[str, List[float]] = {
+        'acc micro': [],
+        'acc macro': [],
+        'f1-score macro': [],
+        'top k micro': []
+    }
+
+    logs = filter(lambda x: '.' not in x, os.listdir(logs_path))
+    logs = map(lambda x: os.path.join(logs_path, x), logs)
+    logs = filter(lambda x: test_file_name in os.listdir(x), logs)
+    logs = list(logs)
+
+    for log in logs:
+        results = get_test_results(log, test_file_name=test_file_name)
+        for metric in metrics_data.keys():
+            if metric in results:
+                metrics_data[metric].append(results[metric])
+
+    mean_std_results = "Metric,Mean,Std Dev\n"
+    for metric, values in metrics_data.items():
+        if values:
+            mean = np.mean(values)
+            std_dev = np.std(values)
+            mean_std_results += f"{metric},{mean:.3f},{std_dev:.3f}\n"
+
+    output_path = os.path.join(logs_path, output_file)
+    with open(output_path, mode='w', encoding='utf8') as f:
+        f.write(mean_std_results)
 
 if __name__ == '__main__':
     # compare_experiments(compare_on='val')
