@@ -8,7 +8,6 @@ import torch
 from torch import Tensor
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
-from torchvision.transforms import Grayscale, ToTensor
 
 sys.path.append(up(up(os.path.abspath(__file__))))
 
@@ -48,7 +47,7 @@ class GradCam:
         
         visualizations = np.zeros((batch_size, img_h, img_w, img_c))
         for b in range(batch_size):
-            rgb_img = utils.convert_tensor_to_rgb(image=image[b].cpu(), normelize=True)
+            rgb_img = utils.convert_tensor_to_rgb(image=image[b].gpu(), normelize=True)
             visualizations[b] = show_cam_on_image(rgb_img, grayscale_cam[b])
 
         return visualizations
