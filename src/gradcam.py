@@ -46,7 +46,7 @@ class GradCam:
         
         visualizations = np.zeros((batch_size, img_h, img_w, img_c))
         for b in range(batch_size):
-            rgb_img = utils.convert_tensor_to_rgb(image=image[b].cpu(), normelize=False)
+            rgb_img = utils.convert_tensor_to_rgb(image=image[b].cpu(), normelize=True)
             visualizations[b] = show_cam_on_image(rgb_img, grayscale_cam[b])
 
         return visualizations
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     config = EasyDict(yaml.safe_load(open(os.path.join(config_path, 'config.yaml'))))
 
     model = get_finetuneresnet(config)
-    weight = utils.load_weights(config_path, device=torch.device('cpu'))
+    weight = utils.load_weights(config_path, device=torch.device('gpu'))
     model.load_dict_learnable_parameters(state_dict=weight, strict=True)
     del weight
 
