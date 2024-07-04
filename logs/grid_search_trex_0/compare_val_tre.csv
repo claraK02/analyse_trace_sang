@@ -1,0 +1,1 @@
+logs,val acc micro,val acc macro,val f1-score macro,val top k micro,learning_rate,freeze_backbone,freeze_param,batch_size

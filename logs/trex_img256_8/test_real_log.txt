@@ -1,0 +1,25 @@
+top k micro: 0.24180327355861664
+top k macro: 0.12307476997375488
+acc micro: 0.15163934230804443
+acc macro: 0.05791407823562622
+precission macro: 0.0953700989484787
+recall macro: 0.05791407823562622
+f1-score macro: 0.040139928460121155
+acc class n°1: 0.13636364042758942
+acc class n°2: 0.0
+acc class n°3: 0.0
+acc class n°4: 0.0625
+acc class n°5: 0.0
+acc class n°6: 0.0
+acc class n°7: 0.0
+acc class n°8: 0.0
+acc class n°9: 0.0
+acc class n°10: 0.0
+acc class n°11: 0.03333333507180214
+acc class n°12: 0.0
+acc class n°13: 0.0
+acc class n°14: 0.3333333432674408
+acc class n°15: 0.4769230782985687
+acc class n°16: 0.0
+acc class n°17: 0.0
+acc class n°18: 0.0
