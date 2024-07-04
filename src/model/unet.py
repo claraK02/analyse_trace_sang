@@ -61,7 +61,7 @@ class Classifier(nn.Module):
     
 if __name__ == "__main__":
     # Create a random tensor representing a batch of images with size 128x128 and 3 channels
-    x = torch.randn(1, 3, 128, 128)
+    x = torch.randn(1, 1, 128, 128)
 
     # Create an instance of the UNet model
     unet = UNet()
