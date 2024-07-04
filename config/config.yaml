@@ -15,13 +15,13 @@ data:                                 # data parameters
       hue: 0.0                        # hue
 
 model:                                # model parameters
-  name: trex                     # name of the model. can be resnet, adversarial
+  name: resnet                     # name of the model. can be resnet, adversarial
   resnet:                             # resnet parameters
-    hidden_size: 64                   # hidden size of the resnet
+    hidden_size: 256                   # hidden size of the resnet
     p_dropout: 0.1                    # dropout probability
     freeze_resnet: false               # freeze the convolution layer of the resnet
     resume_training:                  # resume training from an experiment
-      do_resume: true                # do resume training
+      do_resume: false                # do resume training
       path: logs_previous_models/resnet_allw_img256_2     # path to the experiment
       freeze_param: false             # freeze the parameters for this experiment
   adversarial:                        # adversarial parameters
