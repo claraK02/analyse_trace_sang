@@ -48,7 +48,7 @@ class Classifier(nn.Module):
 
     def forward(self, x):
         x = F.relu(self.conv(x))
-        x = F.adaptive_avg_pool2d(x, (3, 3))
+        x = F.adaptive_avg_pool2d(x, (1, 1))
         x = x.view(x.shape[0], -1)
         x = self.fc(x)
         #add softmax activation

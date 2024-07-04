@@ -8,6 +8,7 @@ import torch
 from torch import Tensor
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
+from torchvision.transforms import Grayscale
 
 sys.path.append(up(up(os.path.abspath(__file__))))
 
@@ -17,6 +18,8 @@ from utils import utils
 
 
 class GradCam:
+
+    cv2.transform.append(Grayscale(num_output_channels=3))
     def __init__(self, model: FineTuneResNet) -> None:
         """
         Initialize the GradCAM object.
@@ -124,3 +127,4 @@ if __name__ == '__main__':
     
     y_pred = gradcam.get_probability_with_mask(model=model, image=x)
     print("y_pred shape:", y_pred.shape)
+
