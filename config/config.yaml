@@ -15,7 +15,7 @@ data:                                 # data parameters
       hue: 0.0                        # hue
 
 model:                                # model parameters
-  name: resnet                     # name of the model. can be resnet, adversarial
+  name: trex                     # name of the model. can be resnet, adversarial
   resnet:                             # resnet parameters
     hidden_size: 256                   # hidden size of the resnet
     p_dropout: 0.1                    # dropout probability
@@ -28,7 +28,7 @@ model:                                # model parameters
     hidden_size: 256                  # hidden size of the adversarial model
     p_dropout: 0.1                    # dropout probability
   trex:                               # trex parameters
-    hidden_size: 64                   # hidden size of the model
+    hidden_size: 256                  # hidden size of the model
     p_dropout: 0.1                    # dropout probability
     freeze_backbone: false            # freeze the convolution layer of the model
     checkpoint_path: trex.pth     # path to the checkpoint
@@ -40,7 +40,7 @@ model:                                # model parameters
 
 learning:                             # learning parameters (training and validation)
   epochs: 20                         # number of epochs
-  batch_size: 42                      # batch size
+  batch_size: 8                      # batch size
   learning_rate: 0.0001              # learning rate
   loss: crossentropy                  # loss function
   optimizer: adam                     # optimizer

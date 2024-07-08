@@ -2,7 +2,8 @@ import os
 import yaml
 import numpy as np
 import pandas as pd
-from typing import Literal, List
+from typing import Literal
+from collections import defaultdict
 
 HYPERPARAMETERS: dict[str, list[str]] = {
         'image_size': ['data', 'image_size'],
@@ -15,12 +16,12 @@ HYPERPARAMETERS: dict[str, list[str]] = {
     }
 
 def compare_experiments(csv_output: str='compare',
-                        logs_path: str='logs',
+                        logs_path: str='../logs/trex_img256_mean',
                         config_name: str= 'config.yaml',
                         hyperparameters: dict[str, list[str]] = HYPERPARAMETERS,
-                        model_name: str = 'resnet',
+                        model_name: str = 'trex',
                         compare_on: Literal['val', 'test'] = 'test',
-                        test_file_name: str='test_log.txt',
+                        test_file_name: str='test_real_log.txt',
                         train_log_name: str='train_log.csv'
                         ) -> None:
     """
@@ -51,13 +52,15 @@ def compare_experiments(csv_output: str='compare',
         logs = filter(lambda x: train_log_name in os.listdir(x), logs)
         metrics_name = list(map(lambda x: f'val {x}', metrics_name))
 
+
     logs = list(logs)
+
+    all_metrics = defaultdict(list)
 
     all_test_results: str = 'logs,' + list_into_str(metrics_name) + ',' + \
                             list_into_str(hyperparameters.keys()) + '\n'
-
+    print(logs)
     for log in logs:
-        print("log : ", log)
         log_name = log.split(os.sep)[-1]
         if compare_on == 'test':
             results = get_test_results(log, test_file_name=test_file_name)
@@ -70,12 +73,23 @@ def compare_experiments(csv_output: str='compare',
 
 
         config = get_config(log, hyperparameters, config_name)
-        results_metrics = list(map(lambda metric_name: results[metric_name],
-                                metrics_name))
+        results_metrics = []
+        for metric_name in metrics_name:
+            value = results[metric_name]
+            results_metrics.append(value)
+            all_metrics[metric_name].append(value)
+
         all_test_results += f'{log_name},' \
                           + f'{list_into_str(results_metrics, round_up=True)}' \
                           + f',{list_into_str(config)}\n'
 
+    average_metrics = {metric: np.nanmean(values) for metric, values in all_metrics.items()}
+    average_results = [average_metrics[metric] for metric in metrics_name]
+    stddev_metrics = {metric: np.nanstd(values) for metric, values in all_metrics.items()}
+    stddev_results = [stddev_metrics[metric] for metric in metrics_name]
+
+    all_test_results += 'Average,' + list_into_str(average_results, round_up=True) + ',' * len(hyperparameters) + '\n'
+    all_test_results += 'Ecart-type,' + list_into_str(stddev_results, round_up=True) + ',' * len(hyperparameters) + '\n'
     csv_output: str = f'{csv_output}_{compare_on}_{model_name[:3]}.csv'
     csv_path = os.path.join(logs_path, csv_output)
     with open(file=csv_path, mode='w', encoding='utf8') as f:
@@ -87,7 +101,7 @@ def get_test_results(log_path: str,
                      test_file_name: str='test_log.txt'
                      ) -> dict[str, float]:
     """
-    Read the test results from a log file and return them as a dictionary.
+    Read the test results from a log file and return the average as a dictionary.
 
     Args:
         log_path (str): The path to the directory containing the log file.
@@ -98,23 +112,28 @@ def get_test_results(log_path: str,
 
     Returns:
         dict[str, float]: A dictionary containing the test results, where the keys are the metric names
-        and the values are the corresponding metric values.
+        and the values are the corresponding averaged metric values.
     """
     test_file = os.path.join(log_path, test_file_name)
-    if not os.path.exists(path=test_file):
+    if not os.path.exists(test_file):
         raise FileNotFoundError(f"{test_file} wasn't found")
 
-    test_results: dict[str, float] = {}
+    metrics = defaultdict(list)
+
     with open(test_file, mode='r', encoding='utf8') as f:
         for line in f.readlines():
             try:
-                metrics_name, metric_value = line[:-1].split(': ')
-            except:
-                raise ValueError(f'Can split the line{line[-1]} with ": "')
+                metric_name, metric_value = line.strip().split(': ')
+                metric_value = float(metric_value)
+                metrics[metric_name].append(metric_value)
+            except Exception as e:
+                print(f"Error processing line {line.strip()}: {e}")
+                continue
 
-            test_results[metrics_name] = float(metric_value)
+    averaged_results = {metric: np.nanmean(values) for metric, values in metrics.items()}
 
-    return test_results
+    return averaged_results
+
 
 
 def get_val_results(log_path: str,
@@ -238,48 +257,12 @@ def get_metrics_name(model_name: Literal['resnet', 'adversarial', 'dann', 'trex'
 
     return metrics_name
 
-def calculate_mean_and_std(logs_path: str, output_file: str = 'mean_std_results.txt', test_file_name: str = 'test_real_log.txt') -> None:
-    """
-    Calculate the mean and standard deviation of metrics from test_real_log.txt files.
-
-    Args:
-        logs_path (str): Path to the directory containing experiment subdirectories.
-        output_file (str, optional): Name of the output file to save the results. Defaults to 'mean_std_results.txt'.
-        test_file_name (str, optional): Name of the test log file. Defaults to 'test_real_log.txt'.
-    """
-    metrics_data: dict[str, List[float]] = {
-        'acc micro': [],
-        'acc macro': [],
-        'f1-score macro': [],
-        'top k micro': []
-    }
-
-    logs = filter(lambda x: '.' not in x, os.listdir(logs_path))
-    logs = map(lambda x: os.path.join(logs_path, x), logs)
-    logs = filter(lambda x: test_file_name in os.listdir(x), logs)
-    logs = list(logs)
-
-    for log in logs:
-        results = get_test_results(log, test_file_name=test_file_name)
-        for metric in metrics_data.keys():
-            if metric in results:
-                metrics_data[metric].append(results[metric])
-
-    mean_std_results = "Metric,Mean,Std Dev\n"
-    for metric, values in metrics_data.items():
-        if values:
-            mean = np.mean(values)
-            std_dev = np.std(values)
-            mean_std_results += f"{metric},{mean:.3f},{std_dev:.3f}\n"
-
-    output_path = os.path.join(logs_path, output_file)
-    with open(output_path, mode='w', encoding='utf8') as f:
-        f.write(mean_std_results)
 
 if __name__ == '__main__':
-    # compare_experiments(compare_on='val')
-    # compare_experiments(compare_on='test')
-    # compare_experiments(compare_on='test',
-    #                     test_file_name='test_real_log.txt',
-    #                     csv_output='compare_real')
-    compare_experiments(logs_path="../logs/grid_search_trex_1", compare_on="val", model_name="trex")
+     #compare_experiments(compare_on='val')
+     compare_experiments(compare_on='test')
+     compare_experiments(compare_on='test',
+                        test_file_name='test_real_log.txt',
+                        csv_output='compare_real')
+    #compare_experiments(logs_path="../logs/grid_search_dann_0", compare_on="val", model_name="dann")
+     #compare_experiments(logs_path="../logs/grid_search_trex_0", compare_on="val", model_name="trex")
